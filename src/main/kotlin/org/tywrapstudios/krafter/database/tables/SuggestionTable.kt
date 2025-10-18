@@ -10,8 +10,9 @@
 
 package org.tywrapstudios.krafter.database.tables
 
-import org.jetbrains.exposed.sql.ResultRow
+import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.json.json
 import org.tywrapstudios.krafter.database.entities.Suggestion
 import org.tywrapstudios.krafter.database.sql.SnowflakeIdTable
 import org.tywrapstudios.krafter.database.sql.snowflake
@@ -36,8 +37,8 @@ object SuggestionTable : SnowflakeIdTable() {
     val ownerAvatar = text("ownerAvatar").nullable()
     val ownerName = text("ownerName")
 
-    val positiveVoters = array<ULong>("positiveVoters").default(mutableListOf())
-    val negativeVoters = array<ULong>("negativeVoters").default(mutableListOf())
+    val positiveVoters = json<List<ULong>>("positiveVoters", Json.Default).default(mutableListOf())
+    val negativeVoters = json<List<ULong>>("negativeVoters", Json.Default).default(mutableListOf())
 
     val isPluralkit = bool("isPluralkit").default(false)
 

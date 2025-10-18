@@ -41,7 +41,7 @@ class SuggestionConverter(
 ) : SingleConverter<Suggestion>() {
     override val signatureType: Key = Translations.Converter.Suggestion.signatureType
 
-    private val suggestions: SuggestionsTransactor by inject()
+    private val suggestions: SuggestionsTransactor = SuggestionsTransactor
 
     override suspend fun parse(parser: StringParser?, context: CommandContext, named: String?): Boolean {
         val arg: String = named ?: parser?.parseNext()?.data ?: return false

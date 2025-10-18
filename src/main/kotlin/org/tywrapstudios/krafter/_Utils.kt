@@ -9,7 +9,6 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.TextChannel
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.lastOrNull
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -24,7 +23,7 @@ fun config(): BotConfig = CFG.getConfig()
 fun saveConfig() = CFG.saveConfig()
 
 fun Transaction.setup() {
-    SchemaUtils.create(TagsTable, AmaConfigTable, MinecraftLinkTable)
+    SchemaUtils.create(TagsTable, AmaConfigTable, MinecraftLinkTable, SuggestionTable, OwnedThreadTable)
     addLogger(krafterSqlLogger)
 }
 
