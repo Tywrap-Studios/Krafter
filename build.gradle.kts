@@ -14,8 +14,24 @@ plugins {
 	alias(libs.plugins.ksp.plugin)
 }
 
-group = "template"
-version = "1.0-SNAPSHOT"
+group = "org.tywrapstudios.krafter"
+version = "0.1.0-SNAPSHOT"
+
+repositories {
+	maven {
+		name = "JitPack"
+		url = uri("https://jitpack.io")
+	}
+	maven {
+		name = "QuiltMC (Snapshots)"
+		url = uri("https://maven.quiltmc.org/repository/snapshot/")
+		// We need this because Quilt's Maven repo is... special I guess
+		metadataSources {
+			gradleMetadata()
+			ignoreGradleMetadataRedirection()
+		}
+	}
+}
 
 dependencies {
 	detektPlugins(libs.detekt)
@@ -29,6 +45,13 @@ dependencies {
 	implementation(libs.logback)
 	implementation(libs.logback.groovy)
 	implementation(libs.logging)
+
+	implementation(libs.bbapi)
+	implementation(libs.bundles.cozy.modules)
+	implementation(libs.bundles.database)
+	implementation(libs.rcon)
+	implementation(libs.excelkt)
+	implementation(libs.bundles.ktor.jvm)
 }
 
 // Configure distributions plugin
@@ -47,19 +70,29 @@ distributions {
 }
 
 kordEx {
-	// https://github.com/gradle/gradle/issues/31383
 	kordExVersion = libs.versions.kordex.asProvider()
 
 	bot {
 		// See https://docs.kordex.dev/data-collection.html
 		dataCollection(DataCollection.Standard)
 
-		mainClass = "template.AppKt"
+		mainClass = "org.tywrapstudios.krafter.AppKt"
+
+		voice = false
 	}
 
+	module("dev-unsafe")
+	module("pluralkit")
+	module("func-phishing")
+	module("func-tags")
+	module("func-welcome")
+	// Currently unavailable
+//    module("func-minecraft")
+
 	i18n {
-		classPackage = "template.i18n"
-		translationBundle = "template.strings"
+		classPackage = "org.tywrapstudios.krafter.i18n"
+		translationBundle = "krafter.strings"
+		outputDirectory = File("${project.projectDir}/src/main/kotlin")
 	}
 }
 

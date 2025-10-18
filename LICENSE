@@ -1,24 +1,60 @@
-This is free and unencumbered software released into the public domain.
+Tywrap Studios Protected Art License 2.0
 
-Anyone is free to copy, modify, publish, use, compile, sell, or
-distribute this software, either in source code form or as a compiled
-binary, for any purpose, commercial or non-commercial, and by any
-means.
+0. Additional Explicit Definitions
 
-In jurisdictions that recognize copyright laws, the author or authors
-of this software dedicate any and all copyright interest in the
-software to the public domain. We make this dedication for the benefit
-of the public at large and to the detriment of our heirs and
-successors. We intend this dedication to be an overt act of
-relinquishment in perpetuity of all present and future rights to this
-software under copyright law.
+    The entity "We/Us" refers to Tywrap Studios, and all its official members as properly displayed.
+    The entity "You/The User" refers to any person obtaining a copy or substantial part of this software and/or
+        anyone contributing to the software.
+    "Code" includes (BUT IS NOT LIMITED TO) all source files located in java/, kotlin/,
+        generated/data/ or resources/data/, as well as <add more relevant directories here>.
+    "Art" includes (BUT IS NOT LIMITED TO) all (source) files located in generated/assets/,
+        resources/assets/ or docs/assets/, as well as <add more relevant directories here>.
+    Parts of the license encapsuled by "/** **/" or "<>" are meant to assist people who use the license to
+        write and edit the license for their needs. If any of these texts reference "you," it refers to the
+        person writing/editing the license.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
+    A copy of the raw, unedited license can be found at https://tiazzz.me/licensing/tyspal.
 
-For more information, please refer to <https://unlicense.org>
+1. All our Code and Documentation Content is licensed under the MIT License, which can be referenced here:
+
+    Copyright (c) 2025 Tywrap Studios
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+2. All our Art is All Rights Reserved:
+
+    Copyright (c) Tywrap Studios; All Rights Reserved unless explicitly stated otherwise.
+
+3. Forking
+
+    Due to these terms, you are fully permitted to fork and copy over the code from any part of the software,
+    unless explicitly stated otherwise. To be clear; this does not include any art. You are required to
+    remove any art you don't own from your fork, whether it's for private or public use.
+
+4. Removal
+
+    We reserve the right to request the removal of our software if we determine that you are
+    violating the license terms or harming the reputation of the software through your use case.
+
+5. License Squared
+
+    You may use this license for any software. But if you modify any part of the license, you must make the
+    user aware of this, for example by changing the title by adding "Modified", and/or explicitly defining and
+    explaining the modification at the place it was made. Again, a copy of the raw, unedited license can
+    be found at https://tiazzz.me/licensing/tyspal.
