@@ -1,7 +1,7 @@
 [versions]
 detekt = "1.23.8"
 kotlin = "2.2.20"
-ksp = "2.2.20-2.0.3"
+ksp = "2.2.20-2.0.4"
 
 bbapi = "2.1.0"
 cozy-modules = "1.1.0-SNAPSHOT"
