@@ -4,10 +4,11 @@ import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kordex.core.checks.hasPermission
 import dev.kordex.core.checks.types.CheckContextWithCache
-import org.jetbrains.exposed.sql.replace
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
+import org.jetbrains.exposed.v1.jdbc.replace
 import org.quiltmc.community.cozy.modules.ama.data.AmaConfig
 import org.quiltmc.community.cozy.modules.ama.data.AmaData
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin

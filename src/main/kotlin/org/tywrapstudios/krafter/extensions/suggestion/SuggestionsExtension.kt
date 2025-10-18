@@ -83,7 +83,8 @@ import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.xssf.usermodel.XSSFColor
-import org.jetbrains.exposed.sql.exists
+import org.jetbrains.exposed.v1.core.exists
+import org.jetbrains.exposed.v1.jdbc.select
 import org.tywrapstudios.krafter.*
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
 import org.tywrapstudios.krafter.config.BotConfig

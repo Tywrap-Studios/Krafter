@@ -14,8 +14,12 @@ package org.tywrapstudios.krafter.database.transactors
 
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.MessageBehavior
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.core.Op
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Query
+import org.jetbrains.exposed.v1.jdbc.replace
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.tywrapstudios.krafter.database.entities.Suggestion
 import org.tywrapstudios.krafter.database.tables.SuggestionTable
 import org.tywrapstudios.krafter.database.tables.SuggestionTable.fromRow
@@ -69,7 +73,7 @@ object SuggestionsTransactor {
     suspend fun getByMessage(message: MessageBehavior) =
         getByMessage(message.id)
 
-    suspend fun find(filter: SqlExpressionBuilder.() -> Op<Boolean>): Query {
+	suspend fun find(filter: () -> Op<Boolean>): Query {
         return transaction {
             setup()
 

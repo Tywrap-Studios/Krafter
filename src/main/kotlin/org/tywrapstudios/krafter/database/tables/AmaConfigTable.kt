@@ -1,6 +1,6 @@
 package org.tywrapstudios.krafter.database.tables
 
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.quiltmc.community.cozy.modules.ama.data.AmaConfig
 import org.quiltmc.community.cozy.modules.ama.data.AmaEmbedConfig
 import org.tywrapstudios.krafter.database.sql.SnowflakeIdTable

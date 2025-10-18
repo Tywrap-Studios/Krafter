@@ -1,11 +1,11 @@
 package org.tywrapstudios.krafter.database.sql
 
 import dev.kord.common.entity.Snowflake
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.IdTable
-import org.jetbrains.exposed.sql.Column
-import org.jetbrains.exposed.sql.ColumnTransformer
-import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.v1.core.Column
+import org.jetbrains.exposed.v1.core.ColumnTransformer
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.dao.id.IdTable
 
 open class SnowflakeIdTable : IdTable<Snowflake>() {
     override val id: Column<EntityID<Snowflake>> = snowflake("id").entityId()

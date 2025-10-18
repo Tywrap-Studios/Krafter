@@ -3,8 +3,11 @@ package org.tywrapstudios.krafter.extensions.data
 import dev.kord.common.entity.Snowflake
 import dev.kordex.modules.func.tags.data.Tag
 import dev.kordex.modules.func.tags.data.TagsData
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.or
+import org.jetbrains.exposed.v1.jdbc.*
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.tywrapstudios.krafter.database.tables.TagsTable
 import org.tywrapstudios.krafter.database.tables.TagsTable.category
 import org.tywrapstudios.krafter.database.tables.TagsTable.fromRow

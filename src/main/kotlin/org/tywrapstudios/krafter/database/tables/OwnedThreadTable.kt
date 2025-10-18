@@ -1,7 +1,7 @@
 package org.tywrapstudios.krafter.database.tables
 
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.javatime.duration
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.javatime.duration
 import org.tywrapstudios.krafter.database.entities.OwnedThread
 import org.tywrapstudios.krafter.database.sql.SnowflakeIdTable
 import org.tywrapstudios.krafter.database.sql.snowflake
