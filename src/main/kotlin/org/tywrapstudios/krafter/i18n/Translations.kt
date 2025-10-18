@@ -244,12 +244,6 @@ public object Translations {
           .withBundle(Translations.bundle)
 
       /**
-       * manage
-       */
-      public val manage: Key = Key("commands.suggestions.manage")
-          .withBundle(Translations.bundle)
-
-      /**
        * refresh
        */
       public val refresh: Key = Key("commands.suggestions.refresh")
@@ -346,19 +340,13 @@ public object Translations {
 
       public object Manage {
         /**
-         * auto-response
+         * manage-auto-response
          */
         public val autoResponse: Key = Key("commands.suggestions.manage.autoResponse")
             .withBundle(Translations.bundle)
 
         /**
-         * Manage suggestions, if you have the permissions to do so.
-         */
-        public val description: Key = Key("commands.suggestions.manage.description")
-            .withBundle(Translations.bundle)
-
-        /**
-         * state
+         * manage-state
          */
         public val state: Key = Key("commands.suggestions.manage.state")
             .withBundle(Translations.bundle)

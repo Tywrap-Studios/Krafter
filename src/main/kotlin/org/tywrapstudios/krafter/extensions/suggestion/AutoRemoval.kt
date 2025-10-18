@@ -38,7 +38,7 @@ data class AutoRemoval(
         reason: String
     ) : this(id, Regex(regex, RegexOption.IGNORE_CASE), status, reason)
 
-    override fun toString() = "`$id`: `$regex` -> ${status.readableName} / \"$reason\""
+    override fun toString() = "`$id`: `$regex` -> ${status.readableName.translate()} / \"$reason\""
 }
 
 fun BotConfig.Miscellaneous.SuggestionForum.AnswerMap.toAutoRemoval(): AutoRemoval {

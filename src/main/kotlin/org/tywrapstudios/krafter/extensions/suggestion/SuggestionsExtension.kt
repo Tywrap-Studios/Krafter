@@ -56,7 +56,6 @@ import dev.kordex.core.checks.topChannelFor
 import dev.kordex.core.commands.Arguments
 import dev.kordex.core.commands.application.slash.converters.impl.optionalEnumChoice
 import dev.kordex.core.commands.application.slash.ephemeralSubCommand
-import dev.kordex.core.commands.application.slash.group
 import dev.kordex.core.commands.converters.impl.optionalString
 import dev.kordex.core.commands.converters.impl.string
 import dev.kordex.core.events.interfaces.MessageEvent
@@ -401,14 +400,14 @@ class SuggestionsExtension : Extension() {
                 val channelId = event.interaction.channelId
 
                 var currentText = 0
-                fun nextRow() = event.interaction.actionRows[currentText++]
+                fun nextRow() = event.interaction.textInputs.toList()[currentText++].second
 
-                val title = nextRow().data.value.value!!
-                val text = nextRow().data.value.value!!
-                val problem = nextRow().data.value.value
-                val solution = nextRow().data.value.value
+                val title = nextRow().value
+                val text = nextRow().value!!
+                val problem = nextRow().value
+                val solution = nextRow().value
 
-                val pkMemberId = nextRow().data.value.value
+                val pkMemberId = nextRow().value
                 val pkMember = if (!pkMemberId.isNullOrBlank()) {
                     val url = "$PK_BASE_URL/members/$pkMemberId"
                     val response = httpClient.get(url).bodyAsText()
@@ -492,12 +491,12 @@ class SuggestionsExtension : Extension() {
             action {
                 val resp = event.interaction.deferEphemeralResponse()
 
-                var currentObj = 0
-                fun nextRow() = event.interaction.actionRows[currentObj++]
+				var currentObject = 0
+                fun nextRow() = event.interaction.textInputs.toList()[currentObject++].second
 
-                val channel = kord.getChannelOf<TopGuildMessageChannel>(Snowflake(nextRow().data.value.value!!))!!
-                val title = nextRow().data.value.value
-                val description = nextRow().data.value.value
+                val channel = kord.getChannelOf<TopGuildMessageChannel>(nextRow().value!!.snowflake())!!
+                val title = nextRow().value
+                val description = nextRow().value
 
                 // Setup channel permissions
                 val currentPerms = channel.permissionOverwrites.firstOrNull { it.target == channel.guildId }
@@ -609,9 +608,11 @@ class SuggestionsExtension : Extension() {
         }
 
         ephemeralSlashCommand {
-            group(Translations.Commands.suggestions) {
-                description = Translations.Commands.Suggestions.description
-            }
+//            group(Translations.Commands.suggestions) {
+//                description = Translations.Commands.Suggestions.description
+//            }
+			name = Translations.Commands.suggestions
+			description = Translations.Commands.Suggestions.description
 
             ephemeralSubCommand {
                 name = Translations.Commands.Suggestions.spreadsheet
@@ -682,71 +683,64 @@ class SuggestionsExtension : Extension() {
                 }
             }
 
-            ephemeralSubCommand {
-                name = Translations.Commands.Suggestions.manage
-                description = Translations.Commands.Suggestions.Manage.description
+			ephemeralSubCommand(::SuggestionStateArguments) {
+				name = Translations.Commands.Suggestions.Manage.state
+				description = Translations.Commands.Suggestions.Manage.State.description
 
-                check { isBotModuleAdmin(config.administrators) }
+				allowInDms = false
 
-                ephemeralSubCommand(::SuggestionStateArguments) {
-                    name = Translations.Commands.Suggestions.Manage.state
-                    description = Translations.Commands.Suggestions.Manage.State.description
+				check { isBotModuleAdmin(config.administrators) }
 
-                    allowInDms = false
+				action {
+					val status = arguments.status
 
-                    check { isBotModuleAdmin(config.administrators) }
+					if (status != null) {
+						arguments.suggestion.status = status
+					}
 
-                    action {
-                        val status = arguments.status
+					if (arguments.comment != null) {
+						arguments.suggestion.comment = if (arguments.comment!!.lowercase() in CLEAR_WORDS) {
+							null
+						} else {
+							arguments.comment
+						}
+					}
 
-                        if (status != null) {
-                            arguments.suggestion.status = status
-                        }
+					suggestions.set(arguments.suggestion)
+					sendSuggestion(arguments.suggestion)
+					sendSuggestionUpdateMessage(arguments.suggestion)
 
-                        if (arguments.comment != null) {
-                            arguments.suggestion.comment = if (arguments.comment!!.lowercase() in CLEAR_WORDS) {
-                                null
-                            } else {
-                                arguments.comment
-                            }
-                        }
+					respond {
+						content = "Suggestion updated."
+					}
+				}
+			}
 
-                        suggestions.set(arguments.suggestion)
-                        sendSuggestion(arguments.suggestion)
-                        sendSuggestionUpdateMessage(arguments.suggestion)
+			ephemeralSubCommand(::SuggestionCannedResponseArguments) {
+				name = Translations.Commands.Suggestions.Manage.autoResponse
+				description = Translations.Commands.Suggestions.Manage.AutoResponse.description
 
-                        respond {
-                            content = "Suggestion updated."
-                        }
-                    }
-                }
+				check { isBotModuleAdmin(config.administrators) }
 
-                ephemeralSubCommand(::SuggestionCannedResponseArguments) {
-                    name = Translations.Commands.Suggestions.Manage.autoResponse
-                    description = Translations.Commands.Suggestions.Manage.AutoResponse.description
+				action {
+					val suggestion = arguments.suggestion
+					val responseId = arguments.id
 
-                    check { isBotModuleAdmin(config.administrators) }
+					val responses = mutableListOf<AutoRemoval>()
+					config.auto_answer.forEach {
+						responses.add(it.toAutoRemoval())
+					}
 
-                    action {
-                        val suggestion = arguments.suggestion
-                        val responseId = arguments.id
+					val response = responses.first { it.id == responseId }
 
-                        val responses = mutableListOf<AutoRemoval>()
-                        config.auto_answer.forEach {
-                            responses.add(it.toAutoRemoval())
-                        }
+					suggestion.status = response.status
+					suggestion.comment = response.reason
 
-                        val response = responses.first { it.id == responseId }
-
-                        suggestion.status = response.status
-                        suggestion.comment = response.reason
-
-                        suggestions.set(suggestion)
-                        sendSuggestion(suggestion)
-                        sendSuggestionUpdateMessage(suggestion)
-                    }
-                }
-            }
+					suggestions.set(suggestion)
+					sendSuggestion(suggestion)
+					sendSuggestionUpdateMessage(suggestion)
+				}
+			}
         }
 
 
@@ -765,10 +759,26 @@ class SuggestionsExtension : Extension() {
                     actionRow {
                         textInput(TextInputStyle.Short, "channel", "Channel snowflake") {
                             placeholder = "Snowflake"
-                            value = channel?.toString()
+                            value = channel?.id.toString()
                             allowedLength = 18..20
                             required = true
                         }
+
+//						textInput(TextInputStyle.Short, "message", "Title") {
+//							placeholder = "A short, descriptive title"
+//							value = "Suggestion channel"
+//							allowedLength = 1..128
+//							required = true
+//						}
+//
+//						textInput(TextInputStyle.Paragraph, "description", "Description") {
+//							placeholder = "A longer description"
+//							value = "This channel is used to submit suggestions. " +
+//								"Click the button below to submit a suggestion."
+//
+//							allowedLength = 1..TEXT_SIZE_LIMIT
+//							required = true
+//						}
                     }
 
                     actionRow {
@@ -807,7 +817,7 @@ class SuggestionsExtension : Extension() {
 //			}
     }
 
-    private fun Sheet.suggestionHeader() {
+	private fun Sheet.suggestionHeader() {
         val headings = listOf("ID", "Status", "Text", "+", "-", "=", "Staff Comment")
 
         val style = createCellStyle {
@@ -846,7 +856,7 @@ class SuggestionsExtension : Extension() {
 
         row {
             cell(suggestion.id.toString())
-            cell(suggestion.status.readableName, statusStyle)
+            cell(suggestion.status.readableName.translate(), statusStyle)
             cell(suggestion.text)
             cell(suggestion.positiveVotes)
             cell(suggestion.negativeVotes)
@@ -1015,7 +1025,7 @@ class SuggestionsExtension : Extension() {
                         "**__Suggestion__**\n\n" +
                         suggestion.text
 
-                description += "\n\n**Status:** ${suggestion.status.readableName}\n"
+                description += "\n\n**Status:** ${suggestion.status.readableName.translate()}\n"
 
                 if (suggestion.comment != null) {
                     description += "\n" +
@@ -1028,7 +1038,7 @@ class SuggestionsExtension : Extension() {
         if (suggestion.thread != null) {
             kord.getChannelOf<ThreadChannel>(suggestion.thread!!)?.createMessage {
                 content = "**__Suggestion updated__**\n" +
-                        "**Status:** ${suggestion.status.readableName}\n"
+                        "**Status:** ${suggestion.status.readableName.translate()}\n"
 
                 if (suggestion.comment != null) {
                     content += "\n" +
@@ -1119,7 +1129,7 @@ class SuggestionsExtension : Extension() {
                 color = suggestion.status.color
 
                 footer {
-                    text = "Status: ${suggestion.status.readableName} • ID: $id"
+                    text = "Status: ${suggestion.status.readableName.translate()} • ID: $id"
                 }
             }
         }
@@ -1203,7 +1213,7 @@ class SuggestionsExtension : Extension() {
                 color = suggestion.status.color
 
                 footer {
-                    text = "Status: ${suggestion.status.readableName} • ID: $id"
+                    text = "Status: ${suggestion.status.readableName.translate()} • ID: $id"
                 }
             }
         }
@@ -1374,7 +1384,7 @@ class SuggestionsExtension : Extension() {
 //            val suggestionFilter = if (partialText.matches("^[a-z]+:.*".toRegex())) {
 //                val allowedStatusText = partialText.substringBefore(':')
 //                partialText = partialText.substringAfter(':').trim()
-//                val allowedStatus = SuggestionStatus.entries.find { it.readableName.translate() == allowedStatusText }
+//                val allowedStatus = SuggestionStatus.entries.find { it.readableName.translate().translate() == allowedStatusText }
 //
 //                if (allowedStatus != null) {
 //                    listOf(allowedStatus)
