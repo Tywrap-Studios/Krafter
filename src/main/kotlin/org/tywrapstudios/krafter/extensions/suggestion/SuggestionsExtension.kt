@@ -763,22 +763,6 @@ class SuggestionsExtension : Extension() {
                             allowedLength = 18..20
                             required = true
                         }
-
-//						textInput(TextInputStyle.Short, "message", "Title") {
-//							placeholder = "A short, descriptive title"
-//							value = "Suggestion channel"
-//							allowedLength = 1..128
-//							required = true
-//						}
-//
-//						textInput(TextInputStyle.Paragraph, "description", "Description") {
-//							placeholder = "A longer description"
-//							value = "This channel is used to submit suggestions. " +
-//								"Click the button below to submit a suggestion."
-//
-//							allowedLength = 1..TEXT_SIZE_LIMIT
-//							required = true
-//						}
                     }
 
                     actionRow {
