@@ -46,7 +46,7 @@ public class LogParserExtension : Extension() {
 	private var scheduler: Scheduler? = null
 
 	private val configUrl: String = envOrNull("PASTEBIN_CONFIG_URL")
-		?: "https://raw.githubusercontent.com/QuiltMC/cozy-discord/root/module-log-parser/pastebins.yml"
+		?: "https://raw.githubusercontent.com/Tywrap-Studios/Krafter/master/module-log-parser/pastebins.yml"
 
 	private val taskDelay: Long = envOrNull("PASTEBIN_REFRESH_MINS")?.toLong()
 		?: 60
