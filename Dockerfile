@@ -13,17 +13,17 @@ VOLUME [ "/bot/data" ]
 VOLUME [ "/bot/plugins" ]
 
 # Copy the distribution files into the container
-COPY [ "build/distributions/template-1.0-SNAPSHOT.tar", "/dist" ]
+COPY [ "build/distributions/Krafter-0.1.0-SNAPSHOT.tar", "/dist" ]
 
 # Extract the distribution files, and prepare them for use
-RUN tar -xf /dist/template-1.0-SNAPSHOT.tar -C /dist/out
-RUN chmod +x /dist/out/template-1.0-SNAPSHOT/bin/template
+RUN tar -xf /dist/Krafter-0.1.0-SNAPSHOT.tar -C /dist/out
+RUN chmod +x /dist/out/Krafter-0.1.0-SNAPSHOT/bin/Krafter
 
 # Clean up unnecessary files
-RUN rm /dist/template-1.0-SNAPSHOT.tar
+RUN rm /dist/Krafter-0.1.0-SNAPSHOT.tar
 
 # Set the correct working directory
 WORKDIR /bot
 
 # Run the distribution start script
-ENTRYPOINT [ "/dist/out/template-1.0-SNAPSHOT/bin/template" ]
+ENTRYPOINT [ "/dist/out/Krafter-0.1.0-SNAPSHOT/bin/Krafter" ]
