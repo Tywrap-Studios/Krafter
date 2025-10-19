@@ -73,6 +73,19 @@ object SuggestionsTransactor {
     suspend fun getByMessage(message: MessageBehavior) =
         getByMessage(message.id)
 
+	suspend fun getAll(): List<Suggestion> {
+		val suggestions = mutableListOf<Suggestion>()
+
+		transaction {
+			setup()
+
+			SuggestionTable.selectAll()
+				.forEach { suggestions.add(fromRow(it)) }
+		}
+
+		return suggestions
+	}
+
 	suspend fun find(filter: () -> Op<Boolean>): Query {
         return transaction {
             setup()

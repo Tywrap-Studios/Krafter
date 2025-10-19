@@ -623,14 +623,14 @@ class SuggestionsExtension : Extension() {
                 check { isBotModuleAdmin(config.administrators) }
 
                 action {
-                    val suggestions = suggestions.find { exists(SuggestionTable.select(SuggestionTable.id)) }.toList()
+                    val suggestions = suggestions.getAll()
                     val outputStream = ByteArrayOutputStream()
 
                     val book = workbook {
                         sheet("Suggestions") {
                             suggestionHeader()
 
-                            suggestions.forEach { suggestionRow(fromRow(it)) }
+                            suggestions.forEach { suggestionRow(it) }
                         }
                     }
 
