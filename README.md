@@ -1,70 +1,35 @@
-# KordEx Bot Template
+# Krafter
 
-This repository contains a basic KordEx example bot for you to use as a template for your own KordEx bots. This
-includes the following:
+Krafter is a content-rich bot for Discord, built using the Kord and KordEx libraries and Kotlin.
+Krafter was made with expansibility in mind, allowing for a lot of configurability and customization.
+Almost everything is turned off by default, and you can enable only the features you want and need with
+minimal effort in the neatly organised config files.
 
-- A basic extension that allows you to slap other people, using both chat commands and slash commands.
-- A basic bot configuration that enables slash commands and shows you how to conditionally provide a different
-  chat command prefix for different guilds.
-- A Gradle Kotlin build script that uses the KordEx Gradle plugin and Detekt for linting (with a
-  fairly strict configuration) – this uses Gradle 7's new version catalogue feature, for easy configuration of
-  dependencies.
-- Forgejo CI scripts that build the bot and publish its artefacts.
-- A reasonable `.gitignore` file, including one in the `.idea` folder that ignores files that you shouldn't commit –
-  if you're using IDEA yourself, you should install the Ignore plugin to handle changes to this for you.
-- A Groovy-based Logback config, so you have reasonable logging out of the box.
-- A default set of translations in `src/main/resources/translations`, and automatic generation of `Key` objects.
-- Automatic generation of a Dockerfile via a `createDockerFile` task, also run at build time.
-- The buildscript packages the bot using the Gradle `distribution` plugin, with the final distribution placed in
-  `build/distributions` in both `.tar` and `.zip` format.
+## Forking and Development
 
-**Note:** This template includes a `.editorconfig` file that defaults to using tabs for indentation in almost all file
-types. This is because tabs are more accessible for the blind, or those with impaired vision. We won't accept
-feedback or PRs targeting this approach, though you can always change it in your projects.
+### Prerequisites
 
-## Potential Changes
+* A JDK 21 or newer: [Download](https://adoptium.net/) and install
+* [IntelliJ IDEA](https://www.jetbrains.com/idea/), the Community Edition gets it done.
+    * Eclipse is technically also supported, but heavily discouraged. If you want to use Eclipse, make sure you install
+	  the [the Kotlin plugin](https://marketplace.eclipse.org/content/kotlin-plugin-eclipse), then go to the `Window`
+	  menu, `Preferences`, `Kotlin`, `Compiler` and make sure you set up the `JDK_HOME` and JVM target version
+* A Discord bot token, from [the developer dashboard](https://discord.com/developers/applications).
 
-- The `.yml` files in `.forgejo/` are used to configure Forgejo Actions.
-  If you're not using them, you can remove them.
-- The `workflows` folder contains sample GitHub Actions workflows, if you're building your project on GitHub.
-  Delete `.forgejo/` and move `workflows/.github` into the project's root folder to use them.
-- The provided `LICENSE` file contains The Unlicense, which makes this repository public domain. You will probably want
-  to change this—we suggest looking at [Choose a License](https://choosealicense.com/) if you're not sure where to
-  start.
-- In the `build.gradle.kts`:
-  - Set the `group` and `version` properties as appropriate.
-  - In the `kordEx` and `tasks.jar` block, update the main class path/name as appropriate.
-  - In the `kordEx` block, update the KordEx version if needed.
-- In the `settings.gradle.kts`, update the name of the root project as appropriate.
-- The bundled Detekt config is pretty strict—you can check over `detekt.yml` if you want to change it, but you need to
-  follow the to-dos in that file regardless.
-- The Logback configuration is in `src/main/resources/logback.groovy`. If the logging setup doesn't suit, you can change
-  it there.
-- The default translation bundle in `src/main/resources/translations` will likely need to be renamed for your project.
-- In `src/main/dist`, read the `README.md` file and consider adding any relevant plugins there.
+### Setting Up
 
-## Bundled Bot
-
-- `App.kt` includes a basic bot, which uses environment variables (or variables in a `.env` file) for the testing guild
-  ID (`TEST_SERVER`) and the bot's token (`TOKEN`). You can specify these either directly as environment variables, or
-  as `KEY=value` pairs in a file named `.env`. Some example code is also included that shows one potential way of
-  providing different command prefixes for different servers.
-- `TestExtension.kt` includes an example extension that creates a `slap` command - this command works as both a
-  message command and slash command, and allows you to slap other users with whatever you wish, defaulting to a
-  `large, smelly trout`.
-
-To test the bot, we recommend using a `.env` file that looks like the following:
+After you've forked and set up your project in your IDE, create
+a file named `.env` in the project root (next to files like the `build.gradle.kts`), and fill it out with your bot's
+environment values. Here's an example of what the `.env` file could look like:
 
 ```dotenv
-TOKEN=abc...
-TEST_SERVER=123...
+TOKEN=AAA....
+TEST_SERVER=273....
+
+ENVIRONMENT=dev
+... other environment variables ...
 ```
-
-Create this file, fill it out, and run the `run` gradle task for testing in development.
-
-## Further Reading
-
-To learn more about KordEx and how to work with it, [please read the documentation](https://docs.kordex.dev).
-
-For more information on the KordEx Gradle plugin and what you can do with it,
-[please read this README](https://github.com/Kord-Extensions/gradle-plugins#kordex-plugin).
+Make sure to replace the values with your own bot's token and test server ID.
+NEVER COMMIT THIS FILE TO VERSION CONTROL! This file contains sensitive information
+that should not be shared publicly. Bad things can happen if people get a hold
+of your bot token.
