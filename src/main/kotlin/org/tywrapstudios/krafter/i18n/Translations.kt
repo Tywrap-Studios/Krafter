@@ -775,7 +775,7 @@ public object Translations {
           .withBundle(Translations.bundle)
 
       /**
-       * refresh
+       * suggestions-refresh
        */
       public val refresh: Key = Key("commands.suggestions.refresh")
           .withBundle(Translations.bundle)

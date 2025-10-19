@@ -524,6 +524,9 @@ class SuggestionsExtension : Extension() {
                     }
                 }
 
+				// Purge database table
+				suggestions.purgeGuild(channel.guildId)
+
                 // Create initial message
                 channel.createMessage {
                     embed {

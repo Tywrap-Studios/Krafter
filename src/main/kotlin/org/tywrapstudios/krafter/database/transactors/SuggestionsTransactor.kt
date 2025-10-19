@@ -17,6 +17,7 @@ import dev.kord.core.behavior.MessageBehavior
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Query
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.replace
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -124,4 +125,14 @@ object SuggestionsTransactor {
             }
         }
     }
+
+	suspend fun purgeGuild(guildId: Snowflake) {
+		transaction {
+			setup()
+
+			SuggestionTable.deleteWhere {
+				SuggestionTable.guildId eq guildId
+			}
+		}
+	}
 }
