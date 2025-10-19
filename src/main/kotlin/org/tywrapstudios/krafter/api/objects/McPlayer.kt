@@ -1,4 +1,4 @@
-package org.tywrapstudios.krafter.api.json
+package org.tywrapstudios.krafter.api.objects
 
 import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
@@ -13,7 +13,7 @@ import java.util.*
 /**
  * Represents a Minecraft player with their ID, name, legacy status, and properties.
  * From the Mojang API at https://sessionserver.mojang.com/session/minecraft/profile/UUID.
- * @property id Player's [java.util.UUID].
+ * @property id Player's [UUID].
  * @property name Player name, case-sensitive.
  * @property legacy Included in response if the account has not migrated to Mojang account.
  * @property properties A list of [McPlayerProperties]. Is expected to contain only one entry.
@@ -49,7 +49,7 @@ data class McPlayerProperties(
  * and a map of textures.
  * This is the decoded value of the `textures` property value from [McPlayerProperties].
  * @property timestamp Unix time in milliseconds the texture is accessed.
- * @property profileId Player's [java.util.UUID] without dashes.
+ * @property profileId Player's [UUID] without dashes.
  * @property profileName Player name.
  * @property signatureRequired Only exists when `?unsigned=false`
  * is appended to the end of the API call URL.

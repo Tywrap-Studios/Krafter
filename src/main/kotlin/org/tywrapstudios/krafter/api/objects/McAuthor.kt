@@ -1,8 +1,7 @@
-package org.tywrapstudios.krafter.api.discord
+package org.tywrapstudios.krafter.api.objects
 
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Member
-import org.tywrapstudios.krafter.api.json.McPlayer
 import java.util.*
 
 class McAuthor(val member: Member, val player: McPlayer?) {

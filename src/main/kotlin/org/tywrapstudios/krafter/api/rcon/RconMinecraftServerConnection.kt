@@ -1,7 +1,8 @@
 package org.tywrapstudios.krafter.api.rcon
 
 import nl.vv32.rcon.Rcon
-import org.tywrapstudios.krafter.api.discord.McMessage
+import org.tywrapstudios.krafter.LOGGING
+import org.tywrapstudios.krafter.api.objects.McMessage
 import org.tywrapstudios.krafter.config
 import org.tywrapstudios.krafter.config.BotConfig
 import org.tywrapstudios.krafter.platform.services.IMinecraftServerConnection
@@ -26,7 +27,7 @@ class RconMinecraftServerConnection : IMinecraftServerConnection {
 				"[{\"text\":\"Sent from Discord\"," +
 				"\"color\":\"dark_purple\"}]}}]"
 		// I'm actually so done with this
-		command(tellrawCommand)
+		LOGGING.debug(command(tellrawCommand))
     }
 
     override fun broadcastPlain(message: String) {

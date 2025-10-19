@@ -1,6 +1,6 @@
 package org.tywrapstudios.krafter.platform.services
 
-import org.tywrapstudios.krafter.api.discord.McMessage
+import org.tywrapstudios.krafter.api.objects.McMessage
 
 interface IMinecraftServerConnection {
 
