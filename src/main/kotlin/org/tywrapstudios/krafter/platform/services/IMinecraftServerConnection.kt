@@ -20,4 +20,11 @@ interface IMinecraftServerConnection {
      * @param message The plain text message to broadcast.
      */
     fun broadcastPlain(message: String)
+
+	/**
+	 * Send a command to the connected Minecraft server and return the response.
+	 * @param command The command to send.
+	 * @return The response from the server.
+	 */
+	fun command(command: String): String
 }

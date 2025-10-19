@@ -30,13 +30,22 @@ public class BotConfig extends BasicConfigClass {
         @Comment("""
                 An address (host plus port) to an RCON connection, which allows the bot to send commands to the server without
                 a direct server connection.
-                
+
                 If you don't know what this is, or what it does, don't touch this. Krafter will always first try to
                 maintain a direct connection before ultimately falling back to RCON.""")
         public String rcon_host = "";
         public String rcon_port = "";
         @Comment("The password for the RCON connection, if you have one set up.")
         public String rcon_password = "";
+		@Comment("""
+			   An address (host plus port) to a CTD (Chat to Discord) connection, which is a better, more fluent way
+			   to maintain a connection without the use of RCON.
+
+			   If you don't know what this is, or what it does, don't touch this.""")
+		public String ctd_host = "";
+		public String ctd_port = "";
+		@Comment("The password for the CTD connection, if you have one set up.")
+		public String ctd_password = "";
     }
     @Comment("The prefix for chat commands.")
     public String prefix = ">>";
@@ -68,7 +77,7 @@ public class BotConfig extends BasicConfigClass {
                 The bot software collects data!
                 This value must be one of "none", "minimal", "standard" or "extra" to be valid,
                 otherwise we'll set it back to "standard" by default. Can only be applied after a full server restart.
-                
+
                 For more information on what data the bot collects, how to get at it, and how it's stored,
                 please see here: https://docs.kordex.dev/data-collection.html""")
         public String data_collection = "standard";
@@ -123,7 +132,7 @@ public class BotConfig extends BasicConfigClass {
             @Comment("""
                     This setting is for those who want to automatically answer suggestions in case there are FAQ set in place
                     or if you don't want your players requesting specific things and explain why.
-                    
+
                     This configuration value consists of a List [] that has a so called AnswerMap inside with the following structure:
                     {
                       "id": "update",       <-- A unique identifier for this answer. Used internally.
@@ -134,9 +143,9 @@ public class BotConfig extends BasicConfigClass {
                       "answer": "We won't update the server because it would break crucial mods we use.",
                       "status": "Denied"    <-- One of: Open, Approved, Denied, Invalid, Spam, Future, Stale, Duplicate, Implemented
                     }
-                    
+
                     Your config might look something like this:
-                    
+
                     "auto_answer": [
                       {
                         "id": "update",
@@ -175,7 +184,7 @@ public class BotConfig extends BasicConfigClass {
                 No idea what plurality is? No worries! There are enough sources online that can explain it neatly.
                 We personally recommend reading the following one: https://quiltmc.org/en/community/pluralkit/, as it also
                 nicely explains how the PluralKit software works and how to use it.
-                
+
                 Enabling this module is non-invasive, purely helpful, and will only fully work once you add the PluralKit
                 bot to your server yourself.""")
         public PluralKit plural_kit = new PluralKit();
@@ -186,7 +195,7 @@ public class BotConfig extends BasicConfigClass {
         @Comment("""
                 Using this module you can host an AMA (Ask Me Anything) in your server, which enables your community
                 to ask you questions about a certain topic related to your server, like upcoming changes or recent updates.
-                
+
                 More settings can be configured in Discord.""")
         public AMA ama = new AMA();
         public static class AMA {
@@ -206,7 +215,7 @@ public class BotConfig extends BasicConfigClass {
             @Comment("Whether to automatically reply to a message with a tag if it fits certain triggers.")
             public boolean auto_tag = true;
         }
-        
+
         @Comment("""
                 Set up channels with flush embeds using this module! Simple, yet effective. And uh swag I guess.
                 """)
@@ -222,7 +231,7 @@ public class BotConfig extends BasicConfigClass {
                     channels works on top of a map like this, for their respective reasons, we just follow. Don't fret though!
                     This is one of the least hard setups out here, just simply put the id in the first parentheses, and the full link in the second!
                     e.g.: "3848576687382457654": "https://discord.com/channels/4837388485758686865/3848576687382457654
-                    
+
                     Note: after you run this channel stuff, the id numbers might become a little messed up. No worries, this is normal!
                     For the technical people out there: read our blog about "F*cked up number configs\"""")
             public Map<String, String> channels = new HashMap<>();

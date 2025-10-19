@@ -168,6 +168,11 @@ class MinecraftExtension : Extension() {
                 }
             }
         }
+
+		ephemeralSlashCommand {
+			name = Translations.Commands.cmd
+			description = Translations.Commands.Cmd.description
+		}
     }
 
     class LinkCommandArguments : Arguments() {
