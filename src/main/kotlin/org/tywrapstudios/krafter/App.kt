@@ -151,6 +151,10 @@ suspend fun setup(): ExtensibleBot {
         presence {
             playing("on ${config.status.server_name}")
         }
+
+		about {
+			addCopyright()
+		}
     }
 }
 

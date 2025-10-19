@@ -7,6 +7,8 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.createTextChannel
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.TextChannel
+import dev.kordex.core.builders.AboutBuilder
+import dev.kordex.core.builders.about.CopyrightType
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.lastOrNull
@@ -16,10 +18,79 @@ import org.tywrapstudios.krafter.config.BotConfig
 import org.tywrapstudios.krafter.database.DatabaseManager.krafterSqlLogger
 import org.tywrapstudios.krafter.database.tables.*
 import java.nio.file.Path
-import java.nio.file.Paths
 import kotlin.io.path.createDirectories
 
 const val CFG_CHANNEL_REASON = "Config prompted for an automatic new channel creation."
+private var copyrightAdded = false
+
+internal fun AboutBuilder.addCopyright() {
+	if (copyrightAdded) {
+		return
+	}
+
+	copyright(
+		"Exposed",
+		"Apache-2.0",
+		CopyrightType.Library,
+		"https://www.jetbrains.com/exposed/"
+	)
+	copyright(
+		"Cozy Discord Modules",
+		"MPL-2.0",
+		CopyrightType.Library,
+		"https://github.com/QuiltMC/cozy-discord"
+	)
+	copyright(
+		"Autolink",
+		"MIT",
+		CopyrightType.Library,
+		"https://github.com/robinst/autolink-java"
+	)
+	copyright(
+		"BlossomBridge",
+		"MIT",
+		CopyrightType.Library,
+		"https://docs.tiazzz.me/BlossomBridge/"
+	)
+	copyright(
+		"ExcelKt",
+		"MIT",
+		CopyrightType.Framework,
+		"https://github.com/evanrupert/ExcelKt"
+	)
+	copyright(
+		"FlexVer",
+		"CC0-1.0",
+		CopyrightType.Library,
+		"https://git.sleeping.town/unascribed/FlexVer"
+	)
+	copyright(
+		"Jansi",
+		"Apache-2.0",
+		CopyrightType.Library,
+		"https://github.com/fusesource/jansi"
+	)
+	copyright(
+		"RCON",
+		"GPL-3.0",
+		CopyrightType.Library,
+		"https://github.com/jobfeikens/rcon"
+	)
+	copyright(
+		"kotlin-semver",
+		"MIT",
+		CopyrightType.Library,
+		"https://z4kn4fein.github.io/kotlin-semver/"
+	)
+	copyright(
+		"SQLite JDBC Driver",
+		"Apache-2.0",
+		CopyrightType.Library,
+		"https://github.com/xerial/sqlite-jdbc"
+	)
+
+	copyrightAdded = true
+}
 
 fun config(): BotConfig = CFG.getConfig()
 
