@@ -36,8 +36,8 @@ class KrafterWelcomeChannelData : WelcomeChannelData {
         config().miscellaneous.embed_channels.channels.clear()
         update.accept(syncDataFromConfig())
         data.forEach {
-            config().miscellaneous.embed_channels.channels.put(it.key.value.toString(), it.value)
-        }
+			config().miscellaneous.embed_channels.channels[it.key.value.toString()] = it.value
+		}
         saveConfig()
         return config().miscellaneous.embed_channels.channels
     }

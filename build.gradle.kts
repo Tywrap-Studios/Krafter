@@ -48,6 +48,7 @@ dependencies {
 
 	implementation(libs.bbapi)
 	implementation(libs.bundles.cozy.modules)
+	implementation(project(":module-ama"))
 	implementation(libs.bundles.database)
 	implementation(libs.rcon)
 	implementation(libs.excelkt)
