@@ -55,7 +55,7 @@ internal fun AboutBuilder.addCopyright() {
 	copyright(
 		"ExcelKt",
 		"MIT",
-		CopyrightType.Framework,
+		CopyrightType.Library,
 		"https://github.com/evanrupert/ExcelKt"
 	)
 	copyright(
