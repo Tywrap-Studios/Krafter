@@ -1368,7 +1368,7 @@ class SuggestionsExtension : Extension() {
 //            val suggestionFilter = if (partialText.matches("^[a-z]+:.*".toRegex())) {
 //                val allowedStatusText = partialText.substringBefore(':')
 //                partialText = partialText.substringAfter(':').trim()
-//                val allowedStatus = SuggestionStatus.entries.find { it.readableName.translate().translate() == allowedStatusText }
+//                val allowedStatus = SuggestionStatus.entries.find { it.readableName.withLocale(getLocale()).translate().withLocale(getLocale()).translate() == allowedStatusText }
 //
 //                if (allowedStatus != null) {
 //                    listOf(allowedStatus)

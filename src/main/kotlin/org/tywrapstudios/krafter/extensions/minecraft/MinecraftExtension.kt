@@ -41,11 +41,11 @@ import java.util.regex.Pattern
 var watchChannel: TextChannel? = null
 
 class MinecraftExtension : Extension() {
-    override val name: String = "krafter.minecraft"
-    val data: KrafterMinecraftLinkData = KrafterMinecraftLinkData()
+	override val name: String = "krafter.minecraft"
+	val data: KrafterMinecraftLinkData = KrafterMinecraftLinkData()
 
-    override suspend fun setup() {
-        val cfg = minecraftConfig()
+	override suspend fun setup() {
+		val cfg = minecraftConfig()
 
 		if (cfg.connection.enabled) {
 			event<GuildCreateEvent> {
@@ -72,112 +72,113 @@ class MinecraftExtension : Extension() {
 
 
 
-        ephemeralSlashCommand {
-            name = Translations.Commands.minecraft
-            description = Translations.Commands.Minecraft.description
+		ephemeralSlashCommand {
+			name = Translations.Commands.minecraft
+			description = Translations.Commands.Minecraft.description
 
-            ephemeralSubCommand(::LinkCommandArguments) {
-                name = Translations.Commands.Minecraft.link
-                description = Translations.Commands.Minecraft.Link.description
-                action {
-                    if (!minecraftConfig().enabled) {
-                        respond {
-                            content = Translations.Responses.Minecraft.Link.Error.disabled.translate()
-                        }
-                        return@action
-                    }
+			ephemeralSubCommand(::LinkCommandArguments) {
+				name = Translations.Commands.Minecraft.link
+				description = Translations.Commands.Minecraft.Link.description
+				action {
+					if (!minecraftConfig().enabled) {
+						respond {
+							content =
+								Translations.Responses.Minecraft.Link.Error.disabled.withLocale(getLocale()).withLocale(getLocale()).translate()
+						}
+						return@action
+					}
 
-                    val uuid = arguments.uuid
-                    val member = event.interaction.user.id
+					val uuid = arguments.uuid
+					val member = event.interaction.user.id
 
-                    val link = data.setLinkStatus(member, KrafterMinecraftLinkData.LinkStatus(UUID.fromString(uuid)))
+					val link = data.setLinkStatus(member, KrafterMinecraftLinkData.LinkStatus(UUID.fromString(uuid)))
 
-                    respond {
-                        content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
-                            link.code
-                        ).translate()
-                    }
-                }
-            }
+					respond {
+						content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
+							link.code
+						).withLocale(getLocale()).translate()
+					}
+				}
+			}
 
-            ephemeralSubCommand {
-                name = Translations.Commands.Minecraft.unlink
-                description = Translations.Commands.Minecraft.Unlink.description
-                action {
-                    if (!minecraftConfig().enabled) {
-                        respond {
-                            content = Translations.Responses.Minecraft.Unlink.Error.disabled.translate()
-                        }
-                        return@action
-                    }
+			ephemeralSubCommand {
+				name = Translations.Commands.Minecraft.unlink
+				description = Translations.Commands.Minecraft.Unlink.description
+				action {
+					if (!minecraftConfig().enabled) {
+						respond {
+							content = Translations.Responses.Minecraft.Unlink.Error.disabled.withLocale(getLocale()).translate()
+						}
+						return@action
+					}
 
-                    val member = event.interaction.user.id
-                    val uuid = data.unlink(member)
-                    if (uuid == null) {
-                        respond {
-                            content = Translations.Responses.Minecraft.Unlink.Error.notLinked.translate()
-                        }
-                    } else {
-                        respond {
-                            content = Translations.Responses.Minecraft.Unlink.success.withOrdinalPlaceholders(
-                                uuid
-                            ).translate()
-                        }
-                    }
-                }
-            }
+					val member = event.interaction.user.id
+					val uuid = data.unlink(member)
+					if (uuid == null) {
+						respond {
+							content = Translations.Responses.Minecraft.Unlink.Error.notLinked.withLocale(getLocale()).translate()
+						}
+					} else {
+						respond {
+							content = Translations.Responses.Minecraft.Unlink.success.withOrdinalPlaceholders(
+								uuid
+							).withLocale(getLocale()).translate()
+						}
+					}
+				}
+			}
 
-            ephemeralSubCommand(::ForceLinkCommandArguments) {
-                name = Translations.Commands.Minecraft.forceLink
-                description = Translations.Commands.Minecraft.ForceLink.description
-                check {
-                    isGlobalBotAdmin()
-                }
-                action {
-                    if (!minecraftConfig().enabled) {
-                        respond {
-                            content = Translations.Responses.Minecraft.ForceLink.Error.disabled.translate()
-                        }
-                        return@action
-                    }
+			ephemeralSubCommand(::ForceLinkCommandArguments) {
+				name = Translations.Commands.Minecraft.forceLink
+				description = Translations.Commands.Minecraft.ForceLink.description
+				check {
+					isGlobalBotAdmin()
+				}
+				action {
+					if (!minecraftConfig().enabled) {
+						respond {
+							content = Translations.Responses.Minecraft.ForceLink.Error.disabled.withLocale(getLocale()).translate()
+						}
+						return@action
+					}
 
-                    val member = arguments.member
-                    val uuid = arguments.uuid
+					val member = arguments.member
+					val uuid = arguments.uuid
 
-                    val currentLink = data.getLinkStatus(member.id)
+					val currentLink = data.getLinkStatus(member.id)
 
-                    if (currentLink == null) {
-                        data.setLinkStatus(
-                            member.id,
-                            KrafterMinecraftLinkData.LinkStatus(UUID.fromString(uuid))
-                        )
-                    } else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
-                        respond {
-                            content =
-                                Translations.Responses.Minecraft.ForceLink.Error.alreadyLinked.withOrdinalPlaceholders(
-                                    currentLink.uuid
-                            ).translate()
-                        }
-                        return@action
-                    } else if (currentLink.uuid.toString() != uuid && currentLink.verified) {
-                        respond {
-                            content = Translations.Responses.Minecraft.ForceLink.Error.alreadyLinkedDifferent
-                                .withOrdinalPlaceholders(currentLink.uuid)
-                                .translate()
-                        }
-                        return@action
-                    } else if (!currentLink.verified) {
-                        data.verify(member.id, currentLink.code)
-                        respond {
-                            content = Translations.Responses.Minecraft.ForceLink.success.withOrdinalPlaceholders(
-                                member.mention,
-                                currentLink.uuid
-                            ).translate()
-                        }
-                    }
-                }
-            }
-        }
+					if (currentLink == null) {
+						data.setLinkStatus(
+							member.id,
+							KrafterMinecraftLinkData.LinkStatus(UUID.fromString(uuid))
+						)
+					} else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
+						respond {
+							content =
+								Translations.Responses.Minecraft.ForceLink.Error.alreadyLinked.withOrdinalPlaceholders(
+									currentLink.uuid
+								).withLocale(getLocale()).translate()
+						}
+						return@action
+					} else if (currentLink.uuid.toString() != uuid && currentLink.verified) {
+						respond {
+							content = Translations.Responses.Minecraft.ForceLink.Error.alreadyLinkedDifferent
+								.withOrdinalPlaceholders(currentLink.uuid)
+								.withLocale(getLocale()).translate()
+						}
+						return@action
+					} else if (!currentLink.verified) {
+						data.verify(member.id, currentLink.code)
+						respond {
+							content = Translations.Responses.Minecraft.ForceLink.success.withOrdinalPlaceholders(
+								member.mention,
+								currentLink.uuid
+							).withLocale(getLocale()).translate()
+						}
+					}
+				}
+			}
+		}
 
 		ephemeralSlashCommand {
 			name = Translations.Commands.cmd
@@ -224,14 +225,14 @@ class MinecraftExtension : Extension() {
 							Translations.Responses.Cmd.Mclogs.success.withOrdinalPlaceholders(
 								id,
 								url
-							).translate(),
+							).withLocale(getLocale()).translate(),
 							DISCORD_BLURPLE
 						)
 					} else {
 						customMscEmbed(
 							Translations.Responses.Cmd.Mclogs.error.withOrdinalPlaceholders(
 								resp
-							).translate(),
+							).withLocale(getLocale()).translate(),
 							DISCORD_RED
 						)
 					}
@@ -495,7 +496,7 @@ class MinecraftExtension : Extension() {
 				}
 			}
 		}
-    }
+	}
 
 	fun EphemeralSlashCommand<*, *>.basicMsc(command: String) {
 		action {
@@ -548,46 +549,46 @@ class MinecraftExtension : Extension() {
 		}
 	}
 
-    class LinkCommandArguments : Arguments() {
-        val uuid by string {
-            name = Translations.Args.Minecraft.Link.uuid
-            description = Translations.Args.Minecraft.Link.Uuid.description
-            validate {
-                failIfNot(Translations.Responses.Minecraft.Link.Error.invalidUuid) {
-                    Pattern
-                        .compile(
-                            "([0-9a-f]{8})(?:-|)([0-9a-f]{4})(?:-|)(4[0-9a-f]{" +
-                                    "3})(?:-|)([89ab][0-9a-f]{3})(?:-|)([0-9a-f]{12})"
-                        )
-                        .matcher(value)
-                        .matches()
-                }
-            }
-        }
-    }
+	class LinkCommandArguments : Arguments() {
+		val uuid by string {
+			name = Translations.Args.Minecraft.Link.uuid
+			description = Translations.Args.Minecraft.Link.Uuid.description
+			validate {
+				failIfNot(Translations.Responses.Minecraft.Link.Error.invalidUuid) {
+					Pattern
+						.compile(
+							"([0-9a-f]{8})(?:-|)([0-9a-f]{4})(?:-|)(4[0-9a-f]{" +
+								"3})(?:-|)([89ab][0-9a-f]{3})(?:-|)([0-9a-f]{12})"
+						)
+						.matcher(value)
+						.matches()
+				}
+			}
+		}
+	}
 
-    class ForceLinkCommandArguments : Arguments() {
-        val member by member {
-            name = Translations.Args.Minecraft.ForceLink.member
-            description = Translations.Args.Minecraft.ForceLink.Member.description
-        }
+	class ForceLinkCommandArguments : Arguments() {
+		val member by member {
+			name = Translations.Args.Minecraft.ForceLink.member
+			description = Translations.Args.Minecraft.ForceLink.Member.description
+		}
 
-        val uuid by string {
-            name = Translations.Args.Minecraft.ForceLink.uuid
-            description = Translations.Args.Minecraft.ForceLink.Uuid.description
-            validate {
-                failIfNot(Translations.Responses.Minecraft.ForceLink.Error.invalidUuid) {
-                    Pattern
-                        .compile(
-                            "([0-9a-f]{8})(?:-|)([0-9a-f]{4})(?:-|)(4[0-9a-f]{" +
-                                    "3})(?:-|)([89ab][0-9a-f]{3})(?:-|)([0-9a-f]{12})"
-                        )
-                        .matcher(value)
-                        .matches()
-                }
-            }
-        }
-    }
+		val uuid by string {
+			name = Translations.Args.Minecraft.ForceLink.uuid
+			description = Translations.Args.Minecraft.ForceLink.Uuid.description
+			validate {
+				failIfNot(Translations.Responses.Minecraft.ForceLink.Error.invalidUuid) {
+					Pattern
+						.compile(
+							"([0-9a-f]{8})(?:-|)([0-9a-f]{4})(?:-|)(4[0-9a-f]{" +
+								"3})(?:-|)([89ab][0-9a-f]{3})(?:-|)([0-9a-f]{12})"
+						)
+						.matcher(value)
+						.matches()
+				}
+			}
+		}
+	}
 
 	class TellrawArguments : Arguments() {
 		val text by string {
@@ -705,10 +706,10 @@ class MinecraftExtension : Extension() {
  */
 @OptIn(DelicateCoroutinesApi::class)
 fun verify(uuid: UUID, code: Int): CompletableFuture<Int> = GlobalScope.future {
-    setup().extensions["krafter.minecraft"]?.let { ext ->
-        if (ext is MinecraftExtension) {
-            return@future ext.data.verify(uuid, code.toUInt())
-        }
-    }
-    return@future 0
+	setup().extensions["krafter.minecraft"]?.let { ext ->
+		if (ext is MinecraftExtension) {
+			return@future ext.data.verify(uuid, code.toUInt())
+		}
+	}
+	return@future 0
 }

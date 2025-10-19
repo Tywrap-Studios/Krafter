@@ -241,7 +241,7 @@ public class AmaExtension : Extension() {
 
 				componentRegistry.register(modalObj)
 
-				event.interaction.modal(modalObj.title.translate(), modalObj.id) {
+				event.interaction.modal(modalObj.title.withLocale(getLocale()).translate(), modalObj.id) {
 					modalObj.applyToBuilder(this, getLocale())
 				}
 
@@ -316,7 +316,7 @@ public class AmaExtension : Extension() {
 
 				this@unsafeSlashCommand.componentRegistry.register(modalObj)
 
-				event.interaction.modal(modalObj.title.translate(), modalObj.id) {
+				event.interaction.modal(modalObj.title.withLocale(getLocale()).translate(), modalObj.id) {
 					modalObj.applyToBuilder(this, getLocale())
 				}
 
