@@ -23,6 +23,7 @@ import kotlin.io.path.createDirectories
 const val CFG_CHANNEL_REASON = "Config prompted for an automatic new channel creation."
 private var copyrightAdded = false
 
+@Suppress("LongMethod")
 internal fun AboutBuilder.addCopyright() {
 	if (copyrightAdded) {
 		return
