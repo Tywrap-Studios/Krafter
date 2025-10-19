@@ -38,10 +38,9 @@ import kotlin.io.path.createDirectory
 
 val TEST_SERVER_ID = envOrNull("TEST_SERVER")?.snowflake()
 private val TOKEN = env("TOKEN")   // Get the bot's token from the env vars or a .env file
-val RUN_PATH: Path = Paths.get("").resolve("krafter-data").createDirectories()
 val CFG: ConfigManager<BotConfig> = ConfigManager(
 	BotConfig::class.java,
-	File(RUN_PATH.toFile(), "krafter.json5")
+	File(getConfigDirectory().toFile(), "krafter.json5")
 )
 val LOGGING: LoggingHandler<BotConfig> = LoggingHandler(
 	"Krafter",

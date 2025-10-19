@@ -19,3 +19,4 @@ dependencyResolutionManagement {
 }
 
 include("module-ama")
+include("module-log-parser")

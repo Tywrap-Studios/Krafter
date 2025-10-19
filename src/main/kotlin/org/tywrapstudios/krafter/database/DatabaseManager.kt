@@ -10,7 +10,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource
 import org.tywrapstudios.krafter.LOGGING
-import org.tywrapstudios.krafter.RUN_PATH
+import org.tywrapstudios.krafter.getDataDirectory
 import javax.sql.DataSource
 import kotlin.io.path.pathString
 
@@ -42,7 +42,7 @@ object DatabaseManager {
     }
 
     private fun getDefaultDatasource(): DataSource {
-        val dbFilepath = RUN_PATH.resolve(CONNECTION).pathString
+        val dbFilepath = getDataDirectory().resolve(CONNECTION).pathString
         return SQLiteDataSource(
             SQLiteConfig().apply {
                 setJournalMode(SQLiteConfig.JournalMode.WAL)

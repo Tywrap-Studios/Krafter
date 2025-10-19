@@ -49,10 +49,10 @@ dependencies {
 	implementation(libs.bbapi)
 	implementation(libs.bundles.cozy.modules)
 	implementation(project(":module-ama"))
+	implementation(project(":module-log-parser"))
 	implementation(libs.bundles.database)
 	implementation(libs.rcon)
 	implementation(libs.excelkt)
-	implementation(libs.bundles.ktor.jvm)
 }
 
 // Configure distributions plugin

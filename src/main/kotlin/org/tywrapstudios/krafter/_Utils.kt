@@ -15,6 +15,9 @@ import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.tywrapstudios.krafter.config.BotConfig
 import org.tywrapstudios.krafter.database.DatabaseManager.krafterSqlLogger
 import org.tywrapstudios.krafter.database.tables.*
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.createDirectories
 
 const val CFG_CHANNEL_REASON = "Config prompted for an automatic new channel creation."
 
@@ -103,3 +106,6 @@ fun Collection<ULong>.snowflake() = this.map { it.snowflake() }.toMutableList()
 fun Collection<String>.snowflake() = this.map { it.snowflake() }.toMutableList()
 
 fun Collection<Snowflake>.uLongs() = this.map { it.value }.toMutableList()
+
+fun getDataDirectory(): Path = Path.of("").resolve("data/krafter").createDirectories()
+fun getConfigDirectory(): Path = Path.of("").resolve("config").createDirectories()
