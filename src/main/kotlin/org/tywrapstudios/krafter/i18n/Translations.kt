@@ -120,6 +120,22 @@ public object Translations {
         }
       }
 
+      public object ModWhitelist {
+        /**
+         * enable
+         */
+        public val enable: Key = Key("args.cmd.modWhitelist.enable")
+            .withBundle(Translations.bundle)
+
+        public object Enable {
+          /**
+           * Whether to enable or disable the whitelist.
+           */
+          public val description: Key = Key("args.cmd.modWhitelist.enable.description")
+              .withBundle(Translations.bundle)
+        }
+      }
+
       public object Run {
         /**
          * command
@@ -415,6 +431,12 @@ public object Translations {
           .withBundle(Translations.bundle)
 
       /**
+       * tempmute
+       */
+      public val modTempMute: Key = Key("commands.cmd.modTempMute")
+          .withBundle(Translations.bundle)
+
+      /**
        * tp-offline
        */
       public val modTpOffline: Key = Key("commands.cmd.modTpOffline")
@@ -555,6 +577,14 @@ public object Translations {
          * Restores a player's grave.
          */
         public val description: Key = Key("commands.cmd.modRestore.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object ModTempMute {
+        /**
+         * Temporarily mutes the selected player on the server.
+         */
+        public val description: Key = Key("commands.cmd.modTempMute.description")
             .withBundle(Translations.bundle)
       }
 
@@ -962,6 +992,26 @@ public object Translations {
 
   public object GeneralResponses {
     public object Cmd {
+      /**
+       * Response:```{0}```
+       */
+      public val response: Key = Key("generalResponses.cmd.response")
+          .withBundle(Translations.bundle)
+
+      /**
+       * Command executed successfully.
+       */
+      public val success: Key = Key("generalResponses.cmd.success")
+          .withBundle(Translations.bundle)
+
+      public object Embed {
+        /**
+         * MSC:
+         */
+        public val title: Key = Key("generalResponses.cmd.embed.title")
+            .withBundle(Translations.bundle)
+      }
+
       public object Error {
         /**
          * Running commands on the Minecraft server is currently disabled.
@@ -973,20 +1023,6 @@ public object Translations {
          * Running commands on the Minecraft server is currently unavailable.
          */
         public val unavailable: Key = Key("generalResponses.cmd.error.unavailable")
-            .withBundle(Translations.bundle)
-      }
-
-      public object Run {
-        /**
-         * Response:```{0}```
-         */
-        public val response: Key = Key("generalResponses.cmd.run.response")
-            .withBundle(Translations.bundle)
-
-        /**
-         * Command executed successfully.
-         */
-        public val success: Key = Key("generalResponses.cmd.run.success")
             .withBundle(Translations.bundle)
       }
     }

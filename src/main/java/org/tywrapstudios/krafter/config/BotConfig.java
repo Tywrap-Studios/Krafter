@@ -23,6 +23,8 @@ public class BotConfig extends BasicConfigClass {
     public static class Minecraft {
         @Comment("Whether Discord messages should be sent to the MC Chat altogether.")
         public boolean enabled = true;
+		@Comment("Role and user ids that are considered administrators for Minecraft functionality.")
+		public AdministratorList administrators = new AdministratorList();
         @Comment("""
                 The name of the channel which the bot will watch for messages to send. e.g. "mc-chat"
                 Set to "new" to have one made automatically.""")

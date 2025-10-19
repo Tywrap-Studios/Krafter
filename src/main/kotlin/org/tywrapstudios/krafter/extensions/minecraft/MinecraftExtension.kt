@@ -2,13 +2,20 @@
 
 package org.tywrapstudios.krafter.extensions.minecraft
 
+import dev.kord.common.Color
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.rest.builder.message.embed
+import dev.kordex.core.DISCORD_BLURPLE
+import dev.kordex.core.DISCORD_RED
 import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.application.slash.EphemeralSlashCommand
 import dev.kordex.core.commands.application.slash.ephemeralSubCommand
-import dev.kordex.core.commands.application.slash.group
+import dev.kordex.core.commands.converters.impl.boolean
+import dev.kordex.core.commands.converters.impl.int
 import dev.kordex.core.commands.converters.impl.member
+import dev.kordex.core.commands.converters.impl.optionalString
 import dev.kordex.core.commands.converters.impl.string
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.ephemeralSlashCommand
@@ -17,6 +24,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.future.future
 import org.tywrapstudios.krafter.api.discord.McMessage
+import org.tywrapstudios.krafter.checks.isBotModuleAdmin
 import org.tywrapstudios.krafter.checks.isGlobalBotAdmin
 import org.tywrapstudios.krafter.config
 import org.tywrapstudios.krafter.extensions.data.KrafterMinecraftLinkData
@@ -169,8 +177,321 @@ class MinecraftExtension : Extension() {
 		ephemeralSlashCommand {
 			name = Translations.Commands.cmd
 			description = Translations.Commands.Cmd.description
+
+			ephemeralSubCommand {
+				name = Translations.Commands.Cmd.list
+				description = Translations.Commands.Cmd.List.description
+
+				basicMsc("/list")
+			}
+
+			ephemeralSubCommand(::TellrawArguments) {
+				name = Translations.Commands.Cmd.tellraw
+				description = Translations.Commands.Cmd.Tellraw.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val json = arguments?.let { it() }?.json
+
+				basicMsc("/tellraw @a $json")
+			}
+
+			ephemeralSubCommand(::MclogsArguments) {
+				name = Translations.Commands.Cmd.mclogs
+				description = Translations.Commands.Cmd.Mclogs.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val log = arguments?.let { it() }?.log
+
+				val resp: String = if (log != null) {
+					MC_CONNECTION.command("/mclogs share $log")
+				} else {
+					MC_CONNECTION.command("/mclogs")
+				}
+
+				if (resp.startsWith("Your log")) {
+					val url = resp.replace("Your log has been uploaded:", "").trim()
+					val id = url.replace("https://mclo.gs/", "").trim()
+					customMscEmbed(
+						Translations.Responses.Cmd.Mclogs.success.withOrdinalPlaceholders(
+							id,
+							url
+						).translate(),
+						DISCORD_BLURPLE
+					)
+				} else {
+					customMscEmbed(
+						Translations.Responses.Cmd.Mclogs.error.withOrdinalPlaceholders(
+							resp
+						).translate(),
+						DISCORD_RED
+					)
+				}
+			}
+
+			ephemeralSubCommand(::MaintenanceArguments) {
+				name = Translations.Commands.Cmd.maintenance
+				description = Translations.Commands.Cmd.Maintenance.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val enable = arguments?.let { it() }?.enable
+
+				basicMsc("/maintenance ${if (enable == true) "on" else "off"}")
+			}
+
+			ephemeralSubCommand(::TpOfflineArguments) {
+				name = Translations.Commands.Cmd.modTpOffline
+				description = Translations.Commands.Cmd.ModTpOffline.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val playerName = arguments?.let { it() }?.playerName
+				val position = arguments?.let { it() }?.position
+				val x = arguments?.let { it() }?.x ?: "0"
+				val y = arguments?.let { it() }?.y ?: "0"
+				val z = arguments?.let { it() }?.z ?: "0"
+				val command = if (position != null) {
+					"/tp-offline $playerName $position"
+				} else {
+					"/tp-offline $playerName $x $y $z"
+				}
+				basicMsc(command)
+			}
+
+			ephemeralSubCommand(::SingularPlayerArguments) {
+				name = Translations.Commands.Cmd.modHeal
+				description = Translations.Commands.Cmd.ModHeal.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val playerName = arguments?.let { it() }?.playerName
+
+				basicMsc("/heal $playerName")
+			}
+
+			ephemeralSubCommand(::DamageArguments) {
+				name = Translations.Commands.Cmd.modDamage
+				description = Translations.Commands.Cmd.ModDamage.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val playerName = arguments?.let { it() }?.playerName
+				val amount = arguments?.let { it() }?.amount
+
+				basicMsc("/damage $playerName $amount")
+			}
+
+			ephemeralSubCommand(::WhiteListArguments) {
+				name = Translations.Commands.Cmd.modWhitelist
+				description = Translations.Commands.Cmd.ModWhitelist.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val enable = arguments?.let { it() }?.enable
+
+				basicMsc("/whitelist ${if (enable == true) "on" else "off"}")
+			}
+
+			ephemeralSubCommand(::SingularPlayerArguments) {
+				name = Translations.Commands.Cmd.ModWhitelist.add
+				description = Translations.Commands.Cmd.ModWhitelist.Add.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val playerName = arguments?.let { it() }?.playerName
+				basicMsc("/whitelist add $playerName")
+			}
+
+			ephemeralSubCommand(::SingularPlayerArguments) {
+				name = Translations.Commands.Cmd.ModWhitelist.remove
+				description = Translations.Commands.Cmd.ModWhitelist.Remove.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val playerName = arguments?.let { it() }?.playerName
+				basicMsc("/whitelist remove $playerName")
+			}
+
+			ephemeralSubCommand {
+				name = Translations.Commands.Cmd.modListWhitelist
+				description = Translations.Commands.Cmd.ModListWhitelist.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				basicMsc("/whitelist list")
+			}
+
+			ephemeralSubCommand(::SingularPlayerArguments) {
+				name = Translations.Commands.Cmd.viewBalance
+				description = Translations.Commands.Cmd.ViewBalance.description
+
+				val playerName = arguments?.let { it() }?.playerName
+
+				basicMsc("/nm view $playerName")
+			}
+
+			ephemeralSubCommand(::ModArguments) {
+				name = Translations.Commands.Cmd.modBan
+				description = Translations.Commands.Cmd.ModBan.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.player
+				val reason = arguments?.let { it() }?.reason ?: ""
+
+				basicMsc("/ban $player $reason")
+			}
+
+			ephemeralSubCommand(::SingularPlayerArguments) {
+				name = Translations.Commands.Cmd.modUnban
+				description = Translations.Commands.Cmd.ModUnban.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.playerName
+
+				basicMsc("/unban $player")
+			}
+
+			ephemeralSubCommand(::ModArguments) {
+				name = Translations.Commands.Cmd.modKick
+				description = Translations.Commands.Cmd.ModKick.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.player
+				val reason = arguments?.let { it() }?.reason ?: ""
+
+				basicMsc("/kick $player $reason")
+			}
+
+			ephemeralSubCommand(::ModArgumentsWithDuration) {
+				name = Translations.Commands.Cmd.tempban
+				description = Translations.Commands.Cmd.Tempban.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.player
+				val reason = arguments?.let { it() }?.reason ?: ""
+				val duration = arguments?.let { it() }?.duration
+
+				basicMsc("/tempban $player $duration $reason")
+			}
+
+			ephemeralSubCommand(::ModArguments) {
+				name = Translations.Commands.Cmd.modMute
+				description = Translations.Commands.Cmd.ModMute.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.player
+				val reason = arguments?.let { it() }?.reason ?: ""
+
+				basicMsc("/mute $player $reason")
+			}
+
+			ephemeralSubCommand(::ModArgumentsWithDuration) {
+				name = Translations.Commands.Cmd.modTempMute
+				description = Translations.Commands.Cmd.ModTempMute.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.player
+				val reason = arguments?.let { it() }?.reason ?: ""
+				val duration = arguments?.let { it() }?.duration
+
+				basicMsc("/tempmute $player $duration $reason")
+			}
+
+			ephemeralSubCommand(::SingularPlayerArguments) {
+				name = Translations.Commands.Cmd.modUnmute
+				description = Translations.Commands.Cmd.ModUnmute.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.playerName
+
+				basicMsc("/unmutes $player")
+			}
+
+			ephemeralSubCommand(::SingularPlayerArguments) {
+				name = Translations.Commands.Cmd.modPardon
+				description = Translations.Commands.Cmd.ModPardon.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.playerName
+
+				basicMsc("/pardon $player")
+			}
+
+			ephemeralSubCommand(::SingularPlayerArguments) {
+				name = Translations.Commands.Cmd.modClear
+				description = Translations.Commands.Cmd.ModClear.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.playerName
+				basicMsc("/clear $player")
+			}
+
+			ephemeralSubCommand(::SingularPlayerArguments) {
+				name = Translations.Commands.Cmd.modRestore
+				description = Translations.Commands.Cmd.ModRestore.description
+
+				check { isBotModuleAdmin(config().minecraft.administrators) }
+
+				val player = arguments?.let { it() }?.playerName
+				basicMsc("/yigd restore $player")
+			}
 		}
     }
+
+	fun EphemeralSlashCommand<*, *>.basicMsc(command: String) {
+		action {
+			respond {
+				if (config().minecraft.enabled) {
+					val response = MC_CONNECTION.command(command.trim())
+
+					embed {
+						color = DISCORD_BLURPLE
+						title = Translations.GeneralResponses.Cmd.Embed.title.translate()
+						description = Translations.GeneralResponses.Cmd.response.withOrdinalPlaceholders(
+							response
+						).translate()
+					}
+				} else {
+					embed {
+						color = DISCORD_RED
+						title = Translations.GeneralResponses.Cmd.Embed.title.translate()
+						description = Translations.GeneralResponses.Cmd.Error.disabled.translate()
+					}
+				}
+			}
+		}
+	}
+
+	fun EphemeralSlashCommand<*, *>.customMscEmbed(content: String, embedColor: Color) {
+		action {
+			respond {
+				if (config().minecraft.enabled) {
+					embed {
+						color = embedColor
+						title = Translations.GeneralResponses.Cmd.Embed.title.translate()
+						description = content
+					}
+				} else {
+					embed {
+						color = DISCORD_RED
+						title = Translations.GeneralResponses.Cmd.Embed.title.translate()
+						description = Translations.GeneralResponses.Cmd.Error.disabled.translate()
+					}
+				}
+			}
+		}
+	}
 
     class LinkCommandArguments : Arguments() {
         val uuid by string {
@@ -212,6 +533,109 @@ class MinecraftExtension : Extension() {
             }
         }
     }
+
+	class TellrawArguments : Arguments() {
+		val json by string {
+			name = Translations.Args.Cmd.Tellraw.message
+			description = Translations.Args.Cmd.Tellraw.Message.description
+		}
+	}
+
+	class MclogsArguments : Arguments() {
+		val log by optionalString {
+			name = Translations.Args.Cmd.Mclogs.log
+			description = Translations.Args.Cmd.Mclogs.Log.description
+		}
+	}
+
+	class MaintenanceArguments : Arguments() {
+		val enable by boolean {
+			name = Translations.Args.Cmd.Maintenance.enable
+			description = Translations.Args.Cmd.Maintenance.Enable.description
+		}
+	}
+
+	class TpOfflineArguments : Arguments() {
+		val playerName by string {
+			name = Translations.GeneralArgs.Cmd.ModCommands.player
+			description = Translations.GeneralArgs.Cmd.ModCommands.Player.description
+		}
+
+		val position by optionalString {
+			name = Translations.Args.Cmd.ModTpOffline.location
+			description = Translations.Args.Cmd.ModTpOffline.Location.description
+		}
+
+		val x by optionalString {
+			name = Translations.Args.Cmd.ModTpOffline.x
+			description = Translations.Args.Cmd.ModTpOffline.X.description
+		}
+
+		val y by optionalString {
+			name = Translations.Args.Cmd.ModTpOffline.y
+			description = Translations.Args.Cmd.ModTpOffline.Y.description
+		}
+
+		val z by optionalString {
+			name = Translations.Args.Cmd.ModTpOffline.z
+			description = Translations.Args.Cmd.ModTpOffline.Z.description
+		}
+	}
+
+	class DamageArguments : Arguments() {
+		val playerName by string {
+			name = Translations.GeneralArgs.Cmd.ModCommands.player
+			description = Translations.GeneralArgs.Cmd.ModCommands.Player.description
+		}
+
+		val amount by int {
+			name = Translations.Args.Cmd.ModDamage.amount
+			description = Translations.Args.Cmd.ModDamage.Amount.description
+		}
+	}
+
+	class WhiteListArguments : Arguments() {
+		val enable by boolean {
+			name = Translations.Args.Cmd.ModWhitelist.enable
+			description = Translations.Args.Cmd.ModWhitelist.Enable.description
+		}
+	}
+
+	class SingularPlayerArguments : Arguments() {
+		val playerName by string {
+			name = Translations.GeneralArgs.Cmd.ModCommands.player
+			description = Translations.GeneralArgs.Cmd.ModCommands.Player.description
+		}
+	}
+
+	class ModArguments : Arguments() {
+		val player by string {
+			name = Translations.GeneralArgs.Cmd.ModCommands.player
+			description = Translations.GeneralArgs.Cmd.ModCommands.Player.description
+		}
+
+		val reason by optionalString {
+			name = Translations.GeneralArgs.Cmd.ModCommands.reason
+			description = Translations.GeneralArgs.Cmd.ModCommands.Reason.description
+		}
+	}
+
+	class ModArgumentsWithDuration : Arguments() {
+		val player by string {
+			name = Translations.GeneralArgs.Cmd.ModCommands.player
+			description = Translations.GeneralArgs.Cmd.ModCommands.Player.description
+		}
+
+		val reason by optionalString {
+			name = Translations.GeneralArgs.Cmd.ModCommands.reason
+			description = Translations.GeneralArgs.Cmd.ModCommands.Reason.description
+		}
+
+		val duration by string {
+			name = Translations.GeneralArgs.Cmd.ModCommands.duration
+			description = Translations.GeneralArgs.Cmd.ModCommands.Duration.description
+		}
+	}
 }
 
 /**
