@@ -82,15 +82,12 @@ import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.xssf.usermodel.XSSFColor
-import org.jetbrains.exposed.v1.core.exists
-import org.jetbrains.exposed.v1.jdbc.select
 import org.tywrapstudios.krafter.*
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
 import org.tywrapstudios.krafter.config.BotConfig
+import org.tywrapstudios.krafter.config.SuggestionsForumConfig
 import org.tywrapstudios.krafter.database.entities.OwnedThread
 import org.tywrapstudios.krafter.database.entities.Suggestion
-import org.tywrapstudios.krafter.database.tables.SuggestionTable
-import org.tywrapstudios.krafter.database.tables.SuggestionTable.fromRow
 import org.tywrapstudios.krafter.database.transactors.OwnedThreadTransactor
 import org.tywrapstudios.krafter.database.transactors.SuggestionsTransactor
 import org.tywrapstudios.krafter.i18n.Translations
@@ -126,7 +123,7 @@ class SuggestionsExtension : Extension() {
     private val logger get() = LOGGING
 
     val suggestions: SuggestionsTransactor = SuggestionsTransactor
-    val config: BotConfig.Miscellaneous.SuggestionForum get() = config().miscellaneous.suggestion_forum
+    val config: SuggestionsForumConfig get() = suggestionsConfig()
     private val threads: OwnedThreadTransactor = OwnedThreadTransactor
 
     private val httpClient = HttpClient {}
@@ -154,7 +151,7 @@ class SuggestionsExtension : Extension() {
     private suspend fun getChannel(guild: Guild?): TextChannel? {
         if (guild == null) return null
         return getOrCreateChannel(
-            config.forum_channel,
+            config.channel,
             "suggestions",
             "A channel to suggest stuff in.",
             null,

@@ -13,7 +13,8 @@ package org.tywrapstudios.krafter.extensions.logs
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
-import org.tywrapstudios.krafter.config
+import org.tywrapstudios.krafter.mainConfig
+import org.tywrapstudios.krafter.sabConfig
 import java.util.regex.Pattern
 
 private val BAD_MODS = mutableMapOf(
@@ -21,7 +22,7 @@ private val BAD_MODS = mutableMapOf(
     "baritone" to "Baritone",
 )
 
-private val SITE_LINK = config().safety_and_abuse.moderation.rules_link
+private val SITE_LINK = sabConfig().rules_link
 
 class RuleBreakingModProcessor : LogProcessor() {
     override val identifier: String = "rule-breaking-mod"

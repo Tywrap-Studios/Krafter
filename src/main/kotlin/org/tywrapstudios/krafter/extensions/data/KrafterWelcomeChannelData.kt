@@ -2,8 +2,8 @@ package org.tywrapstudios.krafter.extensions.data
 
 import dev.kord.common.entity.Snowflake
 import dev.kordex.modules.func.welcome.data.WelcomeChannelData
-import org.tywrapstudios.krafter.config
-import org.tywrapstudios.krafter.saveConfig
+import org.tywrapstudios.krafter.embedChannelsConfig
+import org.tywrapstudios.krafter.saveAllConfigs
 import org.tywrapstudios.krafter.snowflake
 import java.util.function.Consumer
 
@@ -26,19 +26,19 @@ class KrafterWelcomeChannelData : WelcomeChannelData {
 
     private fun syncDataFromConfig(): MutableMap<Snowflake, String> {
         data.clear()
-        config().miscellaneous.embed_channels.channels.forEach {
+        embedChannelsConfig().channels.forEach {
             data[it.key.toULong().snowflake()] = it.value
         }
         return data
     }
 
     private fun syncDataToConfig(update: Consumer<MutableMap<Snowflake, String>>): MutableMap<String, String> {
-        config().miscellaneous.embed_channels.channels.clear()
+        embedChannelsConfig().channels.clear()
         update.accept(syncDataFromConfig())
         data.forEach {
-			config().miscellaneous.embed_channels.channels[it.key.value.toString()] = it.value
+			embedChannelsConfig().channels[it.key.value.toString()] = it.value
 		}
-        saveConfig()
-        return config().miscellaneous.embed_channels.channels
+		saveAllConfigs()
+        return embedChannelsConfig().channels
     }
 }

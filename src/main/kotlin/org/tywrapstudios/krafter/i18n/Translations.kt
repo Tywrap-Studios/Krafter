@@ -13,6 +13,22 @@ public object Translations {
       .withBundle(Translations.bundle)
 
   public object Args {
+    public object Bean {
+      /**
+       * target
+       */
+      public val target: Key = Key("args.bean.target")
+          .withBundle(Translations.bundle)
+
+      public object Target {
+        /**
+         * Your target...
+         */
+        public val description: Key = Key("args.bean.target.description")
+            .withBundle(Translations.bundle)
+      }
+    }
+
     public object Cmd {
       public object Maintenance {
         /**
@@ -334,6 +350,12 @@ public object Translations {
 
   public object Commands {
     /**
+     * bean
+     */
+    public val bean: Key = Key("commands.bean")
+        .withBundle(Translations.bundle)
+
+    /**
      * cmd
      */
     public val cmd: Key = Key("commands.cmd")
@@ -350,6 +372,14 @@ public object Translations {
      */
     public val suggestions: Key = Key("commands.suggestions")
         .withBundle(Translations.bundle)
+
+    public object Bean {
+      /**
+       * Bean.
+       */
+      public val description: Key = Key("commands.bean.description")
+          .withBundle(Translations.bundle)
+    }
 
     public object Cmd {
       /**

@@ -8,21 +8,22 @@ import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.event
-import org.tywrapstudios.krafter.config
+import org.tywrapstudios.krafter.mainConfig
 import org.tywrapstudios.krafter.getOrCreateChannel
+import org.tywrapstudios.krafter.sabConfig
 
 class SafetyAndAbuseExtension : Extension() {
     override val name: String = "krafter.sab"
     var dumpChannel: TextChannel? = null
 
     override suspend fun setup() {
-        val cfg = config().safety_and_abuse
+        val cfg = sabConfig()
 
         event<GuildCreateEvent> {
             action {
                 dumpChannel = getOrCreateChannel(
-                    cfg.dump_channel,
-                    "krafter-sab",
+                    cfg.channel,
+                    "moderation",
                     "Safety and Abuse logging and dump channel for the Krafter software",
                     getOverwrites(event.guild),
                     event.guild
@@ -33,9 +34,9 @@ class SafetyAndAbuseExtension : Extension() {
 }
 
 fun getOverwrites(guild: Guild): MutableSet<Overwrite> {
-    val cfg = config().safety_and_abuse
+    val cfg = mainConfig()
     val overwrites = mutableSetOf<Overwrite>()
-    for (role in cfg.administrators.roles) {
+    for (role in cfg.global_administrators.roles) {
         overwrites.add(
             Overwrite(
                 Snowflake(role),
@@ -52,7 +53,7 @@ fun getOverwrites(guild: Guild): MutableSet<Overwrite> {
         )
     }
 
-    for (user in cfg.administrators.users) {
+    for (user in cfg.global_administrators.users) {
         overwrites.add(
             Overwrite(
                 Snowflake(user),

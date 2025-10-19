@@ -20,7 +20,8 @@ import dev.kordex.core.checks.guildFor
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogParser
-import org.tywrapstudios.krafter.config
+import org.tywrapstudios.krafter.crashAnalyticsConfig
+import org.tywrapstudios.krafter.mainConfig
 import org.tywrapstudios.krafter.getOrCreateChannel
 
 class WrongLocationMessageSender : LogParser() {
@@ -33,7 +34,7 @@ class WrongLocationMessageSender : LogParser() {
         val channel = channelFor(event)?.asChannelOfOrNull<TextChannel>() ?: return false
         val guild = guildFor(event)?.asGuildOrNull() ?: return false
 		allowedChannel = getOrCreateChannel(
-			config().miscellaneous.crash_analysing.watch_channel,
+			crashAnalyticsConfig().channel,
 			"crash-logs",
 			"Send your crash logs here to get help.",
 			mutableSetOf(),

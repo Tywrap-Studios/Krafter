@@ -27,10 +27,11 @@ import kotlinx.coroutines.future.future
 import org.tywrapstudios.krafter.api.objects.McMessage
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
 import org.tywrapstudios.krafter.checks.isGlobalBotAdmin
-import org.tywrapstudios.krafter.config
+import org.tywrapstudios.krafter.mainConfig
 import org.tywrapstudios.krafter.extensions.data.KrafterMinecraftLinkData
 import org.tywrapstudios.krafter.getOrCreateChannel
 import org.tywrapstudios.krafter.i18n.Translations
+import org.tywrapstudios.krafter.minecraftConfig
 import org.tywrapstudios.krafter.platform.MC_CONNECTION
 import org.tywrapstudios.krafter.setup
 import java.util.*
@@ -44,29 +45,32 @@ class MinecraftExtension : Extension() {
     val data: KrafterMinecraftLinkData = KrafterMinecraftLinkData()
 
     override suspend fun setup() {
-        val cfg = config().minecraft
+        val cfg = minecraftConfig()
 
-        event<GuildCreateEvent> {
-            action {
-                watchChannel = getOrCreateChannel(
-                    cfg.watch_channel,
-                    "mc-chat",
-                    "Discord to Chat watch channel for the Krafter software. " +
-                            "Send your messages here to have them sent to Minecraft chat!",
-                    mutableSetOf(),
-                    event.guild
-                )
-            }
-        }
+		if (cfg.connection.enabled) {
+			event<GuildCreateEvent> {
+				action {
+					watchChannel = getOrCreateChannel(
+						cfg.connection.channel,
+						"mc-chat",
+						"Discord to Chat watch channel for the Krafter software. " +
+							"Send your messages here to have them sent to Minecraft chat!",
+						mutableSetOf(),
+						event.guild
+					)
+				}
+			}
+			event<MessageCreateEvent> {
+				action {
+					if (!minecraftConfig().connection.enabled) return@action
+					if (event.message.channel.asChannel() == watchChannel) {
+						event.message.author?.isBot?.let { if (!it) MC_CONNECTION.broadcast(McMessage(event.message)) }
+					}
+				}
+			}
+		}
 
-        event<MessageCreateEvent> {
-            action {
-                if (!config().minecraft.enabled) return@action
-                if (event.message.channel.asChannel() == watchChannel) {
-                    event.message.author?.isBot?.let { if (!it) MC_CONNECTION.broadcast(McMessage(event.message)) }
-                }
-            }
-        }
+
 
         ephemeralSlashCommand {
             name = Translations.Commands.minecraft
@@ -76,7 +80,7 @@ class MinecraftExtension : Extension() {
                 name = Translations.Commands.Minecraft.link
                 description = Translations.Commands.Minecraft.Link.description
                 action {
-                    if (!config().minecraft.enabled) {
+                    if (!minecraftConfig().enabled) {
                         respond {
                             content = Translations.Responses.Minecraft.Link.Error.disabled.translate()
                         }
@@ -100,7 +104,7 @@ class MinecraftExtension : Extension() {
                 name = Translations.Commands.Minecraft.unlink
                 description = Translations.Commands.Minecraft.Unlink.description
                 action {
-                    if (!config().minecraft.enabled) {
+                    if (!minecraftConfig().enabled) {
                         respond {
                             content = Translations.Responses.Minecraft.Unlink.Error.disabled.translate()
                         }
@@ -130,7 +134,7 @@ class MinecraftExtension : Extension() {
                     isGlobalBotAdmin()
                 }
                 action {
-                    if (!config().minecraft.enabled) {
+                    if (!minecraftConfig().enabled) {
                         respond {
                             content = Translations.Responses.Minecraft.ForceLink.Error.disabled.translate()
                         }
@@ -190,7 +194,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.tellraw
 				description = Translations.Commands.Cmd.Tellraw.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val text = arguments.text
@@ -202,7 +206,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.mclogs
 				description = Translations.Commands.Cmd.Mclogs.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val log = arguments.log
@@ -238,7 +242,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.maintenance
 				description = Translations.Commands.Cmd.Maintenance.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val enable = arguments.enable
@@ -251,7 +255,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modTpOffline
 				description = Translations.Commands.Cmd.ModTpOffline.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val playerName = arguments.playerName
@@ -272,7 +276,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modHeal
 				description = Translations.Commands.Cmd.ModHeal.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val playerName = arguments.playerName
@@ -285,7 +289,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modDamage
 				description = Translations.Commands.Cmd.ModDamage.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val playerName = arguments.playerName
@@ -299,7 +303,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modWhitelist
 				description = Translations.Commands.Cmd.ModWhitelist.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val enable = arguments.enable
@@ -312,7 +316,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.ModWhitelist.add
 				description = Translations.Commands.Cmd.ModWhitelist.Add.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val playerName = arguments.playerName
@@ -325,7 +329,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.ModWhitelist.remove
 				description = Translations.Commands.Cmd.ModWhitelist.Remove.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val playerName = arguments.playerName
@@ -338,7 +342,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modListWhitelist
 				description = Translations.Commands.Cmd.ModListWhitelist.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				basicMsc("/whitelist list")
 			}
@@ -358,7 +362,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modBan
 				description = Translations.Commands.Cmd.ModBan.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.player
@@ -372,7 +376,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modUnban
 				description = Translations.Commands.Cmd.ModUnban.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.playerName
@@ -385,7 +389,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modKick
 				description = Translations.Commands.Cmd.ModKick.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.player
@@ -399,7 +403,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.tempban
 				description = Translations.Commands.Cmd.Tempban.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.player
@@ -414,7 +418,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modMute
 				description = Translations.Commands.Cmd.ModMute.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.player
@@ -428,7 +432,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modTempMute
 				description = Translations.Commands.Cmd.ModTempMute.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.player
@@ -443,7 +447,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modUnmute
 				description = Translations.Commands.Cmd.ModUnmute.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.playerName
@@ -456,7 +460,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modPardon
 				description = Translations.Commands.Cmd.ModPardon.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.playerName
@@ -469,7 +473,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modClear
 				description = Translations.Commands.Cmd.ModClear.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.playerName
@@ -482,7 +486,7 @@ class MinecraftExtension : Extension() {
 				name = Translations.Commands.Cmd.modRestore
 				description = Translations.Commands.Cmd.ModRestore.description
 
-				check { isBotModuleAdmin(config().minecraft.administrators) }
+				check { isBotModuleAdmin(minecraftConfig().administrators) }
 
 				action {
 					val player = arguments.playerName
@@ -501,7 +505,7 @@ class MinecraftExtension : Extension() {
 
 	suspend fun EphemeralInteractionContext.basicMsc(command: String) {
 		respond {
-			if (config().minecraft.enabled) {
+			if (minecraftConfig().enabled) {
 				val response = try {
 					MC_CONNECTION.command(command.trim())
 				} catch (e: Exception) {
@@ -528,7 +532,7 @@ class MinecraftExtension : Extension() {
 
 	suspend fun EphemeralInteractionContext.customMscEmbed(content: String, embedColor: Color) {
 		respond {
-			if (config().minecraft.enabled) {
+			if (minecraftConfig().enabled) {
 				embed {
 					color = embedColor
 					title = Translations.GeneralResponses.Cmd.Embed.title.translate()

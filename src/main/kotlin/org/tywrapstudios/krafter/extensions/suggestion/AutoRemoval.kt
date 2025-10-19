@@ -21,7 +21,7 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 import org.intellij.lang.annotations.Language
-import org.tywrapstudios.krafter.config.BotConfig
+import org.tywrapstudios.krafter.config.SuggestionsForumConfig
 
 @Serializable
 data class AutoRemoval(
@@ -41,7 +41,7 @@ data class AutoRemoval(
     override fun toString() = "`$id`: `$regex` -> ${status.readableName.translate()} / \"$reason\""
 }
 
-fun BotConfig.Miscellaneous.SuggestionForum.AnswerMap.toAutoRemoval(): AutoRemoval {
+fun SuggestionsForumConfig.AnswerMap.toAutoRemoval(): AutoRemoval {
     val builder: StringBuilder = StringBuilder()
     this.triggers.forEach { entry ->
         builder.append("$entry|")

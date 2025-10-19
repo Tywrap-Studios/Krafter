@@ -7,6 +7,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.createTextChannel
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.gateway.builder.PresenceBuilder
 import dev.kordex.core.builders.AboutBuilder
 import dev.kordex.core.builders.about.CopyrightType
 import kotlinx.coroutines.flow.count
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.lastOrNull
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.tywrapstudios.krafter.config.AdministratorList
 import org.tywrapstudios.krafter.config.BotConfig
 import org.tywrapstudios.krafter.database.DatabaseManager.krafterSqlLogger
 import org.tywrapstudios.krafter.database.tables.*
@@ -93,27 +95,9 @@ internal fun AboutBuilder.addCopyright() {
 	copyrightAdded = true
 }
 
-fun config(): BotConfig = CFG.getConfig()
-
-fun saveConfig() = CFG.saveConfig()
-
 fun Transaction.setup() {
     SchemaUtils.create(TagsTable, AmaConfigTable, MinecraftLinkTable, SuggestionTable, OwnedThreadTable)
     addLogger(krafterSqlLogger)
-}
-
-fun BotConfig.AdministratorList.getRoles(): Set<String> {
-    val roles = HashSet<String>()
-    roles.addAll(this.roles)
-    roles.addAll(config().global_administrators.roles)
-    return roles
-}
-
-fun BotConfig.AdministratorList.getUsers(): Set<String> {
-    val users = HashSet<String>()
-    users.addAll(this.users)
-    users.addAll(config().global_administrators.users)
-    return users
 }
 
 suspend fun getOrCreateChannel(
@@ -181,3 +165,12 @@ fun Collection<Snowflake>.uLongs() = this.map { it.value }.toMutableList()
 
 fun getDataDirectory(): Path = Path.of("").resolve("data/krafter").createDirectories()
 fun getConfigDirectory(): Path = Path.of("").resolve("config").createDirectories()
+
+fun PresenceBuilder.fromString(presence: String, name: String, url: String?) = when (presence) {
+	"playing" -> playing(name)
+	"listening" -> listening(name)
+	"streaming" -> streaming(name, url!!)
+	"watching" -> watching(name)
+	"competing" -> competing(name)
+	else -> { /* No activity */ }
+}

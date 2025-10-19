@@ -12,7 +12,6 @@ import org.quiltmc.community.cozy.modules.ama.extAma
 import org.quiltmc.community.cozy.modules.logs.extLogParser
 import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.ProblematicLauncherProcessor
-import org.slf4j.LoggerFactory
 import org.tywrapstudios.blossombridge.api.config.ConfigManager
 import org.tywrapstudios.blossombridge.api.logging.LoggingHandler
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
@@ -22,6 +21,8 @@ import org.tywrapstudios.krafter.database.DatabaseManager
 import org.tywrapstudios.krafter.extensions.data.KrafterAmaData
 import org.tywrapstudios.krafter.extensions.data.KrafterTagsData
 import org.tywrapstudios.krafter.extensions.data.KrafterWelcomeChannelData
+import org.tywrapstudios.krafter.extensions.`fun`.FunExtension
+import org.tywrapstudios.krafter.extensions.`fun`.HaikuExtension
 import org.tywrapstudios.krafter.extensions.logs.RuleBreakingModProcessor
 import org.tywrapstudios.krafter.extensions.logs.WrongLocationMessageSender
 import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension
@@ -29,16 +30,10 @@ import org.tywrapstudios.krafter.extensions.sab.SafetyAndAbuseExtension
 import org.tywrapstudios.krafter.extensions.sab.getOverwrites
 import org.tywrapstudios.krafter.extensions.suggestion.SuggestionsExtension
 import java.io.File
-import java.net.URI
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.util.concurrent.CompletableFuture
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createDirectory
 
 val TEST_SERVER_ID = envOrNull("TEST_SERVER")?.snowflake()
 private val TOKEN = env("TOKEN")   // Get the bot's token from the env vars or a .env file
-val CFG: ConfigManager<BotConfig> = ConfigManager(
+val CFG = ConfigManager(
 	BotConfig::class.java,
 	File(getConfigDirectory().toFile(), "krafter.json5")
 )
@@ -51,21 +46,19 @@ var initialised: Boolean = false
 
 suspend fun setup(): ExtensibleBot {
 	if (!initialised) {
-		CFG.loadConfig()
+		loadAllConfigs()
 		LOGGING.debug("Before db setup")
 		DatabaseManager.setup(null)
 		LOGGING.debug("After db setup")
 
 		LOGGING.debug("Current configuration:")
-		LOGGING.debug(CFG.getConfigJsonAsString(comments = false, newlines = true))
+		LOGGING.debug(getAllConfigJsonAsString(comments = false, newlines = true))
 	}
-
-    val config = config()
 
     return ExtensibleBot(TOKEN) {
 
         chatCommands {
-            defaultPrefix = config.prefix
+            defaultPrefix = mainConfig().prefix
             enabled = true
 
             prefix { default ->
@@ -86,39 +79,39 @@ suspend fun setup(): ExtensibleBot {
 
         extensions {
 
-            if (config.miscellaneous.plural_kit.enabled) extPluralKit()
+            if (mainConfig().plural_kit) extPluralKit()
 
             add(::SafetyAndAbuseExtension)
 
-            if(config.minecraft.enabled) {
+            if(minecraftConfig().enabled) {
                 add(::MinecraftExtension)
             }
-            if (config.safety_and_abuse.moderation.block_phishing) extPhishing {
-                for (domain in config.safety_and_abuse.moderation.banned_domains) badDomain(domain)
+            if (sabConfig().block_phishing) extPhishing {
+                for (domain in sabConfig().banned_domains) badDomain(domain)
                 logChannelName =
                     if (
-                        config().safety_and_abuse.dump_channel == "new" ||
-                        config().safety_and_abuse.dump_channel.isEmpty()
+                        sabConfig().channel == "new" ||
+						sabConfig().channel.isEmpty()
                     ) {
-                        "krafter-sab"
+                        "moderation"
                     } else {
-                        config.safety_and_abuse.dump_channel
+						sabConfig().channel
                     }
             }
-            if (config.miscellaneous.tags.enabled) tags(KrafterTagsData()) {
-                staffCommandCheck { isBotModuleAdmin(config.miscellaneous.tags.administrators) }
+            if (tagsConfig().enabled) tags(KrafterTagsData()) {
+                staffCommandCheck { isBotModuleAdmin(tagsConfig().administrators) }
                 loggingChannelName =
                     if (
-                        config().safety_and_abuse.dump_channel == "new" ||
-                        config().safety_and_abuse.dump_channel.isEmpty()
+						sabConfig().channel == "new" ||
+						sabConfig().channel.isEmpty()
                     ) {
-                        "krafter-sab"
+                        "moderation"
                     } else {
-                        config.safety_and_abuse.dump_channel
+						sabConfig().channel
                     }
             }
-            if (config.miscellaneous.ama.enabled) extAma(KrafterAmaData())
-            if (config.miscellaneous.crash_analysing.enabled) extLogParser {
+            if (amaConfig().enabled) extAma(KrafterAmaData())
+            if (crashAnalyticsConfig().enabled) extLogParser {
                 processor(PiracyProcessor())
                 processor(ProblematicLauncherProcessor())
                 processor(RuleBreakingModProcessor())
@@ -126,14 +119,12 @@ suspend fun setup(): ExtensibleBot {
                 parser(WrongLocationMessageSender())
                 staffCommandCheck { isGlobalBotAdmin() }
             }
-            if (config.miscellaneous.embed_channels.enabled) welcomeChannel(KrafterWelcomeChannelData()) {
-                staffCommandCheck { isBotModuleAdmin(config.miscellaneous.embed_channels.administrators) }
+            if (embedChannelsConfig().enabled) welcomeChannel(KrafterWelcomeChannelData()) {
+                staffCommandCheck { isBotModuleAdmin(embedChannelsConfig().administrators) }
                 getLogChannel { channel, guild ->
-                    val cfg = config().safety_and_abuse
-
                     return@getLogChannel getOrCreateChannel(
-                        cfg.dump_channel,
-                        "krafter-sab",
+                        sabConfig().channel,
+                        "moderation",
                         "Safety and Abuse logging and dump channel for the Krafter software",
                         getOverwrites(guild),
                         guild
@@ -141,15 +132,23 @@ suspend fun setup(): ExtensibleBot {
                 }
             }
 
-            if (config.miscellaneous.suggestion_forum.enabled) {
+            if (suggestionsConfig().enabled) {
                 add(::SuggestionsExtension)
+            }
+            if (funConfig().enabled) {
+                add(::HaikuExtension)
+				add(::FunExtension)
             }
         }
 
-        dataCollectionMode = DataCollection.fromDB(config.safety_and_abuse.data_collection)
+        dataCollectionMode = DataCollection.fromDB(sabConfig().data_collection)
 
         presence {
-            playing("on ${config.status.server_name}")
+            fromString(
+				mainConfig().status_type,
+				mainConfig().status_text,
+				mainConfig().status_url
+			)
         }
 
 		about {
@@ -160,8 +159,8 @@ suspend fun setup(): ExtensibleBot {
 
 suspend fun main() {
 	val bot = setup()
-	LOGGING.info("${config().enabled}")
-	if (config().enabled) {
+	LOGGING.info("${mainConfig().enabled}")
+	if (mainConfig().enabled) {
 		bot.start()
 		initialised = true
 	} else {

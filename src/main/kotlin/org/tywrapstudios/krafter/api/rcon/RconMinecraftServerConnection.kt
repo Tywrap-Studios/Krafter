@@ -3,12 +3,14 @@ package org.tywrapstudios.krafter.api.rcon
 import nl.vv32.rcon.Rcon
 import org.tywrapstudios.krafter.LOGGING
 import org.tywrapstudios.krafter.api.objects.McMessage
-import org.tywrapstudios.krafter.config
+import org.tywrapstudios.krafter.mainConfig
 import org.tywrapstudios.krafter.config.BotConfig
+import org.tywrapstudios.krafter.config.MinecraftConfig
+import org.tywrapstudios.krafter.minecraftConfig
 import org.tywrapstudios.krafter.platform.services.IMinecraftServerConnection
 
 class RconMinecraftServerConnection : IMinecraftServerConnection {
-	val cfg: BotConfig.Minecraft = config().minecraft
+	val cfg: MinecraftConfig = minecraftConfig()
 
 	override fun broadcast(message: McMessage) {
 		val author = message.getAuthor().get()
@@ -36,8 +38,8 @@ class RconMinecraftServerConnection : IMinecraftServerConnection {
     }
 
 	override fun command(command: String): String {
-		Rcon.open(cfg.rcon_host, cfg.rcon_port.toInt()).use { rcon ->
-			return if (rcon.authenticate(cfg.rcon_password)) {
+		Rcon.open(cfg.connection.rcon_host, cfg.connection.rcon_port.toInt()).use { rcon ->
+			return if (rcon.authenticate(cfg.connection.rcon_password)) {
 				rcon.sendCommand(command)
 			} else {
 				"Failed to authenticate"

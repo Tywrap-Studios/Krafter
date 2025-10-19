@@ -11,8 +11,9 @@ import org.jetbrains.exposed.v1.jdbc.update
 import org.jetbrains.exposed.v1.jdbc.replace
 import org.quiltmc.community.cozy.modules.ama.data.AmaConfig
 import org.quiltmc.community.cozy.modules.ama.data.AmaData
+import org.tywrapstudios.krafter.amaConfig
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
-import org.tywrapstudios.krafter.config
+import org.tywrapstudios.krafter.mainConfig
 import org.tywrapstudios.krafter.database.tables.AmaConfigTable
 import org.tywrapstudios.krafter.database.tables.AmaConfigTable.fromRow
 import org.tywrapstudios.krafter.setup
@@ -68,11 +69,11 @@ class KrafterAmaData : AmaData {
     }
 
     override suspend fun usePluralKitFronter(user: Snowflake): Boolean {
-        return config().miscellaneous.plural_kit.enabled
+        return mainConfig().plural_kit
     }
 
     override suspend fun CheckContextWithCache<*>.managementChecks() {
         hasPermission(Permission.ManageGuild)
-        isBotModuleAdmin(config().miscellaneous.ama.administrators)
+        isBotModuleAdmin(amaConfig().administrators)
     }
 }

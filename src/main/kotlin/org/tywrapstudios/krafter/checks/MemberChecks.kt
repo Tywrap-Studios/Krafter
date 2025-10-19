@@ -7,13 +7,14 @@ import dev.kordex.core.checks.passed
 import dev.kordex.core.checks.types.CheckContext
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.toList
-import org.tywrapstudios.krafter.config
+import org.tywrapstudios.krafter.config.AdministratorList
+import org.tywrapstudios.krafter.mainConfig
 import org.tywrapstudios.krafter.config.BotConfig
 import org.tywrapstudios.krafter.getRoles
 import org.tywrapstudios.krafter.getUsers
 import org.tywrapstudios.krafter.i18n.Translations
 
-suspend fun CheckContext<*>.isBotModuleAdmin(list: BotConfig.AdministratorList) {
+suspend fun CheckContext<*>.isBotModuleAdmin(list: AdministratorList) {
     if (!passed) {
         return
     }
@@ -51,7 +52,7 @@ suspend fun CheckContext<*>.isBotModuleAdmin(list: BotConfig.AdministratorList) 
     }
 }
 
-suspend fun CheckContext<*>.notIsBotModuleAdmin(list: BotConfig.AdministratorList) {
+suspend fun CheckContext<*>.notIsBotModuleAdmin(list: AdministratorList) {
     if (!passed) {
         return
     }
@@ -95,7 +96,7 @@ suspend fun CheckContext<*>.isGlobalBotAdmin() {
         return
     }
 
-    isBotModuleAdmin(config().global_administrators)
+    isBotModuleAdmin(mainConfig().global_administrators)
 }
 
 suspend fun CheckContext<*>.notIsGlobalBotAdmin() {
@@ -103,5 +104,5 @@ suspend fun CheckContext<*>.notIsGlobalBotAdmin() {
         return
     }
 
-    notIsBotModuleAdmin(config().global_administrators)
+    notIsBotModuleAdmin(mainConfig().global_administrators)
 }
