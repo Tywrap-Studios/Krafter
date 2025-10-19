@@ -62,9 +62,6 @@ class MinecraftExtension : Extension() {
         ephemeralSlashCommand {
             name = Translations.Commands.minecraft
             description = Translations.Commands.Minecraft.description
-//            group(Translations.Commands.minecraft) {
-//                description = Translations.Commands.Minecraft.description
-//            }
 
             ephemeralSubCommand(::LinkCommandArguments) {
                 name = Translations.Commands.Minecraft.link
@@ -72,7 +69,7 @@ class MinecraftExtension : Extension() {
                 action {
                     if (!config().minecraft.enabled) {
                         respond {
-                            content = Translations.Commands.Minecraft.Link.Error.disabled.translate()
+                            content = Translations.Responses.Minecraft.Link.Error.disabled.translate()
                         }
                         return@action
                     }
@@ -83,7 +80,7 @@ class MinecraftExtension : Extension() {
                     val link = data.setLinkStatus(member, KrafterMinecraftLinkData.LinkStatus(UUID.fromString(uuid)))
 
                     respond {
-                        content = Translations.Commands.Minecraft.Link.success.withOrdinalPlaceholders(
+                        content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
                             link.code
                         ).translate()
                     }
@@ -96,7 +93,7 @@ class MinecraftExtension : Extension() {
                 action {
                     if (!config().minecraft.enabled) {
                         respond {
-                            content = Translations.Commands.Minecraft.Unlink.Error.disabled.translate()
+                            content = Translations.Responses.Minecraft.Unlink.Error.disabled.translate()
                         }
                         return@action
                     }
@@ -105,11 +102,11 @@ class MinecraftExtension : Extension() {
                     val uuid = data.unlink(member)
                     if (uuid == null) {
                         respond {
-                            content = Translations.Commands.Minecraft.Unlink.Error.notLinked.translate()
+                            content = Translations.Responses.Minecraft.Unlink.Error.notLinked.translate()
                         }
                     } else {
                         respond {
-                            content = Translations.Commands.Minecraft.Unlink.success.withOrdinalPlaceholders(
+                            content = Translations.Responses.Minecraft.Unlink.success.withOrdinalPlaceholders(
                                 uuid
                             ).translate()
                         }
@@ -126,7 +123,7 @@ class MinecraftExtension : Extension() {
                 action {
                     if (!config().minecraft.enabled) {
                         respond {
-                            content = Translations.Commands.Minecraft.ForceLink.Error.disabled.translate()
+                            content = Translations.Responses.Minecraft.ForceLink.Error.disabled.translate()
                         }
                         return@action
                     }
@@ -144,14 +141,14 @@ class MinecraftExtension : Extension() {
                     } else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
                         respond {
                             content =
-                                Translations.Commands.Minecraft.ForceLink.Error.alreadyLinked.withOrdinalPlaceholders(
+                                Translations.Responses.Minecraft.ForceLink.Error.alreadyLinked.withOrdinalPlaceholders(
                                     currentLink.uuid
                             ).translate()
                         }
                         return@action
                     } else if (currentLink.uuid.toString() != uuid && currentLink.verified) {
                         respond {
-                            content = Translations.Commands.Minecraft.ForceLink.Error.alreadyLinkedDifferent
+                            content = Translations.Responses.Minecraft.ForceLink.Error.alreadyLinkedDifferent
                                 .withOrdinalPlaceholders(currentLink.uuid)
                                 .translate()
                         }
@@ -159,7 +156,7 @@ class MinecraftExtension : Extension() {
                     } else if (!currentLink.verified) {
                         data.verify(member.id, currentLink.code)
                         respond {
-                            content = Translations.Commands.Minecraft.ForceLink.success.withOrdinalPlaceholders(
+                            content = Translations.Responses.Minecraft.ForceLink.success.withOrdinalPlaceholders(
                                 member.mention,
                                 currentLink.uuid
                             ).translate()
@@ -177,10 +174,10 @@ class MinecraftExtension : Extension() {
 
     class LinkCommandArguments : Arguments() {
         val uuid by string {
-            name = Translations.Commands.Minecraft.Link.Arg.uuid
-            description = Translations.Commands.Minecraft.Link.description
+            name = Translations.Args.Minecraft.Link.uuid
+            description = Translations.Args.Minecraft.Link.Uuid.description
             validate {
-                failIfNot(Translations.Commands.Minecraft.Link.Error.invalidUuid) {
+                failIfNot(Translations.Responses.Minecraft.Link.Error.invalidUuid) {
                     Pattern
                         .compile(
                             "([0-9a-f]{8})(?:-|)([0-9a-f]{4})(?:-|)(4[0-9a-f]{" +
@@ -195,15 +192,15 @@ class MinecraftExtension : Extension() {
 
     class ForceLinkCommandArguments : Arguments() {
         val member by member {
-            name = Translations.Commands.Minecraft.ForceLink.Arg.member
-            description = Translations.Commands.Minecraft.ForceLink.Arg.Member.description
+            name = Translations.Args.Minecraft.ForceLink.member
+            description = Translations.Args.Minecraft.ForceLink.Member.description
         }
 
         val uuid by string {
-            name = Translations.Commands.Minecraft.ForceLink.Arg.uuid
-            description = Translations.Commands.Minecraft.ForceLink.Arg.Uuid.description
+            name = Translations.Args.Minecraft.ForceLink.uuid
+            description = Translations.Args.Minecraft.ForceLink.Uuid.description
             validate {
-                failIfNot(Translations.Commands.Minecraft.ForceLink.Error.invalidUuid) {
+                failIfNot(Translations.Responses.Minecraft.ForceLink.Error.invalidUuid) {
                     Pattern
                         .compile(
                             "([0-9a-f]{8})(?:-|)([0-9a-f]{4})(?:-|)(4[0-9a-f]{" +

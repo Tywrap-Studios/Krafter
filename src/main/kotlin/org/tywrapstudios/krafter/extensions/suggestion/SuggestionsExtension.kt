@@ -1230,15 +1230,15 @@ class SuggestionsExtension : Extension() {
     @OptIn(NotTranslated::class)
     class SuggestionEditArguments : Arguments() {
         val suggestion: Suggestion by suggestion {
-            name = Translations.Commands.Suggestions.GeneralArgs.suggestion
-            description = Translations.Commands.Suggestions.GeneralArgs.Suggestion.description
+            name = Translations.GeneralArgs.Suggestions.suggestion
+            description = Translations.GeneralArgs.Suggestions.Suggestion.description
 
 //            autocomplete(onlyUser = true)
         }
 
         val text by optionalString {
-            name = Translations.Commands.Suggestions.Edit.Arg.text
-            description = Translations.Commands.Suggestions.Edit.Arg.Text.description
+            name = Translations.Args.Suggestions.Edit.text
+            description = Translations.Args.Suggestions.Edit.Text.description
 
             validate {
                 if (value != null && value!!.length > SUGGESTION_SIZE_LIMIT) {
@@ -1248,8 +1248,8 @@ class SuggestionsExtension : Extension() {
         }
 
         val problem by optionalString {
-            name = Translations.Commands.Suggestions.Edit.Arg.problem
-            description = Translations.Commands.Suggestions.Edit.Arg.Problem.description
+            name = Translations.Args.Suggestions.Edit.problem
+            description = Translations.Args.Suggestions.Edit.Problem.description
 
             validate {
                 if (value != null && value!!.length > FIELD_SIZE_LIMIT) {
@@ -1259,8 +1259,8 @@ class SuggestionsExtension : Extension() {
         }
 
         val solution by optionalString {
-            name = Translations.Commands.Suggestions.Edit.Arg.solution
-            description = Translations.Commands.Suggestions.Edit.Arg.Solution.description
+            name = Translations.Args.Suggestions.Edit.solution
+            description = Translations.Args.Suggestions.Edit.Solution.description
 
             validate {
                 if (value != null && value!!.length > FIELD_SIZE_LIMIT) {
@@ -1293,22 +1293,22 @@ class SuggestionsExtension : Extension() {
     @OptIn(NotTranslated::class)
     class SuggestionStateArguments : Arguments() {
         val suggestion by suggestion {
-            name = Translations.Commands.Suggestions.GeneralArgs.suggestion
-            description = Translations.Commands.Suggestions.GeneralArgs.Suggestion.description
+            name = Translations.GeneralArgs.Suggestions.suggestion
+            description = Translations.GeneralArgs.Suggestions.Suggestion.description
 
 //            autocomplete()
         }
 
         val status by optionalEnumChoice<SuggestionStatus> {
-            name = Translations.Commands.Suggestions.GeneralArgs.status
-            description = Translations.Commands.Suggestions.GeneralArgs.Status.description
+            name = Translations.GeneralArgs.Suggestions.status
+            description = Translations.GeneralArgs.Suggestions.Status.description
 
-            typeName = Translations.Commands.Suggestions.GeneralArgs.status
+            typeName = Translations.GeneralArgs.Suggestions.status
         }
 
         val comment by optionalString {
-            name = Translations.Commands.Suggestions.Manage.State.Arg.comment
-            description = Translations.Commands.Suggestions.Manage.State.Arg.Comment.description
+            name = Translations.Args.Suggestions.Manage.State.comment
+            description = Translations.Args.Suggestions.Manage.State.Comment.description
 
             validate {
                 if ((value?.length ?: -1) > COMMENT_SIZE_LIMIT) {
@@ -1321,15 +1321,15 @@ class SuggestionsExtension : Extension() {
     @OptIn(NotTranslated::class)
     inner class SuggestionCannedResponseArguments : Arguments() {
         val suggestion by suggestion {
-            name = Translations.Commands.Suggestions.GeneralArgs.suggestion
-            description = Translations.Commands.Suggestions.GeneralArgs.Suggestion.description
+            name = Translations.GeneralArgs.Suggestions.suggestion
+            description = Translations.GeneralArgs.Suggestions.Suggestion.description
 
 //            autocomplete()
         }
 
         val id by string {
-            name = Translations.Commands.Suggestions.Manage.AutoResponse.Arg.id
-            description = Translations.Commands.Suggestions.Manage.AutoResponse.Arg.Id.description
+            name = Translations.Args.Suggestions.Manage.AutoResponse.id
+            description = Translations.Args.Suggestions.Manage.AutoResponse.Id.description
 
             validate {
                 failIf("ID must link to a valid auto response!") {
