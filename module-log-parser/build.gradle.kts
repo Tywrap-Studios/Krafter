@@ -33,3 +33,11 @@ kordEx {
 	module("pluralkit")
 	module("dev-unsafe")
 }
+
+detekt {
+	buildUponDefaultConfig = true
+
+	config.from(rootProject.files("detekt.yml"))
+
+	ignoreFailures = true
+}

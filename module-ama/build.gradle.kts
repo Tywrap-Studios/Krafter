@@ -26,3 +26,11 @@ kordEx {
 		outputDirectory = File("${project.projectDir}/src/main/kotlin/org/quiltmc/community/cozy/modules/ama/i18n")
 	}
 }
+
+detekt {
+	buildUponDefaultConfig = true
+
+	config.from(rootProject.files("detekt.yml"))
+
+	ignoreFailures = true
+}

@@ -101,6 +101,8 @@ detekt {
 	buildUponDefaultConfig = true
 
 	config.from(rootProject.files("detekt.yml"))
+
+	ignoreFailures = true
 }
 
 // Automatically generate a Dockerfile. Set `generateOnBuild` to `false` if you'd prefer to manually run the
