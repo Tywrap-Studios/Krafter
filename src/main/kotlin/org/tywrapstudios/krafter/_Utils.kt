@@ -4,10 +4,14 @@ package org.tywrapstudios.krafter
 
 import dev.kord.common.entity.Overwrite
 import dev.kord.common.entity.Snowflake
+import dev.kord.core.behavior.UserBehavior
+import dev.kord.core.behavior.channel.MessageChannelBehavior
 import dev.kord.core.behavior.createTextChannel
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.thread.TextChannelThread
 import dev.kord.gateway.builder.PresenceBuilder
+import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kordex.core.builders.AboutBuilder
 import dev.kordex.core.builders.about.CopyrightType
 import kotlinx.coroutines.flow.count
@@ -173,4 +177,25 @@ fun PresenceBuilder.fromString(presence: String, name: String, url: String?) = w
 	"watching" -> watching(name)
 	"competing" -> competing(name)
 	else -> { /* No activity */ }
+}
+
+suspend fun TextChannelThread.getFirstMessage() =
+	getMessageOrNull(id)
+
+suspend fun EmbedBuilder.userField(user: UserBehavior, role: String? = null, inline: Boolean = false) {
+	field {
+		name = role ?: "User"
+		value = "${user.mention} (`${user.id}` / `${user.asUser().tag}`)"
+
+		this.inline = inline
+	}
+}
+
+fun EmbedBuilder.channelField(channel: MessageChannelBehavior, title: String, inline: Boolean = false) {
+	field {
+		this.name = title
+		this.value = "${channel.mention} (`${channel.id}`)"
+
+		this.inline = inline
+	}
 }

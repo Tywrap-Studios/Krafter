@@ -1,10 +1,11 @@
 package org.tywrapstudios.krafter.config;
 
+import static org.tywrapstudios.krafter.config.Util.channelCheck;
+
 import blue.endless.jankson.Comment;
 import org.tywrapstudios.blossombridge.api.config.BasicConfigClass;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class BotConfig extends BasicConfigClass {
 
@@ -19,6 +20,9 @@ public class BotConfig extends BasicConfigClass {
 
     @Comment("The prefix for chat commands.")
     public String prefix = ">>";
+
+	@Comment("The name of the channel where the bot should dump its logs and whatever.")
+	public String channel = "bot-dump";
 
 	@Comment("""
 		The PluralKit software allows you to add accessibility to the bot for Plural people and Systems.
@@ -55,5 +59,7 @@ public class BotConfig extends BasicConfigClass {
 			status_type = "playing";
 			status_text = "with Cords";
 		}
+
+		channel = channelCheck.apply(channel);
     }
 }
