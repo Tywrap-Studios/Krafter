@@ -12,6 +12,21 @@ public class FunConfig implements ConfigClass {
 	@Comment("People who administer Fun functions.")
 	public AdministratorList administrators = new AdministratorList();
 
+	public Functions functions = new Functions();
+	public static class Functions {
+
+		@Comment("Bean. Who knows what it does.")
+		public boolean bean = true;
+
+		@Comment("""
+			A Haiku is a traditional form of Japanese consisting of three lines,
+			with the first and last lines having five syllables and the middle
+			line having seven syllables.
+
+			This function looks for accidental Haiku's in chat messages.""")
+		public boolean haiku = true;
+	}
+
 	@Override
 	public void validate() {
 

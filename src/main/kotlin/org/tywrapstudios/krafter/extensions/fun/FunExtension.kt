@@ -2,18 +2,18 @@ package org.tywrapstudios.krafter.extensions.`fun`
 
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.DISCORD_LIGHT_BLURPLE
-import dev.kordex.core.DISCORD_PINK
 import dev.kordex.core.commands.Arguments
 import dev.kordex.core.commands.converters.impl.member
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.publicSlashCommand
+import org.tywrapstudios.krafter.funConfig
 import org.tywrapstudios.krafter.i18n.Translations
 
 class FunExtension : Extension() {
 	override val name: String = "krafter.fun"
 
 	override suspend fun setup() {
-		publicSlashCommand(::BeanArguments) {
+		if (funConfig().functions.bean) publicSlashCommand(::BeanArguments) {
 			name = Translations.Commands.bean
 			description = Translations.Commands.Bean.description
 

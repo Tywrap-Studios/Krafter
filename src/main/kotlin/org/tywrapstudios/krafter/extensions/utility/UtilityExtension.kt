@@ -46,7 +46,6 @@ import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.extensions.event
 import dev.kordex.core.time.TimestampType
 import dev.kordex.core.time.toDiscord
-import dev.kordex.core.utils.envOrNull
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.request.forms.*
 import io.ktor.utils.io.jvm.javaio.*
@@ -69,7 +68,6 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
-val STATUS_CHANNEL_ID = envOrNull("STATUS_CHANNEL")
 val PIN_DELETE_DELAY = 10.seconds
 val THREAD_CREATE_DELETE_DELAY = 30.minutes
 
@@ -90,25 +88,23 @@ class UtilityExtension : Extension() {
 
 	@OptIn(UnexpectedFunctionBehaviour::class)
 	override suspend fun setup() {
-		if (STATUS_CHANNEL_ID != null) {
-			event<ReadyEvent> {
-				action {
-					val channel = getOrCreateChannel(
-						mainConfig().channel,
-						"bot-dump",
-						"Bot dump channel where it dumps its dump.",
-						mutableSetOf(),
-						event.guilds.first().asGuild()
-					)
+		event<ReadyEvent> {
+			action {
+				val channel = getOrCreateChannel(
+					mainConfig().channel,
+					"bot-dump",
+					"Bot dump channel where it dumps its dump.",
+					mutableSetOf(),
+					event.guilds.first().asGuild()
+				)
 
-					channel.createMessage {
-						content = buildString {
-							append("**Bot connected:** ")
-							append(Clock.System.now().toDiscord(TimestampType.LongDateTime))
-							append(" (")
-							append(Clock.System.now().toDiscord(TimestampType.RelativeTime))
-							append(")")
-						}
+				channel.createMessage {
+					content = buildString {
+						append("**Bot connected:** ")
+						append(Clock.System.now().toDiscord(TimestampType.LongDateTime))
+						append(" (")
+						append(Clock.System.now().toDiscord(TimestampType.RelativeTime))
+						append(")")
 					}
 				}
 			}

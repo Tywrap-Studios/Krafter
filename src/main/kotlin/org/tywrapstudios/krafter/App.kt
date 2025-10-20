@@ -29,6 +29,7 @@ import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension
 import org.tywrapstudios.krafter.extensions.sab.SafetyAndAbuseExtension
 import org.tywrapstudios.krafter.extensions.sab.getOverwrites
 import org.tywrapstudios.krafter.extensions.suggestion.SuggestionsExtension
+import org.tywrapstudios.krafter.extensions.utility.UtilityExtension
 import java.io.File
 
 val TEST_SERVER_ID = envOrNull("TEST_SERVER")?.snowflake()
@@ -82,6 +83,7 @@ suspend fun setup(): ExtensibleBot {
             if (mainConfig().plural_kit) extPluralKit()
 
             add(::SafetyAndAbuseExtension)
+			add(::UtilityExtension)
 
             if(minecraftConfig().enabled) {
                 add(::MinecraftExtension)
@@ -136,7 +138,7 @@ suspend fun setup(): ExtensibleBot {
                 add(::SuggestionsExtension)
             }
             if (funConfig().enabled) {
-                add(::HaikuExtension)
+                if (funConfig().functions.haiku) add(::HaikuExtension)
 				add(::FunExtension)
             }
         }

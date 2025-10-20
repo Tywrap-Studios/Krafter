@@ -150,10 +150,14 @@ class HaikuExtension : Extension() {
 			previousWasVowel = isVowel
 		}
 
-		// Handle the silent 'e' rule: if word ends in 'e' and has more than 1 syllable,
-		// the 'e' is usually silent, so subtract 1 (e.g., "make" = 1, not 2)
-		if (lowerWord.endsWith("e") && count > 1) {
-			count--
+		// Handle the silent endings rule: if word ends in either of the following
+		// and has more than 1 syllable, it is usually silent,
+		// so subtract 1 (e.g., "make" = 1, not 2)
+		if (count > 1) {
+			// e.g. "make", "bake", "time"
+			if (lowerWord.endsWith("e")) count--
+			// e.g. "bothered", "catered"
+			if (lowerWord.endsWith("red")) count--
 		}
 
 		// Handle the consonant + 'le' ending rule (e.g., "table", "bottle")
