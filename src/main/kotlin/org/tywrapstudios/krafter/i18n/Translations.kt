@@ -312,6 +312,104 @@ public object Translations {
         }
       }
     }
+
+    public object Utility {
+      public object Say {
+        /**
+         * message
+         */
+        public val message: Key = Key("args.utility.say.message")
+            .withBundle(Translations.bundle)
+
+        /**
+         * target
+         */
+        public val target: Key = Key("args.utility.say.target")
+            .withBundle(Translations.bundle)
+
+        public object Message {
+          /**
+           * Message to send
+           */
+          public val description: Key = Key("args.utility.say.message.description")
+              .withBundle(Translations.bundle)
+        }
+
+        public object Target {
+          /**
+           * Channel to use, if not this one
+           */
+          public val description: Key = Key("args.utility.say.target.description")
+              .withBundle(Translations.bundle)
+        }
+      }
+
+      public object Thread {
+        public object Archive {
+          /**
+           * lock
+           */
+          public val lock: Key = Key("args.utility.thread.archive.lock")
+              .withBundle(Translations.bundle)
+
+          public object Lock {
+            /**
+             * Whether to lock the thread, if you're staff - defaults to false
+             */
+            public val description: Key = Key("args.utility.thread.archive.lock.description")
+                .withBundle(Translations.bundle)
+          }
+        }
+
+        public object PinMessage {
+          /**
+           * message
+           */
+          public val message: Key = Key("args.utility.thread.pinMessage.message")
+              .withBundle(Translations.bundle)
+
+          public object Message {
+            /**
+             * Message link or ID to pin/unpin
+             */
+            public val description: Key = Key("args.utility.thread.pinMessage.message.description")
+                .withBundle(Translations.bundle)
+          }
+        }
+
+        public object Rename {
+          /**
+           * name
+           */
+          public val name: Key = Key("args.utility.thread.rename.name")
+              .withBundle(Translations.bundle)
+
+          public object Name {
+            /**
+             * Name to give the current thread
+             */
+            public val description: Key = Key("args.utility.thread.rename.name.description")
+                .withBundle(Translations.bundle)
+          }
+        }
+
+        public object SetOwner {
+          /**
+           * user
+           */
+          public val user: Key = Key("args.utility.thread.setOwner.user")
+              .withBundle(Translations.bundle)
+
+          public object User {
+            /**
+             * User to set as the owner of the thread
+             */
+            public val description: Key = Key("args.utility.thread.setOwner.user.description")
+                .withBundle(Translations.bundle)
+          }
+        }
+      }
+    }
   }
 
   public object Checks {
@@ -840,6 +938,168 @@ public object Translations {
             .withBundle(Translations.bundle)
       }
     }
+
+    public object Utility {
+      /**
+       * say
+       */
+      public val say: Key = Key("commands.utility.say")
+          .withBundle(Translations.bundle)
+
+      /**
+       * thread
+       */
+      public val thread: Key = Key("commands.utility.thread")
+          .withBundle(Translations.bundle)
+
+      public object MessageCommand {
+        /**
+         * Pin in thread
+         */
+        public val pinInThread: Key = Key("commands.utility.messageCommand.pinInThread")
+            .withBundle(Translations.bundle)
+
+        /**
+         * Raw JSON
+         */
+        public val rawJson: Key = Key("commands.utility.messageCommand.rawJson")
+            .withBundle(Translations.bundle)
+
+        /**
+         * Unpin in thread
+         */
+        public val unpinInThread: Key = Key("commands.utility.messageCommand.unpinInThread")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Say {
+        /**
+         * Send a message.
+         */
+        public val description: Key = Key("commands.utility.say.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Thread {
+        /**
+         * archive
+         */
+        public val archive: Key = Key("commands.utility.thread.archive")
+            .withBundle(Translations.bundle)
+
+        /**
+         * backup
+         */
+        public val backup: Key = Key("commands.utility.thread.backup")
+            .withBundle(Translations.bundle)
+
+        /**
+         * Thread management commands
+         */
+        public val description: Key = Key("commands.utility.thread.description")
+            .withBundle(Translations.bundle)
+
+        /**
+         * pin
+         */
+        public val pin: Key = Key("commands.utility.thread.pin")
+            .withBundle(Translations.bundle)
+
+        /**
+         * prevent-archiving
+         */
+        public val preventArchiving: Key = Key("commands.utility.thread.preventArchiving")
+            .withBundle(Translations.bundle)
+
+        /**
+         * rename
+         */
+        public val rename: Key = Key("commands.utility.thread.rename")
+            .withBundle(Translations.bundle)
+
+        /**
+         * set-owner
+         */
+        public val setOwner: Key = Key("commands.utility.thread.setOwner")
+            .withBundle(Translations.bundle)
+
+        /**
+         * unpin
+         */
+        public val unpin: Key = Key("commands.utility.thread.unpin")
+            .withBundle(Translations.bundle)
+
+        public object Archive {
+          /**
+           * Archive the current thread, if you have permission
+           */
+          public val description: Key = Key("commands.utility.thread.archive.description")
+              .withBundle(Translations.bundle)
+        }
+
+        public object Backup {
+          /**
+           * Get all messages in the current thread, saving them into a Markdown file.
+           */
+          public val description: Key = Key("commands.utility.thread.backup.description")
+              .withBundle(Translations.bundle)
+        }
+
+        public object Pin {
+          /**
+           * Pin a message in this thread, if you have permission
+           */
+          public val description: Key = Key("commands.utility.thread.pin.description")
+              .withBundle(Translations.bundle)
+        }
+
+        public object PreventArchiving {
+          /**
+           * Prevent the current thread from archiving, if you have permission
+           */
+          public val description: Key = Key("commands.utility.thread.preventArchiving.description")
+              .withBundle(Translations.bundle)
+        }
+
+        public object Rename {
+          /**
+           * Rename the current thread, if you have permission
+           */
+          public val description: Key = Key("commands.utility.thread.rename.description")
+              .withBundle(Translations.bundle)
+        }
+
+        public object SetOwner {
+          /**
+           * Change the owner of the thread, if you have permission
+           */
+          public val description: Key = Key("commands.utility.thread.setOwner.description")
+              .withBundle(Translations.bundle)
+        }
+
+        public object Unpin {
+          /**
+           * Unpin a message in this thread, if you have permission
+           */
+          public val description: Key = Key("commands.utility.thread.unpin.description")
+              .withBundle(Translations.bundle)
+        }
+      }
+    }
+  }
+
+  public object Components {
+    public object Utility {
+      public object Thread {
+        public object SetOwner {
+          /**
+           * Yes
+           */
+          public val confirmButton: Key = Key("components.utility.thread.setOwner.confirmButton")
+              .withBundle(Translations.bundle)
+        }
+      }
+    }
   }
 
   public object Converter {
@@ -1054,6 +1314,32 @@ public object Translations {
          */
         public val unavailable: Key = Key("generalResponses.cmd.error.unavailable")
             .withBundle(Translations.bundle)
+      }
+    }
+  }
+
+  public object Modals {
+    public object Utility {
+      public object LogEvent {
+        /**
+         * Log Event
+         */
+        public val title: Key = Key("modals.utility.logEvent.title")
+            .withBundle(Translations.bundle)
+
+        public object Description {
+          /**
+           * Description
+           */
+          public val label: Key = Key("modals.utility.logEvent.description.label")
+              .withBundle(Translations.bundle)
+
+          /**
+           * A few words on what's happening
+           */
+          public val placeholder: Key = Key("modals.utility.logEvent.description.placeholder")
+              .withBundle(Translations.bundle)
+        }
       }
     }
   }
