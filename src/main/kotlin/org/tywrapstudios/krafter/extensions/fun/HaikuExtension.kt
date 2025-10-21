@@ -7,9 +7,16 @@ import dev.kord.core.event.message.MessageCreateEvent
 import dev.kordex.core.DISCORD_PINK
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.event
+import io.ktor.util.collections.setValue
+import org.tywrapstudios.krafter.LOGGING
+import org.tywrapstudios.krafter.haikuAbbreviationsConfig
 
 class HaikuExtension : Extension() {
 	override val name: String = "krafter.haiku"
+
+	init {
+	    ABBREVIATIONS.putAll(haikuAbbreviationsConfig().abbreviations)
+	}
 
 	override suspend fun setup() {
 		event<MessageCreateEvent> {
@@ -50,6 +57,7 @@ class HaikuExtension : Extension() {
 			.replace(Regex("[^a-zA-Z0-9\\s'-]"), "")
 			.split(Regex("\\s+"))
 			.filter { it.isNotBlank() }
+			.map { ABBREVIATIONS.getOrElse(it) { it } }
 
 		if (words.isEmpty()) return null
 
@@ -66,7 +74,6 @@ class HaikuExtension : Extension() {
 
 		return null
 	}
-
 
 	/**
 	 * Attempts to build a haiku starting from a specific word index.
@@ -115,13 +122,15 @@ class HaikuExtension : Extension() {
 	/**
 	 * Counts the number of syllables in a word using English language heuristics.
 	 * This is an approximation as perfect syllable counting can depend on accents, regions and whatnot.
-	 * Also, sometimes things get flagged as multiple syllables or less syllables
-	 * when they are not (e.g., "fire" is often one syllable, but "bothered" is three).
+	 * Also, sometimes things get flagged as having more or fewer syllables
+	 * than they actually do (e.g., "fire" can get seen as one syllable, and "bothered" can be three
+	 * (obviously I fixed these specific examples, hard to have examples of things
+	 * that are wrong if you immediately fix them)).
 	 *
 	 * Basic "rules":
 	 * 1. Count the vowel groups (consecutive vowels count as one "syllable")
-	 * 2. Silent 'e' at the end doesn't count if there are other syllables (e.g., "make")
-	 * 3. Words ending in 'le' with a consonant before get an extra syllable (e.g., "table")
+	 * 2. Some silent vowel groups at the end don't count if there are other syllables (e.g., "make": silent 'e')
+	 * 3. Correct the aforementioned silent groups for certain endings that should count (e.g., "table": the 'le' ending)
 	 * 4. Every word has at least 1 syllable (this is for when you have weird inputs)
 	 *
 	 * @param word The word to count syllables for
@@ -150,25 +159,50 @@ class HaikuExtension : Extension() {
 			previousWasVowel = isVowel
 		}
 
-		// Handle the silent endings rule: if word ends in either of the following
-		// and has more than 1 syllable, it is usually silent,
-		// so subtract 1 (e.g., "make" = 1, not 2)
+		/**
+		 * Helper function to add back a syllable if the word ends with a specific
+		 * consonant + ending combination.
+		 *
+		 * @param consonantIndex The index from the end of the word where the consonant should be
+		 * @param ending The ending string to check for
+		 */
+		fun forceAdd(ending: String) {
+			if (lowerWord.length >= (ending.length + 1) &&
+				lowerWord[lowerWord.length - (ending.length + 1)] !in "aeiouy" &&
+				lowerWord.endsWith(ending)) {
+				count++
+			}
+		}
+
+		/**
+		 * Helper function to remove a syllable if the word ends with a specific ending.
+		 *
+		 * @param ending The ending string to check for
+		 */
+		fun forceRemove(ending: String) {
+			if (lowerWord.length >= (ending.length + 1) &&
+				lowerWord[lowerWord.length - (ending.length + 1)] !in "aeiouy" &&
+				lowerWord.endsWith(ending)) {
+				count--
+			}
+		}
+
+		// Handle the endings rule
 		if (count > 1) {
 			// e.g. "make", "bake", "time"
-			if (lowerWord.endsWith("e")) count--
+			forceRemove("e")
 			// e.g. "bothered", "catered"
-			if (lowerWord.endsWith("red")) count--
+			forceRemove("ered")
+			// e.g. "flames", "makes"
+			forceRemove("es")
+			// e.g. "table", "bottle"
+			forceAdd("le")
 		}
 
-		// Handle the consonant + 'le' ending rule (e.g., "table", "bottle")
-		// If a word ends in 'le' with a consonant before it, that 'le' forms a syllable
-		if (lowerWord.length >= 3 &&
-			lowerWord.endsWith("le") &&
-			lowerWord[lowerWord.length - 3] !in "aeiouy") {
-			count++
-		}
-
-		return maxOf(count, 1)
+		val result = maxOf(count, 1)
+		LOGGING.debug("Haiku: $word = $result syllables (counted $count before maxOf)")
+		return result
+//		return maxOf(count, 1)
 	}
 
 	data class Haiku(val lines: List<String>)

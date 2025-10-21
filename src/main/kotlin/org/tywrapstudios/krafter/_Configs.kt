@@ -9,6 +9,7 @@ import org.tywrapstudios.krafter.config.BotConfig
 import org.tywrapstudios.krafter.config.CrashAnalyticsConfig
 import org.tywrapstudios.krafter.config.EmbedChannelsConfig
 import org.tywrapstudios.krafter.config.FunConfig
+import org.tywrapstudios.krafter.config.HaikuAbbreviationsConfig
 import org.tywrapstudios.krafter.config.MinecraftConfig
 import org.tywrapstudios.krafter.config.SabConfig
 import org.tywrapstudios.krafter.config.SuggestionsForumConfig
@@ -57,6 +58,11 @@ val FunCFG = ConfigManager(
 	getFile("fun")
 )
 fun funConfig() = FunCFG.getConfig()
+val HaikuAbbreviationsCFG = ConfigManager(
+	HaikuAbbreviationsConfig::class.java,
+	getFile("fun", "haiku-abbreviations")
+)
+fun haikuAbbreviationsConfig() = HaikuAbbreviationsCFG.getConfig()
 
 fun getAllConfigJsonAsString(comments: Boolean, newlines: Boolean): String {
 	var string = ""
@@ -69,6 +75,7 @@ fun getAllConfigJsonAsString(comments: Boolean, newlines: Boolean): String {
 	string += SuggestionsCFG.getConfigJsonAsString(comments, newlines) + "\n"
 	string += TagsCFG.getConfigJsonAsString(comments, newlines) + "\n"
 	string += FunCFG.getConfigJsonAsString(comments, newlines) + "\n"
+	string += HaikuAbbreviationsCFG.getConfigJsonAsString(comments, newlines) + "\n"
 	return string
 }
 
@@ -82,6 +89,7 @@ fun loadAllConfigs() {
 	SuggestionsCFG.loadConfig()
 	TagsCFG.loadConfig()
 	FunCFG.loadConfig()
+	HaikuAbbreviationsCFG.loadConfig()
 }
 
 fun saveAllConfigs() {
@@ -94,12 +102,19 @@ fun saveAllConfigs() {
 	SuggestionsCFG.saveConfig()
 	TagsCFG.saveConfig()
 	FunCFG.saveConfig()
+	HaikuAbbreviationsCFG.saveConfig()
 }
 
 internal fun getFile(moduleName: String): File =
 	File(
 		getConfigDirectory().resolve("ext-$moduleName").createDirectories().toFile(),
 		"$moduleName.json5"
+	)
+
+internal fun getFile(moduleName: String, partName: String): File =
+	File(
+		getConfigDirectory().resolve("ext-$moduleName").createDirectories().toFile(),
+		"$partName.json5"
 	)
 
 fun AdministratorList.getRoles(): Set<String> {
