@@ -1,4 +1,4 @@
-package org.tywrapstudios.krafter.extensions.`fun`
+package org.tywrapstudios.krafter.extensions.funtility
 
 val ABBREVIATIONS = mutableMapOf(
 	"rn" to "right now",

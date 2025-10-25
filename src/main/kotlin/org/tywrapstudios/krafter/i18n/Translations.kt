@@ -233,6 +233,50 @@ public object Translations {
       }
     }
 
+    public object Rsvp {
+      /**
+       * event-description
+       */
+      public val eventDescription: Key = Key("args.rsvp.eventDescription")
+          .withBundle(Translations.bundle)
+
+      /**
+       * event-name
+       */
+      public val eventName: Key = Key("args.rsvp.eventName")
+          .withBundle(Translations.bundle)
+
+      /**
+       * event-time
+       */
+      public val eventTime: Key = Key("args.rsvp.eventTime")
+          .withBundle(Translations.bundle)
+
+      public object EventDescription {
+        /**
+         * A description of the event.
+         */
+        public val description: Key = Key("args.rsvp.eventDescription.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object EventName {
+        /**
+         * The name of the event.
+         */
+        public val description: Key = Key("args.rsvp.eventName.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object EventTime {
+        /**
+         * Date and time of the event. Format: YYYY-MM-DD HH:mm (24-hour time, UTC)
+         */
+        public val description: Key = Key("args.rsvp.eventTime.description")
+            .withBundle(Translations.bundle)
+      }
+    }
+
     public object Suggestions {
       public object Edit {
         /**
@@ -463,6 +507,12 @@ public object Translations {
      * minecraft
      */
     public val minecraft: Key = Key("commands.minecraft")
+        .withBundle(Translations.bundle)
+
+    /**
+     * rsvp
+     */
+    public val rsvp: Key = Key("commands.rsvp")
         .withBundle(Translations.bundle)
 
     /**
@@ -857,6 +907,14 @@ public object Translations {
         public val description: Key = Key("commands.minecraft.unlink.description")
             .withBundle(Translations.bundle)
       }
+    }
+
+    public object Rsvp {
+      /**
+       * Create an event people can RSVP to.
+       */
+      public val description: Key = Key("commands.rsvp.description")
+          .withBundle(Translations.bundle)
     }
 
     public object Suggestions {
@@ -1455,6 +1513,17 @@ public object Translations {
           public val notLinked: Key = Key("responses.minecraft.unlink.error.notLinked")
               .withBundle(Translations.bundle)
         }
+      }
+    }
+
+    public object Rsvp {
+      public object Error {
+        /**
+         * The provided date and time is invalid. Please use the format: YYYY-MM-DD HH:mm (24-hour
+         * time, UTC)
+         */
+        public val invalidDate: Key = Key("responses.rsvp.error.invalidDate")
+            .withBundle(Translations.bundle)
       }
     }
   }

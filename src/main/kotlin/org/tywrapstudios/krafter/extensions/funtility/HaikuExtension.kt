@@ -1,13 +1,12 @@
 @file:Suppress("MagicNumber", "ReturnCount")
 
-package org.tywrapstudios.krafter.extensions.`fun`
+package org.tywrapstudios.krafter.extensions.funtility
 
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kordex.core.DISCORD_PINK
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.event
-import io.ktor.util.collections.setValue
 import org.tywrapstudios.krafter.LOGGING
 import org.tywrapstudios.krafter.haikuAbbreviationsConfig
 

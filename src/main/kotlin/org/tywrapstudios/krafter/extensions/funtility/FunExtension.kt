@@ -1,4 +1,4 @@
-package org.tywrapstudios.krafter.extensions.`fun`
+package org.tywrapstudios.krafter.extensions.funtility
 
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.DISCORD_LIGHT_BLURPLE

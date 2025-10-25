@@ -25,6 +25,11 @@ public class FunConfig implements ConfigClass {
 
 			This function looks for accidental Haiku's in chat messages.""")
 		public boolean haiku = true;
+
+		@Comment("""
+			Répondez s'il vous plaît. Allows users to create RSVP events,
+			other users can join these and all get pinged when it starts!""")
+		public boolean rsvp = true;
 	}
 
 	@Override

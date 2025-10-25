@@ -21,8 +21,9 @@ import org.tywrapstudios.krafter.database.DatabaseManager
 import org.tywrapstudios.krafter.extensions.data.KrafterAmaData
 import org.tywrapstudios.krafter.extensions.data.KrafterTagsData
 import org.tywrapstudios.krafter.extensions.data.KrafterWelcomeChannelData
-import org.tywrapstudios.krafter.extensions.`fun`.FunExtension
-import org.tywrapstudios.krafter.extensions.`fun`.HaikuExtension
+import org.tywrapstudios.krafter.extensions.funtility.FunExtension
+import org.tywrapstudios.krafter.extensions.funtility.HaikuExtension
+import org.tywrapstudios.krafter.extensions.funtility.RsvpExtension
 import org.tywrapstudios.krafter.extensions.logs.RuleBreakingModProcessor
 import org.tywrapstudios.krafter.extensions.logs.WrongLocationMessageSender
 import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension
@@ -139,6 +140,7 @@ suspend fun setup(): ExtensibleBot {
             }
             if (funConfig().enabled) {
                 if (funConfig().functions.haiku) add(::HaikuExtension)
+				if (funConfig().functions.rsvp) add (::RsvpExtension)
 				add(::FunExtension)
             }
         }

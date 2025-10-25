@@ -55,12 +55,12 @@ val TagsCFG = ConfigManager(
 fun tagsConfig() = TagsCFG.getConfig()
 val FunCFG = ConfigManager(
 	FunConfig::class.java,
-	getFile("fun")
+	getFile("funtility")
 )
 fun funConfig() = FunCFG.getConfig()
 val HaikuAbbreviationsCFG = ConfigManager(
 	HaikuAbbreviationsConfig::class.java,
-	getFile("fun", "haiku-abbreviations")
+	getFile("funtility", "haiku-abbreviations")
 )
 fun haikuAbbreviationsConfig() = HaikuAbbreviationsCFG.getConfig()
 

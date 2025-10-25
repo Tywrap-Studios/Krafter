@@ -100,7 +100,7 @@ internal fun AboutBuilder.addCopyright() {
 }
 
 fun Transaction.setup() {
-    SchemaUtils.create(TagsTable, AmaConfigTable, MinecraftLinkTable, SuggestionTable, OwnedThreadTable)
+    SchemaUtils.create(TagsTable, AmaConfigTable, MinecraftLinkTable, SuggestionTable, OwnedThreadTable, RsvpTable)
     addLogger(krafterSqlLogger)
 }
 
