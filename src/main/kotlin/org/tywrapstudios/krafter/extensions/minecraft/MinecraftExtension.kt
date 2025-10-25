@@ -27,8 +27,7 @@ import kotlinx.coroutines.future.future
 import org.tywrapstudios.krafter.api.objects.McMessage
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
 import org.tywrapstudios.krafter.checks.isGlobalBotAdmin
-import org.tywrapstudios.krafter.mainConfig
-import org.tywrapstudios.krafter.extensions.data.KrafterMinecraftLinkData
+import org.tywrapstudios.krafter.database.transactors.KrafterMinecraftLinkTransactor
 import org.tywrapstudios.krafter.getOrCreateChannel
 import org.tywrapstudios.krafter.i18n.Translations
 import org.tywrapstudios.krafter.minecraftConfig
@@ -42,7 +41,7 @@ var watchChannel: TextChannel? = null
 
 class MinecraftExtension : Extension() {
 	override val name: String = "krafter.minecraft"
-	val data: KrafterMinecraftLinkData = KrafterMinecraftLinkData()
+	val data: KrafterMinecraftLinkTransactor = KrafterMinecraftLinkTransactor
 
 	override suspend fun setup() {
 		val cfg = minecraftConfig()
@@ -91,7 +90,7 @@ class MinecraftExtension : Extension() {
 					val uuid = arguments.uuid
 					val member = event.interaction.user.id
 
-					val link = data.setLinkStatus(member, KrafterMinecraftLinkData.LinkStatus(UUID.fromString(uuid)))
+					val link = data.setLinkStatus(member, KrafterMinecraftLinkTransactor.LinkStatus(UUID.fromString(uuid)))
 
 					respond {
 						content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
@@ -150,7 +149,7 @@ class MinecraftExtension : Extension() {
 					if (currentLink == null) {
 						data.setLinkStatus(
 							member.id,
-							KrafterMinecraftLinkData.LinkStatus(UUID.fromString(uuid))
+							KrafterMinecraftLinkTransactor.LinkStatus(UUID.fromString(uuid))
 						)
 					} else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
 						respond {
@@ -309,7 +308,7 @@ class MinecraftExtension : Extension() {
 				action {
 					val enable = arguments.enable
 
-					basicMsc("/whitelist ${if (enable == true) "on" else "off"}")
+					basicMsc("/whitelist ${if (enable) "on" else "off"}")
 				}
 			}
 

@@ -1,4 +1,4 @@
-package org.tywrapstudios.krafter.extensions.data
+package org.tywrapstudios.krafter.database.transactors
 
 import dev.kord.common.entity.Snowflake
 import org.jetbrains.exposed.v1.core.eq
@@ -9,11 +9,11 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import org.tywrapstudios.krafter.database.tables.MinecraftLinkTable
 import org.tywrapstudios.krafter.setup
-import java.util.*
+import java.util.UUID
 import kotlin.random.Random
 import kotlin.random.nextUInt
 
-class KrafterMinecraftLinkData {
+object KrafterMinecraftLinkTransactor {
     /**
      * Starts a link status for the given member, if one does not already exist.
      * If a link status already exists, it will be replaced with the new one.
@@ -166,7 +166,7 @@ class KrafterMinecraftLinkData {
      */
     data class LinkStatus(
         val uuid: UUID,
-        val code: UInt = Random.nextUInt(10000u..99999u),
+        val code: UInt = Random.Default.nextUInt(10000u..99999u),
         val verified: Boolean = false
     )
 }
