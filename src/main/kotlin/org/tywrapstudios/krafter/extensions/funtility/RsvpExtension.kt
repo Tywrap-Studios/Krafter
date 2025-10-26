@@ -44,8 +44,9 @@ class RsvpExtension : Extension() {
 	@Suppress("MagicNumber")
 	override suspend fun setup() {
 		checkTask = Scheduler().schedule(
-			seconds = 30,
+			seconds = 10,
 			name = "RSVP Checking Task",
+			repeat = true
 		) {
 			val now = Clock.System.now()
 			val events = rsvp.getRsvpsBeforeAndAt(now)
