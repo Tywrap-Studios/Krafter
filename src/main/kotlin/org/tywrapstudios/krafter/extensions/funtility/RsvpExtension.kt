@@ -1,16 +1,17 @@
 package org.tywrapstudios.krafter.extensions.funtility
 
 import dev.kord.common.entity.ButtonStyle
-import dev.kord.common.entity.Snowflake
-import dev.kord.core.behavior.UserBehavior
+import dev.kord.core.behavior.channel.MessageChannelBehavior
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.respondEphemeral
+import dev.kord.core.behavior.reply
 import dev.kord.core.entity.User
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.embed
+import dev.kordex.core.DISCORD_GREEN
 import dev.kordex.core.DISCORD_RED
 import dev.kordex.core.commands.Arguments
 import dev.kordex.core.commands.converters.impl.optionalString
@@ -21,18 +22,66 @@ import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.extensions.event
 import dev.kordex.core.time.TimestampType
 import dev.kordex.core.time.toDiscord
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import org.tywrapstudios.krafter.LOGGING
 import org.tywrapstudios.krafter.database.entities.RsvpEvent
 import org.tywrapstudios.krafter.database.transactors.RsvpTransactor
 import org.tywrapstudios.krafter.i18n.Translations
+import org.tywrapstudios.krafter.snowflake
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 class RsvpExtension : Extension() {
 	override val name: String = "krafter.rsvp"
 	val rsvp = RsvpTransactor
+	private var checkJob: Job? = null
 
 	@OptIn(ExperimentalTime::class)
+	@Suppress("MagicNumber")
 	override suspend fun setup() {
+		val scope = CoroutineScope(kord.coroutineContext)
+		checkJob = scope.launch {
+			try {
+				while (isActive) {
+					val now = Clock.System.now()
+					val events = rsvp.getRsvpsBeforeAndAt(now)
+					for (event in events) {
+						LOGGING.debug("Starting RSVP event ${event.id}.")
+						val channel = kord.getChannel(event.channelId) as MessageChannelBehavior
+						val message = channel.getMessage(event.id)
+						message.reply {
+							event.invited.add(0, event.organizerId.value)
+							content = event.invited.joinToString(", ") {
+								"<@${it}>"
+							}
+							response(event)
+						}
+						message.edit {
+							rsvp(
+								event.title,
+								event.description,
+								event.eventTime,
+								kord.getUser(event.organizerId)!!,
+								event.invited,
+							)
+						}
+						rsvp.cancelRsvp(event.id)
+					}
+					delay(30_000) // Run every half minute
+				}
+			} catch (e: CancellationException) {
+				LOGGING.warn("RSVP checking job was cancelled.")
+				e.printStackTrace()
+			}
+		}
+
 		ephemeralSlashCommand(::RsvpArguments) {
 			name = Translations.Commands.rsvp
 			description = Translations.Commands.Rsvp.description
@@ -54,8 +103,9 @@ class RsvpExtension : Extension() {
 				rsvp.setRsvp(
 					RsvpEvent(
 						message.id,
+						message.channelId,
 						user.id,
-						listOf(),
+						mutableListOf(),
 						eventName,
 						eventDescription,
 						eventTime.instant,
@@ -79,7 +129,7 @@ class RsvpExtension : Extension() {
 					}
 					return@action
 				}
-				if (rsvpEvent.invited.contains(event.interaction.user.id)) {
+				if (rsvpEvent.invited.contains(event.interaction.user.id.value)) {
 					rsvp.subScribe(
 						event.interaction.message.id,
 						event.interaction.user.id,
@@ -98,13 +148,15 @@ class RsvpExtension : Extension() {
 					}
 				}
 
+				val newRsvpEvent = rsvp.getRsvp(event.interaction.message.id)!!
+
 				event.interaction.message.edit {
 					rsvp(
-						rsvpEvent.title,
-						rsvpEvent.description,
-						rsvpEvent.eventTime,
-						kord.getUser(rsvpEvent.organizerId)!!,
-						rsvpEvent.invited
+						newRsvpEvent.title,
+						newRsvpEvent.description,
+						newRsvpEvent.eventTime,
+						kord.getUser(newRsvpEvent.organizerId)!!,
+						newRsvpEvent.invited
 					)
 				}
 			}
@@ -154,17 +206,17 @@ class RsvpExtension : Extension() {
 	}
 
 	@OptIn(ExperimentalTime::class)
-	suspend fun MessageBuilder.rsvp(
+	fun MessageBuilder.rsvp(
 		eventTitle: String,
 		eventDescription: String?,
 		eventTimeStamp: Instant,
 		organizer: User,
-		invited: List<Snowflake> = mutableListOf()
+		invited: List<ULong> = mutableListOf()
 	) {
 		embed {
 			title = "RSVP: $eventTitle"
 			description = eventDescription
-			color = DISCORD_RED
+			color = if (Clock.System.now() >= eventTimeStamp) DISCORD_GREEN else DISCORD_RED
 			field {
 				name = "Starts:"
 				value = eventTimeStamp.toDiscord(TimestampType.RelativeTime)
@@ -175,7 +227,7 @@ class RsvpExtension : Extension() {
 					"No one... Yet!"
 				} else {
 					invited.joinToString(", ") {
-						"<@${it.value}>"
+						"<@${it}>"
 					}
 				}
 			}
@@ -189,10 +241,34 @@ class RsvpExtension : Extension() {
 		actionRow {
 			interactionButton(ButtonStyle.Primary, "rsvp:join") {
 				label = "Join"
+				disabled = Clock.System.now() >= eventTimeStamp
 			}
 			interactionButton(ButtonStyle.Danger, "rsvp:cancel") {
 				label = "Cancel RSVP"
+				disabled = Clock.System.now() >= eventTimeStamp
 			}
+		}
+	}
+
+	@OptIn(ExperimentalTime::class)
+	suspend fun MessageBuilder.response(
+		rsvpEvent: RsvpEvent,
+	) {
+		val organizer = kord.getUser(rsvpEvent.organizerId)!!
+
+		embed {
+			title = "${rsvpEvent.title} is starting!"
+			description = rsvpEvent.description
+			color = DISCORD_GREEN
+			field {
+				name = "Started:"
+				value = rsvpEvent.eventTime.toDiscord(TimestampType.RelativeTime)
+			}
+			footer {
+				text = "hosted by ${organizer.username}"
+				icon = organizer.avatar?.cdnUrl?.toUrl()
+			}
+			timestamp = rsvpEvent.eventTime
 		}
 	}
 }

@@ -21,6 +21,7 @@ import dev.kordex.core.DISCORD_BLURPLE
 import dev.kordex.core.DISCORD_GREEN
 import dev.kordex.core.DISCORD_RED
 import dev.kordex.core.DISCORD_YELLOW
+import dev.kordex.core.annotations.NotTranslated
 import dev.kordex.core.builders.ExtensionsBuilder
 import dev.kordex.core.components.ComponentContainer
 import dev.kordex.core.components.components
@@ -369,6 +370,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 	}
 }
 
+@OptIn(NotTranslated::class)
 public suspend inline fun ComponentContainer.answeringButtons(
 	claimer: User,
 	liveChatChannel: GuildMessageChannel?,

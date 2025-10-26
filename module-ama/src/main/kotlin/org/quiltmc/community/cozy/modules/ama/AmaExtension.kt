@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+@file:OptIn(NotTranslated::class)
+
 package org.quiltmc.community.cozy.modules.ama
 
 import dev.kord.common.entity.ButtonStyle
@@ -27,6 +29,7 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TopGuildChannel
 import dev.kord.core.event.interaction.GuildButtonInteractionCreateEvent
 import dev.kord.rest.builder.message.embed
+import dev.kordex.core.annotations.NotTranslated
 import dev.kordex.core.checks.anyGuild
 import dev.kordex.core.checks.guildFor
 import dev.kordex.core.commands.Arguments
