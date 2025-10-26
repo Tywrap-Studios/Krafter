@@ -5,6 +5,8 @@ pluginManagement {
 
 		maven("https://snapshots-repo.kordex.dev")
 		maven("https://releases-repo.kordex.dev")
+
+		maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 	}
 }
 

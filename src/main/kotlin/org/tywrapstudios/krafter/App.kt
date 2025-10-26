@@ -31,6 +31,7 @@ import org.tywrapstudios.krafter.extensions.sab.SafetyAndAbuseExtension
 import org.tywrapstudios.krafter.extensions.sab.getOverwrites
 import org.tywrapstudios.krafter.extensions.suggestion.SuggestionsExtension
 import org.tywrapstudios.krafter.extensions.funtility.UtilityExtension
+import org.tywrapstudios.krafter.extensions.funtility.welcome.WelcomeExtension
 import java.io.File
 
 val TEST_SERVER_ID = envOrNull("TEST_SERVER")?.snowflake()
@@ -85,7 +86,12 @@ suspend fun setup(): ExtensibleBot {
 
             add(::SafetyAndAbuseExtension)
 
-			if (utilityConfig().enabled) { add(::UtilityExtension) }
+			if (utilityConfig().enabled) {
+				add(::UtilityExtension)
+				if (utilityConfig().functions.welcome_message) {
+					add(::WelcomeExtension)
+				}
+			}
             if(minecraftConfig().enabled) { add(::MinecraftExtension) }
             if (sabConfig().block_phishing) extPhishing {
                 for (domain in sabConfig().banned_domains) badDomain(domain)

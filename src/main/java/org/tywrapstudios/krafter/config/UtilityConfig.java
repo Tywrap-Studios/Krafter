@@ -23,6 +23,11 @@ public class UtilityConfig implements ConfigClass {
 
 		@Comment("Lets the bot say things via command.")
 		public boolean say = true;
+
+		@Comment("Welcomes new members to the server.")
+		public boolean welcome_message = true;
+		@Comment("The channel to send welcome messages to.")
+		public String welcome_channel = "welcome";
 	}
 
 	@Override

@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalComposeLibrary::class)
+
 import dev.kordex.gradle.plugins.docker.file.*
 import dev.kordex.gradle.plugins.kordex.DataCollection
+import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
 	distribution
@@ -12,6 +15,9 @@ plugins {
 	alias(libs.plugins.kordex.docker)
 	alias(libs.plugins.kordex.plugin)
 	alias(libs.plugins.ksp.plugin)
+
+	alias(libs.plugins.compose)
+	alias(libs.plugins.kotlin.compose)
 }
 
 group = "org.tywrapstudios.krafter"
@@ -53,6 +59,11 @@ dependencies {
 	implementation(libs.bundles.database)
 	implementation(libs.rcon)
 	implementation(libs.excelkt)
+
+	implementation(compose.desktop.uiTestJUnit4)
+	implementation(compose.desktop.currentOs)
+	implementation(compose.ui)
+	implementation(compose.material)
 }
 
 // Configure distributions plugin

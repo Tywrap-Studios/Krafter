@@ -5,6 +5,7 @@ ksp = "2.2.20-2.0.3"
 
 autolink = "0.11.0"
 bbapi = "2.1.0"
+compose = "1.10.0-alpha03"
 cozy-modules = "1.1.0-SNAPSHOT"
 excelkt = "1.0.2"
 exposed = "1.0.0-rc-2"
@@ -27,6 +28,7 @@ semver = "2.0.0"
 [libraries]
 autolink = { module = "org.nibor.autolink:autolink", version.ref = "autolink" }
 bbapi = { module = "com.github.Tywrap-Studios:BlossomBridge", version.ref = "bbapi" }
+compose-desktop = { module = "org.jetbrains.compose.desktop:desktop", version.ref = "compose" }
 cozy-ama = {  module = "org.quiltmc.community:module-ama", version.ref = "cozy-modules" }
 cozy-log-parser = { module = "org.quiltmc.community:module-log-parser", version.ref = "cozy-modules" }
 cozy-moderation = { module = "org.quiltmc.community:module-moderation", version.ref = "cozy-modules" }
@@ -55,6 +57,9 @@ semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
 
 [plugins]
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
