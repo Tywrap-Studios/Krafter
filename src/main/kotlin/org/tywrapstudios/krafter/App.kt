@@ -84,11 +84,9 @@ suspend fun setup(): ExtensibleBot {
             if (mainConfig().plural_kit) extPluralKit()
 
             add(::SafetyAndAbuseExtension)
-			add(::UtilityExtension)
 
-            if(minecraftConfig().enabled) {
-                add(::MinecraftExtension)
-            }
+			if (utilityConfig().enabled) { add(::UtilityExtension) }
+            if(minecraftConfig().enabled) { add(::MinecraftExtension) }
             if (sabConfig().block_phishing) extPhishing {
                 for (domain in sabConfig().banned_domains) badDomain(domain)
                 logChannelName =
@@ -134,10 +132,7 @@ suspend fun setup(): ExtensibleBot {
                     )
                 }
             }
-
-            if (suggestionsConfig().enabled) {
-                add(::SuggestionsExtension)
-            }
+            if (suggestionsConfig().enabled) { add(::SuggestionsExtension) }
             if (funConfig().enabled) {
                 if (funConfig().functions.haiku) add(::HaikuExtension)
 				if (funConfig().functions.rsvp) add (::RsvpExtension)

@@ -90,21 +90,23 @@ class UtilityExtension : Extension() {
 	override suspend fun setup() {
 		event<ReadyEvent> {
 			action {
-				val channel = getOrCreateChannel(
-					mainConfig().channel,
-					"bot-dump",
-					"Bot dump channel where it dumps its dump.",
-					mutableSetOf(),
-					event.guilds.first().asGuild()
-				)
+				for (guild in event.guilds) {
+					val channel = getOrCreateChannel(
+						mainConfig().channel,
+						"bot-dump",
+						"Bot dump channel where it dumps its dump.",
+						mutableSetOf(),
+						guild.asGuild()
+					)
 
-				channel.createMessage {
-					content = buildString {
-						append("**Bot connected:** ")
-						append(Clock.System.now().toDiscord(TimestampType.LongDateTime))
-						append(" (")
-						append(Clock.System.now().toDiscord(TimestampType.RelativeTime))
-						append(")")
+					channel.createMessage {
+						content = buildString {
+							append("**Bot connected:** ")
+							append(Clock.System.now().toDiscord(TimestampType.LongDateTime))
+							append(" (")
+							append(Clock.System.now().toDiscord(TimestampType.RelativeTime))
+							append(")")
+						}
 					}
 				}
 			}
@@ -131,308 +133,100 @@ class UtilityExtension : Extension() {
 //			}
 //		}
 
-		event<TextChannelThreadCreateEvent> {
-			check { failIf(event.channel.ownerId == kord.selfId) }
-			check { failIf(event.channel.member != null) }  // We only want thread creation, not join
-			check { failIf(event.channel.owner.asUserOrNull()?.isBot == true) }
+		if (utilityConfig().functions.view_json) {
+			ephemeralMessageCommand {
+				name = Translations.Commands.Utility.MessageCommand.rawJson
 
-			action {
-				val owner = event.channel.owner.asUser()
-
-				logger.info { "Thread created by ${owner.tag}" }
-
-				// Work around a Discord API race condition - yes, really!
-				// Specifically: "Cannot message this thread until after the post author has sent an initial message."
-				delay(2.seconds)
-
-				val parentForum = event.channel.parent.asChannelOfOrNull<ForumChannel>()
-
-				val message = event.channel.createMessage {
-					content = "One moment..."
-				}
-
-				event.channel.withTyping {
-					delay(1.seconds)
-				}
-
-				if (parentForum != null) {
-					event.channel.getFirstMessage()?.pin("First message in the forum post.")
-
-					event.channel.withTyping {
-						delay(1.seconds)
-					}
-
-					message.delete()
-				} else {
-					event.channel.withTyping {
-						delay(1.seconds)
-					}
-
-					message.edit {
-						content = "Welcome to your new thread, ${owner.mention}! This message is at the " +
-							"start of the thread. Remember, you're welcome to use the `/thread` commands to manage " +
-							"your thread as needed."
-					}
-
-					message.pin("First message in the thread.")
-				}
-			}
-		}
-
-		event<ThreadUpdateEvent> {
-			action {
-				val channel = event.channel
-				val ownedThread = threads.get(channel)
-
-				if (channel.isArchived && ownedThread != null && ownedThread.preventArchiving) {
-					channel.edit {
-						archived = false
-						reason = "Preventing thread from being archived."
-					}
-				}
-			}
-		}
-
-		ephemeralMessageCommand {
-			name = Translations.Commands.Utility.MessageCommand.rawJson
-
-			allowInDms = false
-
-			guild(guildId)
-
-			action {
-				val messages = targetMessages.map { it.data }
-				val data = json.encodeToString(messages)
-
-				respond {
-					content = "Raw message data attached below."
-
-					addFile(
-						"message.json",
-
-						ChannelProvider { data.byteInputStream().toByteReadChannel() }
-					)
-				}
-			}
-		}
-
-		ephemeralMessageCommand {
-			name = Translations.Commands.Utility.MessageCommand.pinInThread
-
-			allowInDms = false
-
-			guild(guildId)
-
-			check { isInThread() }
-
-			action {
-				val channel = channel.asChannel() as ThreadChannel
-				val member = user.asMember(guild!!.id)
-				val roles = member.roles.toList().map { it.id }
-
-				if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
-					targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
-					edit { content = "Messages pinned." }
-
-					return@action
-				}
-
-				if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
-					respond { content = "**Error:** This is not your thread." }
-
-					return@action
-				}
-
-				targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
-
-				edit { content = "Messages pinned." }
-			}
-		}
-
-		ephemeralMessageCommand {
-			name = Translations.Commands.Utility.MessageCommand.unpinInThread
-
-			allowInDms = false
-
-			guild(guildId)
-
-			check { isInThread() }
-
-			action {
-				val channel = channel.asChannel() as ThreadChannel
-				val member = user.asMember(guild!!.id)
-				val roles = member.roles.toList().map { it.id }
-
-				if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
-					targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
-					edit { content = "Messages unpinned." }
-
-					return@action
-				}
-
-				if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
-					respond { content = "**Error:** This is not your thread." }
-
-					return@action
-				}
-
-				targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
-
-				edit { content = "Messages unpinned." }
-			}
-		}
-
-		ephemeralSlashCommand {
-			name = Translations.Commands.Utility.thread
-			description = Translations.Commands.Utility.Thread.description
-
-			allowInDms = false
-
-			guild(guildId)
-
-			check { isInThread() }
-
-			publicSubCommand {
-				name = Translations.Commands.Utility.Thread.backup
-				description = Translations.Commands.Utility.Thread.Backup.description
+				allowInDms = false
 
 				guild(guildId)
 
-				check { isGlobalBotAdmin() }
-				check { isInThread() }
-
 				action {
-					val thread = channel.asChannelOfOrNull<ThreadChannel>()
-
-					if (thread == null) {
-						respondOpposite {
-							content = "**Error:** This channel isn't a thread!"
-						}
-
-						return@action
-					}
-
-					val messageBuilder = StringBuilder()
-					val formatter = DateTimeFormatter.ofPattern("dd LL, yyyy -  kk:mm:ss")
-
-					if (thread.lastMessageId == null) {
-						respondOpposite {
-							content = "**Error:** This thread has no messages!"
-						}
-
-						return@action
-					}
-
-					val messages = thread.getMessagesBefore(thread.lastMessageId!!)
-					val lastMessage = thread.getLastMessage()!!
-
-					val parent = thread.parent.asChannel()
-
-					messageBuilder.append("# Thread: ${thread.name}\n\n")
-					messageBuilder.append("* **ID:** `${thread.id.value}`\n")
-					messageBuilder.append("* **Parent:** #${parent.name} (`${parent.id.value}`)\n\n")
-
-					val messageStrings: MutableList<String> = mutableListOf()
-
-					messages.collect { msg ->
-						val author = msg.author
-						val builder = StringBuilder()
-						val timestamp = formatter.format(
-							msg.id.timestamp.toLocalDateTime(TimeZone.UTC).toJavaLocalDateTime()
-						)
-
-						if (msg.content.isNotEmpty() || msg.attachments.isNotEmpty()) {
-							val authorName = author?.tag ?: msg.data.author.username
-
-							this@UtilityExtension.logger.debug { "\nAuthor name: `$authorName`\n${msg.content}\n" }
-
-							if (msg.type == MessageType.ChatInputCommand) {
-								builder.append("🖥️ ")
-							} else if (author == null) {
-								builder.append("🌐 ")
-							} else if (author.isBot) {
-								builder.append("🤖 ")
-							} else {
-								builder.append("💬 ")
-							}
-
-							builder.append("**$authorName** at $timestamp (UTC)\n\n")
-
-							if (msg.content.isNotEmpty()) {
-								builder.append(msg.content.lines().joinToString("\n") { line -> "> $line" })
-								builder.append("\n\n")
-							}
-
-							if (msg.attachments.isNotEmpty()) {
-								msg.attachments.forEach { att ->
-									builder.append("* 📄 [${att.filename}](${att.url})\n")
-								}
-
-								builder.append("\n")
-							}
-
-							messageStrings.add(builder.toString())
-						}
-					}
-
-					messageStrings.reverse()
-
-					lastMessage.let { msg ->
-						val author = msg.author
-						val builder = StringBuilder()
-						val timestamp = formatter.format(
-							msg.id.timestamp.toLocalDateTime(TimeZone.UTC).toJavaLocalDateTime()
-						)
-
-						if (msg.content.isNotEmpty() || msg.attachments.isNotEmpty()) {
-							val authorName = author?.tag ?: msg.data.author.username
-
-							if (msg.type == MessageType.ChatInputCommand) {
-								builder.append("🖥️ ")
-							} else if (author == null) {
-								builder.append("🌐 ")
-							} else if (author.isBot) {
-								builder.append("🤖 ")
-							} else {
-								builder.append("💬 ")
-							}
-
-							builder.append("**$authorName** at $timestamp (UTC)\n\n")
-
-							if (msg.content.isNotEmpty()) {
-								builder.append(msg.content.lines().joinToString("\n") { line -> "> $line" })
-								builder.append("\n\n")
-							}
-
-							if (msg.attachments.isNotEmpty()) {
-								msg.attachments.forEach { att ->
-									builder.append("* 📄 [${att.filename}](${att.url})\n")
-								}
-
-								builder.append("\n")
-							}
-
-							messageStrings.add(builder.toString())
-						}
-					}
-
-					messageStrings.forEach(messageBuilder::append)
+					val messages = targetMessages.map { it.data }
+					val data = json.encodeToString(messages)
 
 					respond {
-						content = "**Thread backup created by ${user.mention}.**"
+						content = "Raw message data attached below."
 
 						addFile(
-							"thread.md",
+							"message.json",
 
-							ChannelProvider { messageBuilder.toString().byteInputStream().toByteReadChannel() }
+							ChannelProvider { data.byteInputStream().toByteReadChannel() }
 						)
 					}
 				}
 			}
+		}
 
-			ephemeralSubCommand(::RenameArguments) {
-				name = Translations.Commands.Utility.Thread.rename
-				description = Translations.Commands.Utility.Thread.Rename.description
+		if (utilityConfig().functions.thread_commands) {
+			event<ThreadUpdateEvent> {
+				action {
+					val channel = event.channel
+					val ownedThread = threads.get(channel)
+
+					if (channel.isArchived && ownedThread != null && ownedThread.preventArchiving) {
+						channel.edit {
+							archived = false
+							reason = "Preventing thread from being archived."
+						}
+					}
+				}
+			}
+
+			event<TextChannelThreadCreateEvent> {
+				check { failIf(event.channel.ownerId == kord.selfId) }
+				check { failIf(event.channel.member != null) }  // We only want thread creation, not join
+				check { failIf(event.channel.owner.asUserOrNull()?.isBot == true) }
+
+				action {
+					val owner = event.channel.owner.asUser()
+
+					logger.info { "Thread created by ${owner.tag}" }
+
+					// Work around a Discord API race condition - yes, really!
+					// Specifically: "Cannot message this thread until after the post author has sent an initial message."
+					delay(2.seconds)
+
+					val parentForum = event.channel.parent.asChannelOfOrNull<ForumChannel>()
+
+					val message = event.channel.createMessage {
+						content = "One moment..."
+					}
+
+					event.channel.withTyping {
+						delay(1.seconds)
+					}
+
+					if (parentForum != null) {
+						event.channel.getFirstMessage()?.pin("First message in the forum post.")
+
+						event.channel.withTyping {
+							delay(1.seconds)
+						}
+
+						message.delete()
+					} else {
+						event.channel.withTyping {
+							delay(1.seconds)
+						}
+
+						message.edit {
+							content = "Welcome to your new thread, ${owner.mention}! This message is at the " +
+								"start of the thread. Remember, you're welcome to use the `/thread` commands to manage " +
+								"your thread as needed."
+						}
+
+						message.pin("First message in the thread.")
+					}
+				}
+			}
+
+			ephemeralMessageCommand {
+				name = Translations.Commands.Utility.MessageCommand.pinInThread
+
+				allowInDms = false
+
+				guild(guildId)
 
 				check { isInThread() }
 
@@ -442,6 +236,234 @@ class UtilityExtension : Extension() {
 					val roles = member.roles.toList().map { it.id }
 
 					if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
+						targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+						edit { content = "Messages pinned." }
+
+						return@action
+					}
+
+					if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+						respond { content = "**Error:** This is not your thread." }
+
+						return@action
+					}
+
+					targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+
+					edit { content = "Messages pinned." }
+				}
+			}
+
+			ephemeralMessageCommand {
+				name = Translations.Commands.Utility.MessageCommand.unpinInThread
+
+				allowInDms = false
+
+				guild(guildId)
+
+				check { isInThread() }
+
+				action {
+					val channel = channel.asChannel() as ThreadChannel
+					val member = user.asMember(guild!!.id)
+					val roles = member.roles.toList().map { it.id }
+
+					if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
+						targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
+						edit { content = "Messages unpinned." }
+
+						return@action
+					}
+
+					if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+						respond { content = "**Error:** This is not your thread." }
+
+						return@action
+					}
+
+					targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
+
+					edit { content = "Messages unpinned." }
+				}
+			}
+
+			ephemeralSlashCommand {
+				name = Translations.Commands.Utility.thread
+				description = Translations.Commands.Utility.Thread.description
+
+				allowInDms = false
+
+				guild(guildId)
+
+				check { isInThread() }
+
+				publicSubCommand {
+					name = Translations.Commands.Utility.Thread.backup
+					description = Translations.Commands.Utility.Thread.Backup.description
+
+					guild(guildId)
+
+					check { isGlobalBotAdmin() }
+					check { isInThread() }
+
+					action {
+						val thread = channel.asChannelOfOrNull<ThreadChannel>()
+
+						if (thread == null) {
+							respondOpposite {
+								content = "**Error:** This channel isn't a thread!"
+							}
+
+							return@action
+						}
+
+						val messageBuilder = StringBuilder()
+						val formatter = DateTimeFormatter.ofPattern("dd LL, yyyy -  kk:mm:ss")
+
+						if (thread.lastMessageId == null) {
+							respondOpposite {
+								content = "**Error:** This thread has no messages!"
+							}
+
+							return@action
+						}
+
+						val messages = thread.getMessagesBefore(thread.lastMessageId!!)
+						val lastMessage = thread.getLastMessage()!!
+
+						val parent = thread.parent.asChannel()
+
+						messageBuilder.append("# Thread: ${thread.name}\n\n")
+						messageBuilder.append("* **ID:** `${thread.id.value}`\n")
+						messageBuilder.append("* **Parent:** #${parent.name} (`${parent.id.value}`)\n\n")
+
+						val messageStrings: MutableList<String> = mutableListOf()
+
+						messages.collect { msg ->
+							val author = msg.author
+							val builder = StringBuilder()
+							val timestamp = formatter.format(
+								msg.id.timestamp.toLocalDateTime(TimeZone.UTC).toJavaLocalDateTime()
+							)
+
+							if (msg.content.isNotEmpty() || msg.attachments.isNotEmpty()) {
+								val authorName = author?.tag ?: msg.data.author.username
+
+								this@UtilityExtension.logger.debug { "\nAuthor name: `$authorName`\n${msg.content}\n" }
+
+								if (msg.type == MessageType.ChatInputCommand) {
+									builder.append("🖥️ ")
+								} else if (author == null) {
+									builder.append("🌐 ")
+								} else if (author.isBot) {
+									builder.append("🤖 ")
+								} else {
+									builder.append("💬 ")
+								}
+
+								builder.append("**$authorName** at $timestamp (UTC)\n\n")
+
+								if (msg.content.isNotEmpty()) {
+									builder.append(msg.content.lines().joinToString("\n") { line -> "> $line" })
+									builder.append("\n\n")
+								}
+
+								if (msg.attachments.isNotEmpty()) {
+									msg.attachments.forEach { att ->
+										builder.append("* 📄 [${att.filename}](${att.url})\n")
+									}
+
+									builder.append("\n")
+								}
+
+								messageStrings.add(builder.toString())
+							}
+						}
+
+						messageStrings.reverse()
+
+						lastMessage.let { msg ->
+							val author = msg.author
+							val builder = StringBuilder()
+							val timestamp = formatter.format(
+								msg.id.timestamp.toLocalDateTime(TimeZone.UTC).toJavaLocalDateTime()
+							)
+
+							if (msg.content.isNotEmpty() || msg.attachments.isNotEmpty()) {
+								val authorName = author?.tag ?: msg.data.author.username
+
+								if (msg.type == MessageType.ChatInputCommand) {
+									builder.append("🖥️ ")
+								} else if (author == null) {
+									builder.append("🌐 ")
+								} else if (author.isBot) {
+									builder.append("🤖 ")
+								} else {
+									builder.append("💬 ")
+								}
+
+								builder.append("**$authorName** at $timestamp (UTC)\n\n")
+
+								if (msg.content.isNotEmpty()) {
+									builder.append(msg.content.lines().joinToString("\n") { line -> "> $line" })
+									builder.append("\n\n")
+								}
+
+								if (msg.attachments.isNotEmpty()) {
+									msg.attachments.forEach { att ->
+										builder.append("* 📄 [${att.filename}](${att.url})\n")
+									}
+
+									builder.append("\n")
+								}
+
+								messageStrings.add(builder.toString())
+							}
+						}
+
+						messageStrings.forEach(messageBuilder::append)
+
+						respond {
+							content = "**Thread backup created by ${user.mention}.**"
+
+							addFile(
+								"thread.md",
+
+								ChannelProvider { messageBuilder.toString().byteInputStream().toByteReadChannel() }
+							)
+						}
+					}
+				}
+
+				ephemeralSubCommand(::RenameArguments) {
+					name = Translations.Commands.Utility.Thread.rename
+					description = Translations.Commands.Utility.Thread.Rename.description
+
+					check { isInThread() }
+
+					action {
+						val channel = channel.asChannel() as ThreadChannel
+						val member = user.asMember(guild!!.id)
+						val roles = member.roles.toList().map { it.id }
+
+						if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
+							channel.edit {
+								name = arguments.name
+
+								reason = "Renamed by ${member.tag}"
+							}
+
+							edit { content = "Thread renamed." }
+
+							return@action
+						}
+
+						if ((channel.ownerId != user.id && threads.isOwner(channel, user) != true)) {
+							edit { content = "**Error:** This is not your thread." }
+
+							return@action
+						}
+
 						channel.edit {
 							name = arguments.name
 
@@ -449,336 +471,320 @@ class UtilityExtension : Extension() {
 						}
 
 						edit { content = "Thread renamed." }
-
-						return@action
 					}
-
-					if ((channel.ownerId != user.id && threads.isOwner(channel, user) != true)) {
-						edit { content = "**Error:** This is not your thread." }
-
-						return@action
-					}
-
-					channel.edit {
-						name = arguments.name
-
-						reason = "Renamed by ${member.tag}"
-					}
-
-					edit { content = "Thread renamed." }
 				}
-			}
 
-			ephemeralSubCommand(::ArchiveArguments) {
-				name = Translations.Commands.Utility.Thread.archive
-				description = Translations.Commands.Utility.Thread.Archive.description
+				ephemeralSubCommand(::ArchiveArguments) {
+					name = Translations.Commands.Utility.Thread.archive
+					description = Translations.Commands.Utility.Thread.Archive.description
 
-				check { isInThread() }
+					check { isInThread() }
 
-				action {
-					val channel = channel.asChannel() as ThreadChannel
-					val member = user.asMember(guild!!.id)
-					val roles = member.roles.toList().map { it.id }
-					val ownedThread = threads.get(channel)
+					action {
+						val channel = channel.asChannel() as ThreadChannel
+						val member = user.asMember(guild!!.id)
+						val roles = member.roles.toList().map { it.id }
+						val ownedThread = threads.get(channel)
 
-					if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
-						if (ownedThread != null) {
-							ownedThread.preventArchiving = false
-							threads.set(ownedThread)
-						}
-
-						channel.edit {
-							this.archived = true
-							this.locked = arguments.lock
-
-							reason = "Archived by ${user.asUser().tag}"
-						}
-
-						edit {
-							content = "Thread archived"
-
-							if (arguments.lock) {
-								content += " and locked"
+						if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
+							if (ownedThread != null) {
+								ownedThread.preventArchiving = false
+								threads.set(ownedThread)
 							}
 
-							content += "."
-						}
+							channel.edit {
+								this.archived = true
+								this.locked = arguments.lock
 
-						return@action
-					}
+								reason = "Archived by ${user.asUser().tag}"
+							}
 
-					if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
-						edit { content = "This is not your thread." }
-
-						return@action
-					}
-
-					if (channel.isArchived) {
-						edit { content = "**Error:** This channel is already archived." }
-
-						return@action
-					}
-
-					if (arguments.lock) {
-						edit { content = "**Error:** Only moderators may lock threads." }
-
-						return@action
-					}
-
-					if (ownedThread != null && ownedThread.preventArchiving) {
-						edit {
-							content = "**Error:** This thread can only be archived by a moderator."
-						}
-
-						return@action
-					}
-
-					channel.edit {
-						archived = true
-
-						reason = "Archived by ${user.asUser().tag}"
-					}
-
-					edit { content = "Thread archived." }
-				}
-			}
-
-			ephemeralSubCommand(::PinMessageArguments) {
-				name = Translations.Commands.Utility.Thread.pin
-				description = Translations.Commands.Utility.Thread.Pin.description
-
-				check { isInThread() }
-
-				action {
-					val channel = channel.asChannel() as ThreadChannel
-					val member = user.asMember(guild!!.id)
-					val roles = member.roles.toList().map { it.id }
-
-					if (arguments.message.channelId != channel.id) {
-						edit {
-							content = "**Error:** You may only pin a message in the current thread."
-						}
-
-						return@action
-					}
-
-					if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
-						arguments.message.pin("Pinned by ${member.tag}")
-						edit { content = "Message pinned." }
-
-						return@action
-					}
-
-					if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
-						edit { content = "**Error:** This is not your thread." }
-
-						return@action
-					}
-
-					arguments.message.pin("Pinned by ${member.tag}")
-
-					edit { content = "Message pinned." }
-				}
-			}
-
-			ephemeralSubCommand(::PinMessageArguments) {
-				name = Translations.Commands.Utility.Thread.unpin
-				description = Translations.Commands.Utility.Thread.Unpin.description
-
-				check { isInThread() }
-
-				action {
-					val channel = channel.asChannel() as ThreadChannel
-					val member = user.asMember(guild!!.id)
-					val roles = member.roles.toList().map { it.id }
-
-					if (arguments.message.channelId != channel.id) {
-						edit {
-							content = "**Error:** You may only pin a message in the current thread."
-						}
-
-						return@action
-					}
-
-					if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
-						arguments.message.unpin("Unpinned by ${member.tag}")
-						edit { content = "Message unpinned." }
-
-						return@action
-					}
-
-					if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
-						edit { content = "**Error:** This is not your thread." }
-
-						return@action
-					}
-
-					arguments.message.unpin("Unpinned by ${member.tag}")
-
-					edit { content = "Message unpinned." }
-				}
-			}
-
-			ephemeralSubCommand {
-				name = Translations.Commands.Utility.Thread.preventArchiving
-				description = Translations.Commands.Utility.Thread.PreventArchiving.description
-
-				guild(guildId)
-
-				check { isGlobalBotAdmin() }
-				check { isInThread() }
-
-				action {
-					val channel = channel.asChannel() as ThreadChannel
-					val member = user.asMember(guild!!.id)
-
-					if (channel.isArchived) {
-						channel.edit {
-							archived = false
-							reason = "`/thread prevent-archiving` run by ${member.tag}"
-						}
-					}
-
-					val thread = threads.get(channel)
-
-					if (thread != null) {
-						if (thread.preventArchiving) {
 							edit {
-								content = "I'm already stopping this thread from being archived."
+								content = "Thread archived"
+
+								if (arguments.lock) {
+									content += " and locked"
+								}
+
+								content += "."
 							}
 
 							return@action
 						}
 
-						thread.preventArchiving = true
-						threads.set(thread)
-					} else {
-						threads.set(
-							OwnedThread(
-								channel.id,
-								channel.owner.id,
-								channel.guild.id,
-								true
-							)
-						)
-					}
+						if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+							edit { content = "This is not your thread." }
 
-					edit { content = "Thread will no longer be archived." }
-
-					guild?.asGuild()?.getModLogChannel()?.createEmbed {
-						title = "Thread Persistence Enabled"
-						color = DISCORD_BLURPLE
-
-						userField(member, "Moderator")
-						channelField(channel, "Thread")
-					}
-				}
-			}
-
-			ephemeralSubCommand(::SetOwnerArguments) {
-				name = Translations.Commands.Utility.Thread.setOwner
-				description = Translations.Commands.Utility.Thread.SetOwner.description
-
-				check { isInThread() }
-
-				action {
-					val channel = channel.asChannel() as ThreadChannel
-					val member = user.asMember(guild!!.id)
-					val roles = member.roles.toList().map { it.id }
-					var thread = threads.get(channel)
-
-					if (thread == null) {
-						thread = OwnedThread(
-							id = channel.id,
-							owner = channel.ownerId,
-							guildId = guild!!.id,
-							preventArchiving = false,
-						)
-					}
-
-					val previousOwner = thread.owner
-
-					if ((thread.owner != user.id && threads.isOwner(channel, user) != true) &&
-						!mainConfig().global_administrators.roles.any { it.snowflake() in roles }
-					) {
-						edit { content = "**Error:** This is not your thread." }
-						return@action
-					}
-
-					if (thread.owner == arguments.user.id) {
-						edit {
-							content = "That user already owns this thread."
+							return@action
 						}
 
-						return@action
-					}
+						if (channel.isArchived) {
+							edit { content = "**Error:** This channel is already archived." }
 
-					if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
-						thread.owner = arguments.user.id
-						threads.set(thread)
-
-						edit { content = "Updated thread owner to ${arguments.user.mention}" }
-
-						guild?.asGuild()?.getModLogChannel()?.createEmbed {
-							title = "Thread Owner Updated (Moderator)"
-							color = DISCORD_BLURPLE
-
-							userField(member.asUser(), "Moderator")
-							userField(guild!!.getMember(previousOwner), "Previous Owner")
-							userField(arguments.user, "New Owner")
-							channelField(channel, "Thread")
+							return@action
 						}
-					} else {
-						respond {
-							embed {
-								color = DISCORD_BLURPLE
-								description =
-									"Are you sure you want to transfer ownership to " +
-										"${arguments.user.mention}? To cancel the" +
-										" transfer, simply ignore this message."
+
+						if (arguments.lock) {
+							edit { content = "**Error:** Only moderators may lock threads." }
+
+							return@action
+						}
+
+						if (ownedThread != null && ownedThread.preventArchiving) {
+							edit {
+								content = "**Error:** This thread can only be archived by a moderator."
 							}
 
-							components(15.seconds) {
-								onTimeout {
-									edit {
-										embed {
-											color = DISCORD_BLURPLE
-											description =
-												"Action timed out - no change performed"
-										}
+							return@action
+						}
 
-										components {
-											removeAll()
-										}
-									}
+						channel.edit {
+							archived = true
+
+							reason = "Archived by ${user.asUser().tag}"
+						}
+
+						edit { content = "Thread archived." }
+					}
+				}
+
+				ephemeralSubCommand(::PinMessageArguments) {
+					name = Translations.Commands.Utility.Thread.pin
+					description = Translations.Commands.Utility.Thread.Pin.description
+
+					check { isInThread() }
+
+					action {
+						val channel = channel.asChannel() as ThreadChannel
+						val member = user.asMember(guild!!.id)
+						val roles = member.roles.toList().map { it.id }
+
+						if (arguments.message.channelId != channel.id) {
+							edit {
+								content = "**Error:** You may only pin a message in the current thread."
+							}
+
+							return@action
+						}
+
+						if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
+							arguments.message.pin("Pinned by ${member.tag}")
+							edit { content = "Message pinned." }
+
+							return@action
+						}
+
+						if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+							edit { content = "**Error:** This is not your thread." }
+
+							return@action
+						}
+
+						arguments.message.pin("Pinned by ${member.tag}")
+
+						edit { content = "Message pinned." }
+					}
+				}
+
+				ephemeralSubCommand(::PinMessageArguments) {
+					name = Translations.Commands.Utility.Thread.unpin
+					description = Translations.Commands.Utility.Thread.Unpin.description
+
+					check { isInThread() }
+
+					action {
+						val channel = channel.asChannel() as ThreadChannel
+						val member = user.asMember(guild!!.id)
+						val roles = member.roles.toList().map { it.id }
+
+						if (arguments.message.channelId != channel.id) {
+							edit {
+								content = "**Error:** You may only pin a message in the current thread."
+							}
+
+							return@action
+						}
+
+						if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
+							arguments.message.unpin("Unpinned by ${member.tag}")
+							edit { content = "Message unpinned." }
+
+							return@action
+						}
+
+						if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+							edit { content = "**Error:** This is not your thread." }
+
+							return@action
+						}
+
+						arguments.message.unpin("Unpinned by ${member.tag}")
+
+						edit { content = "Message unpinned." }
+					}
+				}
+
+				ephemeralSubCommand {
+					name = Translations.Commands.Utility.Thread.preventArchiving
+					description = Translations.Commands.Utility.Thread.PreventArchiving.description
+
+					guild(guildId)
+
+					check { isGlobalBotAdmin() }
+					check { isInThread() }
+
+					action {
+						val channel = channel.asChannel() as ThreadChannel
+						val member = user.asMember(guild!!.id)
+
+						if (channel.isArchived) {
+							channel.edit {
+								archived = false
+								reason = "`/thread prevent-archiving` run by ${member.tag}"
+							}
+						}
+
+						val thread = threads.get(channel)
+
+						if (thread != null) {
+							if (thread.preventArchiving) {
+								edit {
+									content = "I'm already stopping this thread from being archived."
 								}
 
-								ephemeralButton {
-									label = Translations.Components.Utility.Thread.SetOwner.confirmButton
-									action {
-										thread.owner = arguments.user.id
-										threads.set(thread)
+								return@action
+							}
 
+							thread.preventArchiving = true
+							threads.set(thread)
+						} else {
+							threads.set(
+								OwnedThread(
+									channel.id,
+									channel.owner.id,
+									channel.guild.id,
+									true
+								)
+							)
+						}
+
+						edit { content = "Thread will no longer be archived." }
+
+						guild?.asGuild()?.getModLogChannel()?.createEmbed {
+							title = "Thread Persistence Enabled"
+							color = DISCORD_BLURPLE
+
+							userField(member, "Moderator")
+							channelField(channel, "Thread")
+						}
+					}
+				}
+
+				ephemeralSubCommand(::SetOwnerArguments) {
+					name = Translations.Commands.Utility.Thread.setOwner
+					description = Translations.Commands.Utility.Thread.SetOwner.description
+
+					check { isInThread() }
+
+					action {
+						val channel = channel.asChannel() as ThreadChannel
+						val member = user.asMember(guild!!.id)
+						val roles = member.roles.toList().map { it.id }
+						var thread = threads.get(channel)
+
+						if (thread == null) {
+							thread = OwnedThread(
+								id = channel.id,
+								owner = channel.ownerId,
+								guildId = guild!!.id,
+								preventArchiving = false,
+							)
+						}
+
+						val previousOwner = thread.owner
+
+						if ((thread.owner != user.id && threads.isOwner(channel, user) != true) &&
+							!mainConfig().global_administrators.roles.any { it.snowflake() in roles }
+						) {
+							edit { content = "**Error:** This is not your thread." }
+							return@action
+						}
+
+						if (thread.owner == arguments.user.id) {
+							edit {
+								content = "That user already owns this thread."
+							}
+
+							return@action
+						}
+
+						if (mainConfig().global_administrators.roles.any { it.snowflake() in roles }) {
+							thread.owner = arguments.user.id
+							threads.set(thread)
+
+							edit { content = "Updated thread owner to ${arguments.user.mention}" }
+
+							guild?.asGuild()?.getModLogChannel()?.createEmbed {
+								title = "Thread Owner Updated (Moderator)"
+								color = DISCORD_BLURPLE
+
+								userField(member.asUser(), "Moderator")
+								userField(guild!!.getMember(previousOwner), "Previous Owner")
+								userField(arguments.user, "New Owner")
+								channelField(channel, "Thread")
+							}
+						} else {
+							respond {
+								embed {
+									color = DISCORD_BLURPLE
+									description =
+										"Are you sure you want to transfer ownership to " +
+											"${arguments.user.mention}? To cancel the" +
+											" transfer, simply ignore this message."
+								}
+
+								components(15.seconds) {
+									onTimeout {
 										edit {
 											embed {
 												color = DISCORD_BLURPLE
 												description =
-													"Updated thread owner to " +
-														arguments.user.mention
+													"Action timed out - no change performed"
 											}
 
 											components {
 												removeAll()
 											}
 										}
+									}
 
-										guild?.asGuild()?.getModLogChannel()?.createEmbed {
-											title = "Thread Owner Updated (User)"
-											color = DISCORD_BLURPLE
+									ephemeralButton {
+										label = Translations.Components.Utility.Thread.SetOwner.confirmButton
+										action {
+											thread.owner = arguments.user.id
+											threads.set(thread)
 
-											userField(member.asUser(), "Previous Owner")
-											userField(arguments.user, "New Owner")
-											channelField(channel, "Thread")
+											edit {
+												embed {
+													color = DISCORD_BLURPLE
+													description =
+														"Updated thread owner to " +
+															arguments.user.mention
+												}
+
+												components {
+													removeAll()
+												}
+											}
+
+											guild?.asGuild()?.getModLogChannel()?.createEmbed {
+												title = "Thread Owner Updated (User)"
+												color = DISCORD_BLURPLE
+
+												userField(member.asUser(), "Previous Owner")
+												userField(arguments.user, "New Owner")
+												channelField(channel, "Thread")
+											}
 										}
 									}
 								}
@@ -789,39 +795,41 @@ class UtilityExtension : Extension() {
 			}
 		}
 
-		ephemeralSlashCommand(::SayArguments) {
-			name = Translations.Commands.Utility.say
-			description = Translations.Commands.Utility.Say.description
+		if (utilityConfig().functions.say) {
+			ephemeralSlashCommand(::SayArguments) {
+				name = Translations.Commands.Utility.say
+				description = Translations.Commands.Utility.Say.description
 
-			allowInDms = false
+				allowInDms = false
 
-			guild(guildId)
+				guild(guildId)
 
-			check { isGlobalBotAdmin() }
+				check { isGlobalBotAdmin() }
 
-			action {
-				val targetChannel = (arguments.target ?: channel.asChannel()) as GuildMessageChannel
+				action {
+					val targetChannel = (arguments.target ?: channel.asChannel()) as GuildMessageChannel
 
-				targetChannel.createMessage(arguments.message)
+					targetChannel.createMessage(arguments.message)
 
-				guild?.asGuild()?.getModLogChannel()?.createEmbed {
-					title = "/say command used"
-					description = arguments.message
+					guild?.asGuild()?.getModLogChannel()?.createEmbed {
+						title = "/say command used"
+						description = arguments.message
 
-					field {
-						inline = true
-						name = "Channel"
-						value = targetChannel.mention
+						field {
+							inline = true
+							name = "Channel"
+							value = targetChannel.mention
+						}
+
+						field {
+							inline = true
+							name = "User"
+							value = user.mention
+						}
 					}
 
-					field {
-						inline = true
-						name = "User"
-						value = user.mention
-					}
+					edit { content = "Done!" }
 				}
-
-				edit { content = "Done!" }
 			}
 		}
 	}
