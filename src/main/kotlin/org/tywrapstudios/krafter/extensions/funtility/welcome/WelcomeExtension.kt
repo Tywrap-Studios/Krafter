@@ -21,7 +21,9 @@ class WelcomeExtension : Extension() {
 				val username = member.effectiveName
 				val avatar = member.avatar?.getImage(
 					size = Image.Size.Size4096
-				) ?: return@action
+				) ?: member.defaultAvatar.getImage(
+					size = Image.Size.Size4096
+				)
 
 				val welcomeImageFile = generateWelcomeImage(username, avatar.data.decodeToImageBitmap())
 

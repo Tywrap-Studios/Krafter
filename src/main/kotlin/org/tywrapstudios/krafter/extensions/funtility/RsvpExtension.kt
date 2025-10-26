@@ -22,11 +22,8 @@ import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.extensions.event
 import dev.kordex.core.time.TimestampType
 import dev.kordex.core.time.toDiscord
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import dev.kordex.core.utils.scheduling.Scheduler
+import dev.kordex.core.utils.scheduling.Task
 import org.tywrapstudios.krafter.LOGGING
 import org.tywrapstudios.krafter.database.entities.RsvpEvent
 import org.tywrapstudios.krafter.database.transactors.RsvpTransactor
@@ -41,44 +38,38 @@ import kotlin.time.Instant
 class RsvpExtension : Extension() {
 	override val name: String = "krafter.rsvp"
 	val rsvp = RsvpTransactor
-	private var checkJob: Job? = null
+	private var checkTask: Task? = null
 
 	@OptIn(ExperimentalTime::class)
 	@Suppress("MagicNumber")
 	override suspend fun setup() {
-		val scope = CoroutineScope(kord.coroutineContext)
-		checkJob = scope.launch {
-			try {
-				while (isActive) {
-					val now = Clock.System.now()
-					val events = rsvp.getRsvpsBeforeAndAt(now)
-					for (event in events) {
-						LOGGING.debug("Starting RSVP event ${event.id}.")
-						val channel = kord.getChannel(event.channelId) as MessageChannelBehavior
-						val message = channel.getMessage(event.id)
-						message.reply {
-							event.invited.add(0, event.organizerId.value)
-							content = event.invited.joinToString(", ") {
-								"<@${it}>"
-							}
-							response(event)
-						}
-						message.edit {
-							rsvp(
-								event.title,
-								event.description,
-								event.eventTime,
-								kord.getUser(event.organizerId)!!,
-								event.invited,
-							)
-						}
-						rsvp.cancelRsvp(event.id)
+		checkTask = Scheduler().schedule(
+			seconds = 30,
+			name = "RSVP Checking Task",
+		) {
+			val now = Clock.System.now()
+			val events = rsvp.getRsvpsBeforeAndAt(now)
+			for (event in events) {
+				LOGGING.debug("Starting RSVP event ${event.id}.")
+				val channel = kord.getChannel(event.channelId) as MessageChannelBehavior
+				val message = channel.getMessage(event.id)
+				message.reply {
+					event.invited.add(0, event.organizerId.value)
+					content = event.invited.joinToString(", ") {
+						"<@${it}>"
 					}
-					delay(30_000) // Run every half minute
+					response(event)
 				}
-			} catch (e: CancellationException) {
-				LOGGING.warn("RSVP checking job was cancelled.")
-				e.printStackTrace()
+				message.edit {
+					rsvp(
+						event.title,
+						event.description,
+						event.eventTime,
+						kord.getUser(event.organizerId)!!,
+						event.invited,
+					)
+				}
+				rsvp.cancelRsvp(event.id)
 			}
 		}
 
