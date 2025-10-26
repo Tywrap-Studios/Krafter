@@ -30,7 +30,7 @@ import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension
 import org.tywrapstudios.krafter.extensions.sab.SafetyAndAbuseExtension
 import org.tywrapstudios.krafter.extensions.sab.getOverwrites
 import org.tywrapstudios.krafter.extensions.suggestion.SuggestionsExtension
-import org.tywrapstudios.krafter.extensions.utility.UtilityExtension
+import org.tywrapstudios.krafter.extensions.funtility.UtilityExtension
 import java.io.File
 
 val TEST_SERVER_ID = envOrNull("TEST_SERVER")?.snowflake()

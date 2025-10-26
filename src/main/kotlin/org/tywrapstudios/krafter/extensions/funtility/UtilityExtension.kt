@@ -12,7 +12,7 @@
 
 @file:Suppress("MagicNumber", "WildcardImport")
 
-package org.tywrapstudios.krafter.extensions.utility
+package org.tywrapstudios.krafter.extensions.funtility
 
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.MessageType
