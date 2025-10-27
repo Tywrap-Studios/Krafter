@@ -231,6 +231,37 @@ public object Translations {
               .withBundle(Translations.bundle)
         }
       }
+
+      public object Lookup {
+        /**
+         * user
+         */
+        public val member: Key = Key("args.minecraft.lookup.member")
+            .withBundle(Translations.bundle)
+
+        /**
+         * name-mc
+         */
+        public val nameMc: Key = Key("args.minecraft.lookup.nameMc")
+            .withBundle(Translations.bundle)
+
+        public object Member {
+          /**
+           * The member to look up the linked Minecraft account for.
+           */
+          public val description: Key = Key("args.minecraft.lookup.member.description")
+              .withBundle(Translations.bundle)
+        }
+
+        public object NameMc {
+          /**
+           * Whether to use NameMC to look up the Minecraft account in case the Discord account is
+           * not linked.
+           */
+          public val description: Key = Key("args.minecraft.lookup.nameMc.description")
+              .withBundle(Translations.bundle)
+        }
+      }
     }
 
     public object Rsvp {
@@ -879,6 +910,12 @@ public object Translations {
           .withBundle(Translations.bundle)
 
       /**
+       * lookup
+       */
+      public val lookup: Key = Key("commands.minecraft.lookup")
+          .withBundle(Translations.bundle)
+
+      /**
        * unlink
        */
       public val unlink: Key = Key("commands.minecraft.unlink")
@@ -897,6 +934,14 @@ public object Translations {
          * Link your Minecraft account to your Discord account.
          */
         public val description: Key = Key("commands.minecraft.link.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Lookup {
+        /**
+         * Lookup the Minecraft account linked to a Discord account.
+         */
+        public val description: Key = Key("commands.minecraft.lookup.description")
             .withBundle(Translations.bundle)
       }
 

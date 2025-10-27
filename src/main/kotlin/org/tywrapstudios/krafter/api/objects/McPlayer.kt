@@ -4,8 +4,7 @@ import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.tywrapstudios.krafter.LOGGING
-import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension
-import org.tywrapstudios.krafter.setup
+import org.tywrapstudios.krafter.database.transactors.KrafterMinecraftLinkTransactor
 import java.net.URI
 import java.net.URL
 import java.util.*
@@ -97,16 +96,18 @@ fun getMcPlayer(uuid: UUID): McPlayer? {
         Json.decodeFromString<McPlayer>(response)
     } catch (e: Exception) {
         LOGGING.warn("Something went wrong while fetching Minecraft profile for UUID: $uuid")
-        null
+        e.printStackTrace()
+		null
     }
 }
 
+fun KrafterMinecraftLinkTransactor.LinkStatus.getMcPlayer(): McPlayer? = getMcPlayer(uuid)
+
 suspend fun getMcPlayer(member: Snowflake): McPlayer? {
-    val extension = setup().extensions["krafter.minecraft"] as? MinecraftExtension
-    val link = extension?.data?.getLinkStatus(member)
+    val link = KrafterMinecraftLinkTransactor.getLinkStatus(member)
 
     if (link == null) {
-        LOGGING.warn("Couldn't fetch link for McPlayer object for member $member with $extension")
+        LOGGING.warn("Couldn't fetch link for McPlayer object for member $member with $link")
         return null
     }
 
@@ -135,3 +136,5 @@ fun getMcPlayerSigned(uuid: UUID): McPlayer? {
         null
     }
 }
+
+fun KrafterMinecraftLinkTransactor.LinkStatus.getMcPlayerSigned(): McPlayer? = getMcPlayerSigned(uuid)

@@ -52,6 +52,7 @@ object KrafterMinecraftLinkTransactor {
             MinecraftLinkTable.selectAll().where { MinecraftLinkTable.id eq member }
                 .forEach {
                     status = LinkStatus(
+						it[MinecraftLinkTable.id].value,
                         it[MinecraftLinkTable.uuid],
                         it[MinecraftLinkTable.code],
                         it[MinecraftLinkTable.verified]
@@ -60,6 +61,31 @@ object KrafterMinecraftLinkTransactor {
         }
         return status
     }
+
+	/**
+	 * Gets the link status for the given member.
+	 *
+	 * @param uuid The [UUID] to get the link status for.
+	 * @return The [LinkStatus] for the [UUID], or null if no link status exists. Note that the [LinkStatus.verified]
+	 * value might be false, even if a link status exists, meaning the member has not yet verified their link.
+	 */
+	suspend fun getLinkStatus(uuid: UUID): LinkStatus? {
+		var status: LinkStatus? = null
+		transaction {
+			setup()
+
+			MinecraftLinkTable.selectAll().where { MinecraftLinkTable.uuid eq uuid }
+				.forEach {
+					status = LinkStatus(
+						it[MinecraftLinkTable.id].value,
+						it[MinecraftLinkTable.uuid],
+						it[MinecraftLinkTable.code],
+						it[MinecraftLinkTable.verified]
+					)
+				}
+		}
+		return status
+	}
 
     /**
      * Verifies the link status for the given member, using the provided verification code.
@@ -165,8 +191,9 @@ object KrafterMinecraftLinkTransactor {
      * @property verified Whether the link has been verified by the user.
      */
     data class LinkStatus(
-        val uuid: UUID,
-        val code: UInt = Random.Default.nextUInt(10000u..99999u),
-        val verified: Boolean = false
+		val member: Snowflake,
+		val uuid: UUID,
+		val code: UInt = Random.nextUInt(10000u..99999u),
+		val verified: Boolean = false
     )
 }

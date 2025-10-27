@@ -3,20 +3,24 @@
 package org.tywrapstudios.krafter.extensions.minecraft
 
 import dev.kord.common.Color
+import dev.kord.common.entity.ButtonStyle
+import dev.kord.core.builder.components.emoji
+import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.interaction.followup.FollowupMessage
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.rest.builder.message.actionRow
+import dev.kord.rest.builder.message.create.FollowupMessageCreateBuilder
+import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.DISCORD_BLURPLE
 import dev.kordex.core.DISCORD_RED
 import dev.kordex.core.commands.Arguments
 import dev.kordex.core.commands.application.slash.EphemeralSlashCommand
 import dev.kordex.core.commands.application.slash.ephemeralSubCommand
-import dev.kordex.core.commands.converters.impl.boolean
-import dev.kordex.core.commands.converters.impl.int
-import dev.kordex.core.commands.converters.impl.member
-import dev.kordex.core.commands.converters.impl.optionalString
-import dev.kordex.core.commands.converters.impl.string
+import dev.kordex.core.commands.application.slash.publicSubCommand
+import dev.kordex.core.commands.converters.impl.*
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.extensions.event
@@ -25,9 +29,13 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.future.future
 import org.tywrapstudios.krafter.api.objects.McMessage
+import org.tywrapstudios.krafter.api.objects.McPlayer
+import org.tywrapstudios.krafter.api.objects.getMcPlayer
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
 import org.tywrapstudios.krafter.checks.isGlobalBotAdmin
 import org.tywrapstudios.krafter.database.transactors.KrafterMinecraftLinkTransactor
+import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension.SearchUsernameArguments
+import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension.SearchUuidArguments
 import org.tywrapstudios.krafter.getOrCreateChannel
 import org.tywrapstudios.krafter.i18n.Translations
 import org.tywrapstudios.krafter.minecraftConfig
@@ -69,8 +77,6 @@ class MinecraftExtension : Extension() {
 			}
 		}
 
-
-
 		ephemeralSlashCommand {
 			name = Translations.Commands.minecraft
 			description = Translations.Commands.Minecraft.description
@@ -82,7 +88,8 @@ class MinecraftExtension : Extension() {
 					if (!minecraftConfig().enabled) {
 						respond {
 							content =
-								Translations.Responses.Minecraft.Link.Error.disabled.withLocale(getLocale()).withLocale(getLocale()).translate()
+								Translations.Responses.Minecraft.Link.Error.disabled.withLocale(getLocale())
+									.withLocale(getLocale()).translate()
 						}
 						return@action
 					}
@@ -90,7 +97,8 @@ class MinecraftExtension : Extension() {
 					val uuid = arguments.uuid
 					val member = event.interaction.user.id
 
-					val link = data.setLinkStatus(member, KrafterMinecraftLinkTransactor.LinkStatus(UUID.fromString(uuid)))
+					val link =
+						data.setLinkStatus(member, KrafterMinecraftLinkTransactor.LinkStatus(member, UUID.fromString(uuid)))
 
 					respond {
 						content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
@@ -106,7 +114,8 @@ class MinecraftExtension : Extension() {
 				action {
 					if (!minecraftConfig().enabled) {
 						respond {
-							content = Translations.Responses.Minecraft.Unlink.Error.disabled.withLocale(getLocale()).translate()
+							content = Translations.Responses.Minecraft.Unlink.Error.disabled.withLocale(getLocale())
+								.translate()
 						}
 						return@action
 					}
@@ -115,7 +124,8 @@ class MinecraftExtension : Extension() {
 					val uuid = data.unlink(member)
 					if (uuid == null) {
 						respond {
-							content = Translations.Responses.Minecraft.Unlink.Error.notLinked.withLocale(getLocale()).translate()
+							content = Translations.Responses.Minecraft.Unlink.Error.notLinked.withLocale(getLocale())
+								.translate()
 						}
 					} else {
 						respond {
@@ -136,7 +146,8 @@ class MinecraftExtension : Extension() {
 				action {
 					if (!minecraftConfig().enabled) {
 						respond {
-							content = Translations.Responses.Minecraft.ForceLink.Error.disabled.withLocale(getLocale()).translate()
+							content = Translations.Responses.Minecraft.ForceLink.Error.disabled.withLocale(getLocale())
+								.translate()
 						}
 						return@action
 					}
@@ -149,7 +160,7 @@ class MinecraftExtension : Extension() {
 					if (currentLink == null) {
 						data.setLinkStatus(
 							member.id,
-							KrafterMinecraftLinkTransactor.LinkStatus(UUID.fromString(uuid))
+							KrafterMinecraftLinkTransactor.LinkStatus(member.id, UUID.fromString(uuid))
 						)
 					} else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
 						respond {
@@ -174,6 +185,88 @@ class MinecraftExtension : Extension() {
 								currentLink.uuid
 							).withLocale(getLocale()).translate()
 						}
+					}
+				}
+			}
+
+			publicSubCommand(::LookupCommandArguments) {
+				name = Translations.Commands.Minecraft.lookup
+				description = Translations.Commands.Minecraft.Lookup.description
+				action {
+					val mcLink = data.getLinkStatus(arguments.member.id)
+					val player = mcLink?.getMcPlayer()
+					if (mcLink != null && player != null) {
+						respond {
+							embed {
+								title = "Minecraft profile for ${arguments.member.effectiveName}"
+								field {
+									name = "Username and UUID"
+									value = """
+										```
+										${player.name}
+										```
+										```
+										${player.id}
+										```
+									""".trimIndent()
+								}
+								field {
+									name = "Link status"
+									value = "Verified: ${if (mcLink.verified) "✅" else "❌"}"
+								}
+								thumbnail {
+									url = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
+								}
+								footer {
+									text = player.name
+									icon = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
+								}
+							}
+							actionRow {
+								interactionButton(ButtonStyle.Primary, "minecraft:force-link") {
+									label = "Force link"
+									emoji(ReactionEmoji.Unicode("🔗"))
+								}
+							}
+						}
+					} else {
+						respond {
+							embed {
+								title = "Minecraft profile for ${arguments.member.effectiveName}"
+								field {
+									name = "Could not present profile:"
+									value = if (mcLink == null)
+										"Our database does not contain this member."
+									else if (player == null) "Our database contains a linked UUID, but this player profile " +
+										"does not actually exist or could not be found due to other reasons."
+									else "Something unexpected happened, please contact a staff member."
+								}
+							}
+						}
+					}
+				}
+			}
+
+			publicSubCommand(::SearchUuidArguments) {
+//				name = Translations.Commands.Minecraft.searchUuid
+//				description = Translations.Commands.Minecraft.SearchUuid.description
+
+				action {
+					val player = getMcPlayer(UUID.fromString(arguments.uuid))
+					respond {
+						mcPlayerProfileEmbed(arguments.uuid, player)
+					}
+				}
+			}
+
+			publicSubCommand(::SearchUsernameArguments) {
+//				name = Translations.Commands.Minecraft.searchUsername
+//				description = Translations.Commands.Minecraft.SearchUsername.description
+
+				action {
+					val player = null // Awaiting API
+					respond {
+						mcPlayerProfileEmbed(arguments.username, player)
 					}
 				}
 			}
@@ -548,6 +641,61 @@ class MinecraftExtension : Extension() {
 		}
 	}
 
+	suspend fun FollowupMessageCreateBuilder.mcPlayerProfileEmbed(prompt: String, player: McPlayer?) {
+		val mcLink = KrafterMinecraftLinkTransactor.getLinkStatus(UUID.fromString(player?.id))
+
+		if (player == null) {
+			embed {
+				title = "Minecraft profile for $prompt"
+				field {
+					name = "Could not present profile:"
+					value = "This player profile does not actually exist or could not be found due to other reasons."
+				}
+			}
+			return
+		}
+		embed {
+			title = "Minecraft profile for $prompt"
+			field {
+				name = "Username and UUID"
+				value = """
+										```
+										${player.name}
+										```
+										```
+										${player.id}
+										```
+									""".trimIndent()
+			}
+			field {
+				name = "Link status"
+				value = if (mcLink == null) {
+					"This UUID is currently not being linked."
+				} else {
+					"""
+					User: <@${mcLink.member}>
+					Verified: ${if (mcLink.verified) "✅" else "❌"}
+					""".trimIndent()
+				}
+			}
+			thumbnail {
+				url = "https://mc-heads.net/avatar/${player.id}/90"
+			}
+			footer {
+				text = player.name
+				icon = "https://mc-heads.net/avatar/${player.id}/90"
+			}
+		}
+		if (mcLink != null) {
+			actionRow {
+				interactionButton(ButtonStyle.Primary, "minecraft:force-link") {
+					label = "Force link"
+					emoji(ReactionEmoji.Unicode("🔗"))
+				}
+			}
+		}
+	}
+
 	class LinkCommandArguments : Arguments() {
 		val uuid by string {
 			name = Translations.Args.Minecraft.Link.uuid
@@ -586,6 +734,38 @@ class MinecraftExtension : Extension() {
 						.matches()
 				}
 			}
+		}
+	}
+
+	class LookupCommandArguments : Arguments() {
+		val member by member {
+			name = Translations.Args.Minecraft.Lookup.member
+			description = Translations.Args.Minecraft.Lookup.Member.description
+		}
+	}
+
+	class SearchUuidArguments : Arguments() {
+		val uuid by string {
+//			name = Translations.Args.Minecraft.SearchUuid.uuid
+//			description = Translations.Args.Minecraft.SearchUuid.Uuid.description
+			validate {
+				failIfNot(Translations.Responses.Minecraft.Link.Error.invalidUuid) {
+					Pattern
+						.compile(
+							"([0-9a-f]{8})(?:-|)([0-9a-f]{4})(?:-|)(4[0-9a-f]{" +
+								"3})(?:-|)([89ab][0-9a-f]{3})(?:-|)([0-9a-f]{12})"
+						)
+						.matcher(value)
+						.matches()
+				}
+			}
+		}
+	}
+
+	class SearchUsernameArguments : Arguments() {
+		val username by string {
+//			name = Translations.Args.Minecraft.SearchUsername.username
+//			description = Translations.Args.Minecraft.SearchUsername.Username.description
 		}
 	}
 
@@ -691,24 +871,4 @@ class MinecraftExtension : Extension() {
 			description = Translations.GeneralArgs.Cmd.ModCommands.Reason.description
 		}
 	}
-}
-
-/**
- * Verifies a Minecraft link for the given UUID and code.
- *
- * SHOULD ONLY BE USED IF YOU'RE CERTAIN THAT THE MEMBER IS CURRENTLY BEING LINKED
- * TO A UUID IN THE CURRENT RUNTIME.
- *
- * - If the verification code does not match, the method will return -1.
- * - If the verification is successful, it will return 1.
- * - If no link status exists for the member, or a different error occurs it will return 0.
- */
-@OptIn(DelicateCoroutinesApi::class)
-fun verify(uuid: UUID, code: Int): CompletableFuture<Int> = GlobalScope.future {
-	setup().extensions["krafter.minecraft"]?.let { ext ->
-		if (ext is MinecraftExtension) {
-			return@future ext.data.verify(uuid, code.toUInt())
-		}
-	}
-	return@future 0
 }
