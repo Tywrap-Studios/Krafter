@@ -25,7 +25,7 @@ object DatabaseManager {
     private var databaseContext = Dispatchers.IO + CoroutineName("Krafter Database")
     val krafterSqlLogger = object : SqlLogger {
         override fun log(context: StatementContext, transaction: Transaction) {
-            LOGGING.debug("[SQL]: ${context.expandArgs(transaction)}")
+            LOGGING.literalDebug("[SQL]: ${context.expandArgs(transaction)}")
         }
     }
 

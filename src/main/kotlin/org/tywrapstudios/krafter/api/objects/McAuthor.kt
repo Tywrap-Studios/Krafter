@@ -3,6 +3,9 @@ package org.tywrapstudios.krafter.api.objects
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Member
 import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
 class McAuthor(val member: Member, val player: McPlayer?) {
     fun getName(): String {
@@ -21,8 +24,9 @@ class McAuthor(val member: Member, val player: McPlayer?) {
         return member.id
     }
 
-    fun getMcId(): UUID? {
-        return if(player == null) null else UUID.fromString(player.id)
+    @OptIn(ExperimentalUuidApi::class)
+	fun getMcId(): UUID? {
+        return if(player == null) null else Uuid.parse(player.id).toJavaUuid()
     }
 
     fun getMention(): String {

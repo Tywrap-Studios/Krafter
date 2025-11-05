@@ -7,12 +7,10 @@ import dev.kord.common.entity.ButtonStyle
 import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.TextChannel
-import dev.kord.core.entity.interaction.followup.FollowupMessage
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.create.FollowupMessageCreateBuilder
-import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.DISCORD_BLURPLE
 import dev.kordex.core.DISCORD_RED
@@ -25,25 +23,20 @@ import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.extensions.event
 import dev.kordex.core.types.EphemeralInteractionContext
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.future.future
 import org.tywrapstudios.krafter.api.objects.McMessage
 import org.tywrapstudios.krafter.api.objects.McPlayer
 import org.tywrapstudios.krafter.api.objects.getMcPlayer
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
 import org.tywrapstudios.krafter.checks.isGlobalBotAdmin
 import org.tywrapstudios.krafter.database.transactors.KrafterMinecraftLinkTransactor
-import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension.SearchUsernameArguments
-import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension.SearchUuidArguments
 import org.tywrapstudios.krafter.getOrCreateChannel
 import org.tywrapstudios.krafter.i18n.Translations
 import org.tywrapstudios.krafter.minecraftConfig
 import org.tywrapstudios.krafter.platform.MC_CONNECTION
-import org.tywrapstudios.krafter.setup
-import java.util.*
-import java.util.concurrent.CompletableFuture
 import java.util.regex.Pattern
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
 var watchChannel: TextChannel? = null
 
@@ -51,6 +44,7 @@ class MinecraftExtension : Extension() {
 	override val name: String = "krafter.minecraft"
 	val data: KrafterMinecraftLinkTransactor = KrafterMinecraftLinkTransactor
 
+	@OptIn(ExperimentalUuidApi::class)
 	override suspend fun setup() {
 		val cfg = minecraftConfig()
 
@@ -98,7 +92,7 @@ class MinecraftExtension : Extension() {
 					val member = event.interaction.user.id
 
 					val link =
-						data.setLinkStatus(member, KrafterMinecraftLinkTransactor.LinkStatus(member, UUID.fromString(uuid)))
+						data.setLinkStatus(member, KrafterMinecraftLinkTransactor.LinkStatus(member, Uuid.parse(uuid).toJavaUuid()))
 
 					respond {
 						content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
@@ -160,7 +154,7 @@ class MinecraftExtension : Extension() {
 					if (currentLink == null) {
 						data.setLinkStatus(
 							member.id,
-							KrafterMinecraftLinkTransactor.LinkStatus(member.id, UUID.fromString(uuid))
+							KrafterMinecraftLinkTransactor.LinkStatus(member.id, Uuid.parse(uuid).toJavaUuid())
 						)
 					} else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
 						respond {
@@ -248,11 +242,11 @@ class MinecraftExtension : Extension() {
 			}
 
 			publicSubCommand(::SearchUuidArguments) {
-//				name = Translations.Commands.Minecraft.searchUuid
-//				description = Translations.Commands.Minecraft.SearchUuid.description
+				name = Translations.Commands.Minecraft.searchUuid
+				description = Translations.Commands.Minecraft.SearchUuid.description
 
 				action {
-					val player = getMcPlayer(UUID.fromString(arguments.uuid))
+					val player = getMcPlayer(Uuid.parse(arguments.uuid).toJavaUuid())
 					respond {
 						mcPlayerProfileEmbed(arguments.uuid, player)
 					}
@@ -260,11 +254,11 @@ class MinecraftExtension : Extension() {
 			}
 
 			publicSubCommand(::SearchUsernameArguments) {
-//				name = Translations.Commands.Minecraft.searchUsername
-//				description = Translations.Commands.Minecraft.SearchUsername.description
+				name = Translations.Commands.Minecraft.searchUsername
+				description = Translations.Commands.Minecraft.SearchUsername.description
 
 				action {
-					val player = null // Awaiting API
+					val player = getMcPlayer(arguments.username)
 					respond {
 						mcPlayerProfileEmbed(arguments.username, player)
 					}
@@ -641,8 +635,13 @@ class MinecraftExtension : Extension() {
 		}
 	}
 
+	@OptIn(ExperimentalUuidApi::class)
 	suspend fun FollowupMessageCreateBuilder.mcPlayerProfileEmbed(prompt: String, player: McPlayer?) {
-		val mcLink = KrafterMinecraftLinkTransactor.getLinkStatus(UUID.fromString(player?.id))
+		val mcLink = try {
+			KrafterMinecraftLinkTransactor.getLinkStatus(Uuid.parse(player?.id ?: "").toJavaUuid())
+		} catch (_: Exception) {
+			null
+		}
 
 		if (player == null) {
 			embed {
@@ -679,11 +678,11 @@ class MinecraftExtension : Extension() {
 				}
 			}
 			thumbnail {
-				url = "https://mc-heads.net/avatar/${player.id}/90"
+				url = "https://mc-heads.net/body/${player.id}/600/left"
 			}
 			footer {
 				text = player.name
-				icon = "https://mc-heads.net/avatar/${player.id}/90"
+				icon = "https://mc-heads.net/avatar/${player.id}/600"
 			}
 		}
 		if (mcLink != null) {
@@ -746,8 +745,8 @@ class MinecraftExtension : Extension() {
 
 	class SearchUuidArguments : Arguments() {
 		val uuid by string {
-//			name = Translations.Args.Minecraft.SearchUuid.uuid
-//			description = Translations.Args.Minecraft.SearchUuid.Uuid.description
+			name = Translations.Args.Minecraft.SearchUuid.uuid
+			description = Translations.Args.Minecraft.SearchUuid.Uuid.description
 			validate {
 				failIfNot(Translations.Responses.Minecraft.Link.Error.invalidUuid) {
 					Pattern
@@ -764,8 +763,8 @@ class MinecraftExtension : Extension() {
 
 	class SearchUsernameArguments : Arguments() {
 		val username by string {
-//			name = Translations.Args.Minecraft.SearchUsername.username
-//			description = Translations.Args.Minecraft.SearchUsername.Username.description
+			name = Translations.Args.Minecraft.SearchUsername.username
+			description = Translations.Args.Minecraft.SearchUsername.Username.description
 		}
 	}
 

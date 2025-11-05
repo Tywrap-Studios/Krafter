@@ -239,12 +239,6 @@ public object Translations {
         public val member: Key = Key("args.minecraft.lookup.member")
             .withBundle(Translations.bundle)
 
-        /**
-         * name-mc
-         */
-        public val nameMc: Key = Key("args.minecraft.lookup.nameMc")
-            .withBundle(Translations.bundle)
-
         public object Member {
           /**
            * The member to look up the linked Minecraft account for.
@@ -252,13 +246,36 @@ public object Translations {
           public val description: Key = Key("args.minecraft.lookup.member.description")
               .withBundle(Translations.bundle)
         }
+      }
 
-        public object NameMc {
+      public object SearchUsername {
+        /**
+         * username
+         */
+        public val username: Key = Key("args.minecraft.searchUsername.username")
+            .withBundle(Translations.bundle)
+
+        public object Username {
           /**
-           * Whether to use NameMC to look up the Minecraft account in case the Discord account is
-           * not linked.
+           * The username to search with.
            */
-          public val description: Key = Key("args.minecraft.lookup.nameMc.description")
+          public val description: Key = Key("args.minecraft.searchUsername.username.description")
+              .withBundle(Translations.bundle)
+        }
+      }
+
+      public object SearchUuid {
+        /**
+         * uuid
+         */
+        public val uuid: Key = Key("args.minecraft.searchUuid.uuid")
+            .withBundle(Translations.bundle)
+
+        public object Uuid {
+          /**
+           * The UUID to search with.
+           */
+          public val description: Key = Key("args.minecraft.searchUuid.uuid.description")
               .withBundle(Translations.bundle)
         }
       }
@@ -916,6 +933,18 @@ public object Translations {
           .withBundle(Translations.bundle)
 
       /**
+       * search-username
+       */
+      public val searchUsername: Key = Key("commands.minecraft.searchUsername")
+          .withBundle(Translations.bundle)
+
+      /**
+       * search-uuid
+       */
+      public val searchUuid: Key = Key("commands.minecraft.searchUuid")
+          .withBundle(Translations.bundle)
+
+      /**
        * unlink
        */
       public val unlink: Key = Key("commands.minecraft.unlink")
@@ -942,6 +971,23 @@ public object Translations {
          * Lookup the Minecraft account linked to a Discord account.
          */
         public val description: Key = Key("commands.minecraft.lookup.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object SearchUsername {
+        /**
+         * Search a Minecraft profile using its username. Note: cracked accounts won't be able to
+         * use this!
+         */
+        public val description: Key = Key("commands.minecraft.searchUsername.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object SearchUuid {
+        /**
+         * Search a Minecraft profile using a UUID.
+         */
+        public val description: Key = Key("commands.minecraft.searchUuid.description")
             .withBundle(Translations.bundle)
       }
 
