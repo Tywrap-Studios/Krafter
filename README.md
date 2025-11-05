@@ -26,7 +26,7 @@ nitpicked to your liking.
   - [x] Run commands remotely - Execute commands on your Minecraft server remotely.
   - [x] Whitelist management - Manage your Minecraft server whitelist directly from Discord.
   - [x] Talk to in-game players - Send messages to in-game players from Discord.
-- Minecraft utilities - A set of tools to enhance your Minecraft experience.
+- [x] Minecraft utilities - A set of tools to enhance your Minecraft experience.
   - [x] Profile lookups - Look up Minecraft player profiles using UUIDs or usernames.
   - [x] Skin viewing - View Minecraft player skins directly in Discord.
   - [ ] Minecraft release updates - Get notified about new Minecraft releases. (awaiting first-party module)
