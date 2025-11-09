@@ -907,23 +907,35 @@ public object Translations {
       }
     }
 
-	object ManageTags {
-		val setAuto: Key = Key("commands.manageTags.setAuto")
-			.withBundle(Translations.bundle)
+    public object ManageTags {
+      /**
+       * edit-auto
+       */
+      public val editAuto: Key = Key("commands.manageTags.editAuto")
+          .withBundle(Translations.bundle)
 
-		val editAuto: Key = Key("commands.manageTags.editAuto")
-			.withBundle(Translations.bundle)
+      /**
+       * set-auto
+       */
+      public val setAuto: Key = Key("commands.manageTags.setAuto")
+          .withBundle(Translations.bundle)
 
-		object SetAuto {
-			val description: Key = Key("commands.manageTags.setAuto.description")
-				.withBundle(Translations.bundle)
-		}
+      public object EditAuto {
+        /**
+         * Edit an existing auto-tag
+         */
+        public val description: Key = Key("commands.manageTags.editAuto.description")
+            .withBundle(Translations.bundle)
+      }
 
-		object EditAuto {
-			val description: Key = Key("commands.manageTags.editAuto.description")
-				.withBundle(Translations.bundle)
-		}
-	}
+      public object SetAuto {
+        /**
+         * Create or replace an auto-tag
+         */
+        public val description: Key = Key("commands.manageTags.setAuto.description")
+            .withBundle(Translations.bundle)
+      }
+    }
 
     public object Minecraft {
       /**
@@ -1416,14 +1428,21 @@ public object Translations {
       }
     }
 
-	  object ManageTags {
-		  val trigger: Key = Key("generalArgs.manageTags.trigger")
-			  .withBundle(Translations.bundle)
-		  object Trigger {
-			  val description: Key = Key("generalArgs.manageTags.trigger.description")
-				  .withBundle(Translations.bundle)
-		  }
-	  }
+    public object ManageTags {
+      /**
+       * trigger
+       */
+      public val trigger: Key = Key("generalArgs.manageTags.trigger")
+          .withBundle(Translations.bundle)
+
+      public object Trigger {
+        /**
+         * The Regex pattern for matching message content
+         */
+        public val description: Key = Key("generalArgs.manageTags.trigger.description")
+            .withBundle(Translations.bundle)
+      }
+    }
 
     public object Suggestions {
       /**
