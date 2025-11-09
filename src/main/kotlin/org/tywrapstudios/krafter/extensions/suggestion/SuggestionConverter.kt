@@ -8,11 +8,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-@file:OptIn(KordPreview::class)
-
 package org.tywrapstudios.krafter.extensions.suggestion
 
-import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.interaction.OptionValue
 import dev.kord.core.entity.interaction.StringOptionValue
@@ -27,7 +24,6 @@ import dev.kordex.core.commands.converters.Validator
 import dev.kordex.core.commands.wrapStringOption
 import dev.kordex.core.i18n.types.Key
 import dev.kordex.parser.StringParser
-import org.koin.core.component.inject
 import org.tywrapstudios.krafter.database.entities.Suggestion
 import org.tywrapstudios.krafter.database.transactors.SuggestionsTransactor
 import org.tywrapstudios.krafter.i18n.Translations
