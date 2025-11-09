@@ -16,30 +16,30 @@ import org.tywrapstudios.krafter.extensions.suggestion.SuggestionStatus
 
 @Serializable
 data class Suggestion(
-    val id: Snowflake,
-    val guildId: Snowflake,
-    val channelId: Snowflake,
+	val id: Snowflake,
+	val guildId: Snowflake,
+	val channelId: Snowflake,
 
-    var comment: String? = null,
-    var status: SuggestionStatus = SuggestionStatus.RequiresName,
-    var message: Snowflake? = null,
-    var thread: Snowflake? = null,
-    var threadButtons: Snowflake? = null,
+	var comment: String? = null,
+	var status: SuggestionStatus = SuggestionStatus.RequiresName,
+	var message: Snowflake? = null,
+	var thread: Snowflake? = null,
+	var threadButtons: Snowflake? = null,
 
-    var text: String,
-    var problem: String? = null,
-    var solution: String? = null,
+	var text: String,
+	var problem: String? = null,
+	var solution: String? = null,
 
-    val owner: Snowflake,
-    val ownerAvatar: String?,
-    val ownerName: String,
+	val owner: Snowflake,
+	val ownerAvatar: String?,
+	val ownerName: String,
 
-    val positiveVoters: MutableList<Snowflake> = mutableListOf(),
-    val negativeVoters: MutableList<Snowflake> = mutableListOf(),
+	val positiveVoters: MutableList<Snowflake> = mutableListOf(),
+	val negativeVoters: MutableList<Snowflake> = mutableListOf(),
 
-    val isPluralkit: Boolean = false,
+	val isPluralkit: Boolean = false,
 ) {
-    val positiveVotes get() = positiveVoters.size
-    val negativeVotes get() = negativeVoters.size
-    val voteDifference get() = positiveVotes - negativeVotes
+	val positiveVotes get() = positiveVoters.size
+	val negativeVotes get() = negativeVoters.size
+	val voteDifference get() = positiveVotes - negativeVotes
 }

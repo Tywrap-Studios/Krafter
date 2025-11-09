@@ -92,7 +92,10 @@ class MinecraftExtension : Extension() {
 					val member = event.interaction.user.id
 
 					val link =
-						data.setLinkStatus(member, KrafterMinecraftLinkTransactor.LinkStatus(member, Uuid.parse(uuid).toJavaUuid()))
+						data.setLinkStatus(
+							member,
+							KrafterMinecraftLinkTransactor.LinkStatus(member, Uuid.parse(uuid).toJavaUuid())
+						)
 
 					respond {
 						content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(

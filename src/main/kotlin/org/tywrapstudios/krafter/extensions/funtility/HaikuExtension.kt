@@ -14,7 +14,7 @@ class HaikuExtension : Extension() {
 	override val name: String = "krafter.haiku"
 
 	init {
-	    ABBREVIATIONS.putAll(haikuAbbreviationsConfig().abbreviations)
+		ABBREVIATIONS.putAll(haikuAbbreviationsConfig().abbreviations)
 	}
 
 	override suspend fun setup() {
@@ -168,7 +168,8 @@ class HaikuExtension : Extension() {
 		fun forceAdd(ending: String) {
 			if (lowerWord.length >= (ending.length + 1) &&
 				lowerWord[lowerWord.length - (ending.length + 1)] !in "aeiouy" &&
-				lowerWord.endsWith(ending)) {
+				lowerWord.endsWith(ending)
+			) {
 				count++
 			}
 		}
@@ -181,7 +182,8 @@ class HaikuExtension : Extension() {
 		fun forceRemove(ending: String) {
 			if (lowerWord.length >= (ending.length + 1) &&
 				lowerWord[lowerWord.length - (ending.length + 1)] !in "aeiouy" &&
-				lowerWord.endsWith(ending)) {
+				lowerWord.endsWith(ending)
+			) {
 				count--
 			}
 		}

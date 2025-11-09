@@ -29,60 +29,60 @@ import org.tywrapstudios.krafter.database.transactors.SuggestionsTransactor
 import org.tywrapstudios.krafter.i18n.Translations
 
 @Converter(
-    names = ["suggestion"],
-    types = [ConverterType.SINGLE, ConverterType.OPTIONAL],
+	names = ["suggestion"],
+	types = [ConverterType.SINGLE, ConverterType.OPTIONAL],
 )
 class SuggestionConverter(
-    override var validator: Validator<Suggestion> = null
+	override var validator: Validator<Suggestion> = null
 ) : SingleConverter<Suggestion>() {
-    override val signatureType: Key = Translations.Converter.Suggestion.signatureType
+	override val signatureType: Key = Translations.Converter.Suggestion.signatureType
 
-    private val suggestions: SuggestionsTransactor = SuggestionsTransactor
+	private val suggestions: SuggestionsTransactor = SuggestionsTransactor
 
-    override suspend fun parse(parser: StringParser?, context: CommandContext, named: String?): Boolean {
-        val arg: String = named ?: parser?.parseNext()?.data ?: return false
+	override suspend fun parse(parser: StringParser?, context: CommandContext, named: String?): Boolean {
+		val arg: String = named ?: parser?.parseNext()?.data ?: return false
 
-        try {
-            val snowflake = Snowflake(arg)
+		try {
+			val snowflake = Snowflake(arg)
 
-            this.parsed = suggestions.get(snowflake)
-                ?: suggestions.getByMessage(snowflake)
-                        ?: throw DiscordRelayedException(
-                    Translations.Errors.Exceptions.unknownSuggestionId.withOrdinalPlaceholders(
-                        arg
-                    )
-                )
-        } catch (_: NumberFormatException) {
-            throw DiscordRelayedException(
-                Translations.Errors.Exceptions.unknownSuggestionId.withOrdinalPlaceholders(arg)
-            )
-        }
+			this.parsed = suggestions.get(snowflake)
+				?: suggestions.getByMessage(snowflake)
+					?: throw DiscordRelayedException(
+					Translations.Errors.Exceptions.unknownSuggestionId.withOrdinalPlaceholders(
+						arg
+					)
+				)
+		} catch (_: NumberFormatException) {
+			throw DiscordRelayedException(
+				Translations.Errors.Exceptions.unknownSuggestionId.withOrdinalPlaceholders(arg)
+			)
+		}
 
-        return true
-    }
+		return true
+	}
 
-    override suspend fun toSlashOption(arg: Argument<*>): OptionWrapper<*> =
-        wrapStringOption(arg.displayName, arg.description) { required = true }
+	override suspend fun toSlashOption(arg: Argument<*>): OptionWrapper<*> =
+		wrapStringOption(arg.displayName, arg.description) { required = true }
 
-    override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
-        val arg = (option as? StringOptionValue)?.value ?: return false
+	override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
+		val arg = (option as? StringOptionValue)?.value ?: return false
 
-        try {
-            val snowflake = Snowflake(arg)
+		try {
+			val snowflake = Snowflake(arg)
 
-            this.parsed = suggestions.get(snowflake)
-                ?: suggestions.getByMessage(snowflake)
-                        ?: throw DiscordRelayedException(
-                    Translations.Errors.Exceptions.unknownSuggestionId.withOrdinalPlaceholders(
-                        arg
-                    )
-                )
-        } catch (_: NumberFormatException) {
-            throw DiscordRelayedException(
-                Translations.Errors.Exceptions.unknownSuggestionId.withOrdinalPlaceholders(arg)
-            )
-        }
+			this.parsed = suggestions.get(snowflake)
+				?: suggestions.getByMessage(snowflake)
+					?: throw DiscordRelayedException(
+					Translations.Errors.Exceptions.unknownSuggestionId.withOrdinalPlaceholders(
+						arg
+					)
+				)
+		} catch (_: NumberFormatException) {
+			throw DiscordRelayedException(
+				Translations.Errors.Exceptions.unknownSuggestionId.withOrdinalPlaceholders(arg)
+			)
+		}
 
-        return true
-    }
+		return true
+	}
 }

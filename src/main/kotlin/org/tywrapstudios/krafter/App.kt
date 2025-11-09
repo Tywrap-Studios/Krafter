@@ -24,14 +24,14 @@ import org.tywrapstudios.krafter.extensions.data.KrafterWelcomeChannelData
 import org.tywrapstudios.krafter.extensions.funtility.FunExtension
 import org.tywrapstudios.krafter.extensions.funtility.HaikuExtension
 import org.tywrapstudios.krafter.extensions.funtility.RsvpExtension
+import org.tywrapstudios.krafter.extensions.funtility.UtilityExtension
+import org.tywrapstudios.krafter.extensions.funtility.welcome.WelcomeExtension
 import org.tywrapstudios.krafter.extensions.logs.RuleBreakingModProcessor
 import org.tywrapstudios.krafter.extensions.logs.WrongLocationMessageSender
 import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension
 import org.tywrapstudios.krafter.extensions.sab.SafetyAndAbuseExtension
 import org.tywrapstudios.krafter.extensions.sab.getOverwrites
 import org.tywrapstudios.krafter.extensions.suggestion.SuggestionsExtension
-import org.tywrapstudios.krafter.extensions.funtility.UtilityExtension
-import org.tywrapstudios.krafter.extensions.funtility.welcome.WelcomeExtension
 import java.io.File
 
 val TEST_SERVER_ID = envOrNull("TEST_SERVER")?.snowflake()
@@ -58,33 +58,33 @@ suspend fun setup(): ExtensibleBot {
 		LOGGING.debug(getAllConfigJsonAsString(comments = false, newlines = true))
 	}
 
-    return ExtensibleBot(TOKEN) {
+	return ExtensibleBot(TOKEN) {
 
-        chatCommands {
-            defaultPrefix = mainConfig().prefix
-            enabled = true
+		chatCommands {
+			defaultPrefix = mainConfig().prefix
+			enabled = true
 
-            prefix { default ->
-                // If TEST_SERVER_ID isn't null, we are in test mode and should not use the default prefix.
-                if (TEST_SERVER_ID != null) {
-                    "?>"
-                } else {
-                    default
-                }
-            }
-        }
+			prefix { default ->
+				// If TEST_SERVER_ID isn't null, we are in test mode and should not use the default prefix.
+				if (TEST_SERVER_ID != null) {
+					"?>"
+				} else {
+					default
+				}
+			}
+		}
 
-        applicationCommands {
-            if (TEST_SERVER_ID != null) {
-                defaultGuild = TEST_SERVER_ID
-            }
-        }
+		applicationCommands {
+			if (TEST_SERVER_ID != null) {
+				defaultGuild = TEST_SERVER_ID
+			}
+		}
 
-        extensions {
+		extensions {
 
-            if (mainConfig().plural_kit) extPluralKit()
+			if (mainConfig().plural_kit) extPluralKit()
 
-            add(::SafetyAndAbuseExtension)
+			add(::SafetyAndAbuseExtension)
 
 			if (utilityConfig().enabled) {
 				add(::UtilityExtension)
@@ -92,74 +92,78 @@ suspend fun setup(): ExtensibleBot {
 					add(::WelcomeExtension)
 				}
 			}
-            if(minecraftConfig().enabled) { add(::MinecraftExtension) }
-            if (sabConfig().block_phishing) extPhishing {
-                for (domain in sabConfig().banned_domains) badDomain(domain)
-                logChannelName =
-                    if (
-                        sabConfig().channel == "new" ||
-						sabConfig().channel.isEmpty()
-                    ) {
-                        "moderation"
-                    } else {
-						sabConfig().channel
-                    }
-            }
-            if (tagsConfig().enabled) tags(KrafterTagsData()) {
-                staffCommandCheck { isBotModuleAdmin(tagsConfig().administrators) }
-                loggingChannelName =
-                    if (
+			if (minecraftConfig().enabled) {
+				add(::MinecraftExtension)
+			}
+			if (sabConfig().block_phishing) extPhishing {
+				for (domain in sabConfig().banned_domains) badDomain(domain)
+				logChannelName =
+					if (
 						sabConfig().channel == "new" ||
 						sabConfig().channel.isEmpty()
-                    ) {
-                        "moderation"
-                    } else {
+					) {
+						"moderation"
+					} else {
 						sabConfig().channel
-                    }
-            }
-            if (amaConfig().enabled) extAma(KrafterAmaData())
-            if (crashAnalyticsConfig().enabled) extLogParser {
-                processor(PiracyProcessor())
-                processor(ProblematicLauncherProcessor())
-                processor(RuleBreakingModProcessor())
+					}
+			}
+			if (tagsConfig().enabled) tags(KrafterTagsData()) {
+				staffCommandCheck { isBotModuleAdmin(tagsConfig().administrators) }
+				loggingChannelName =
+					if (
+						sabConfig().channel == "new" ||
+						sabConfig().channel.isEmpty()
+					) {
+						"moderation"
+					} else {
+						sabConfig().channel
+					}
+			}
+			if (amaConfig().enabled) extAma(KrafterAmaData())
+			if (crashAnalyticsConfig().enabled) extLogParser {
+				processor(PiracyProcessor())
+				processor(ProblematicLauncherProcessor())
+				processor(RuleBreakingModProcessor())
 
-                parser(WrongLocationMessageSender())
-                staffCommandCheck { isGlobalBotAdmin() }
-            }
-            if (embedChannelsConfig().enabled) welcomeChannel(KrafterWelcomeChannelData()) {
-                staffCommandCheck { isBotModuleAdmin(embedChannelsConfig().administrators) }
-                getLogChannel { channel, guild ->
-                    return@getLogChannel getOrCreateChannel(
-                        sabConfig().channel,
-                        "moderation",
-                        "Safety and Abuse logging and dump channel for the Krafter software",
-                        getOverwrites(guild),
-                        guild
-                    )
-                }
-            }
-            if (suggestionsConfig().enabled) { add(::SuggestionsExtension) }
-            if (funConfig().enabled) {
-                if (funConfig().functions.haiku) add(::HaikuExtension)
-				if (funConfig().functions.rsvp) add (::RsvpExtension)
+				parser(WrongLocationMessageSender())
+				staffCommandCheck { isGlobalBotAdmin() }
+			}
+			if (embedChannelsConfig().enabled) welcomeChannel(KrafterWelcomeChannelData()) {
+				staffCommandCheck { isBotModuleAdmin(embedChannelsConfig().administrators) }
+				getLogChannel { channel, guild ->
+					return@getLogChannel getOrCreateChannel(
+						sabConfig().channel,
+						"moderation",
+						"Safety and Abuse logging and dump channel for the Krafter software",
+						getOverwrites(guild),
+						guild
+					)
+				}
+			}
+			if (suggestionsConfig().enabled) {
+				add(::SuggestionsExtension)
+			}
+			if (funConfig().enabled) {
+				if (funConfig().functions.haiku) add(::HaikuExtension)
+				if (funConfig().functions.rsvp) add(::RsvpExtension)
 				add(::FunExtension)
-            }
-        }
+			}
+		}
 
-        dataCollectionMode = DataCollection.fromDB(sabConfig().data_collection)
+		dataCollectionMode = DataCollection.fromDB(sabConfig().data_collection)
 
-        presence {
-            fromString(
+		presence {
+			fromString(
 				mainConfig().status_type,
 				mainConfig().status_text,
 				mainConfig().status_url
 			)
-        }
+		}
 
 		about {
 			addCopyright()
 		}
-    }
+	}
 }
 
 suspend fun main() {

@@ -12,6 +12,12 @@ public class UtilityConfig implements ConfigClass {
 	public AdministratorList administrators = new AdministratorList();
 
 	public UtilityConfig.Functions functions = new UtilityConfig.Functions();
+
+	@Override
+	public void validate() {
+
+	}
+
 	public static class Functions {
 
 		@Comment("Useful commands to let users manage their threads.\n" +
@@ -28,10 +34,5 @@ public class UtilityConfig implements ConfigClass {
 		public boolean welcome_message = true;
 		@Comment("The channel to send welcome messages to.")
 		public String welcome_channel = "welcome";
-	}
-
-	@Override
-	public void validate() {
-
 	}
 }

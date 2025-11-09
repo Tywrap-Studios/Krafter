@@ -13,12 +13,12 @@ public class SabConfig implements ConfigClass {
 	public String channel = "moderation";
 
 	@Comment("""
-    	The bot software collects data.
-    	This value must be one of "none", "minimal", "standard" or "extra" to be valid,
-    	otherwise we'll set it back to "standard" by default. Can only be applied after a full server restart.
+		The bot software collects data.
+		This value must be one of "none", "minimal", "standard" or "extra" to be valid,
+		otherwise we'll set it back to "standard" by default. Can only be applied after a full server restart.
 
-    	For more information on what data the bot collects, how to get at it, and how it's stored,
-    	please see here: https://docs.kordex.dev/data-collection.html""")
+		For more information on what data the bot collects, how to get at it, and how it's stored,
+		please see here: https://docs.kordex.dev/data-collection.html""")
 	public String data_collection = "standard";
 
 	@Comment("Whether the bot should block, report and keep your server clean of phishing links.")

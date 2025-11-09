@@ -12,11 +12,7 @@ import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toAwtImage
-import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,14 +28,15 @@ fun WelcomeImage(username: String, avatar: ImageBitmap) {
 			.fillMaxSize()
 			.background(
 				Brush.linearGradient(
-				0.0f to Color(252, 187, 109, 255),
-				0.2f to Color(216, 115, 127, 255),
-				0.4f to Color(171, 108, 178, 255),
-				0.6f to Color(166, 126, 227, 255),
-				1.0f to Color(132, 174, 234, 255),
-				start = Offset(0.0f, 150.0f),
-				end = Offset.Infinite
-			))
+					0.0f to Color(252, 187, 109, 255),
+					0.2f to Color(216, 115, 127, 255),
+					0.4f to Color(171, 108, 178, 255),
+					0.6f to Color(166, 126, 227, 255),
+					1.0f to Color(132, 174, 234, 255),
+					start = Offset(0.0f, 150.0f),
+					end = Offset.Infinite
+				)
+			)
 			.clip(RoundedCornerShape(48.dp)),
 		contentAlignment = Alignment.CenterStart
 	) {

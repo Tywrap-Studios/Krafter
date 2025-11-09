@@ -19,11 +19,11 @@ import java.util.*
  */
 @Serializable
 data class McPlayer(
-    val id: String,
-    val name: String,
-    val legacy: Boolean? = false,
-    val properties: List<McPlayerProperties>,
-    val profileActions: List<String>
+	val id: String,
+	val name: String,
+	val legacy: Boolean? = false,
+	val properties: List<McPlayerProperties>,
+	val profileActions: List<String>
 )
 
 /**
@@ -38,9 +38,9 @@ data class McPlayer(
  */
 @Serializable
 data class McPlayerProperties(
-    val name: String,
-    val signature: String? = null,
-    val value: String,
+	val name: String,
+	val signature: String? = null,
+	val value: String,
 )
 
 /**
@@ -56,11 +56,11 @@ data class McPlayerProperties(
  */
 @Serializable
 data class PropertiesValue(
-    val timestamp: Int,
-    val profileId: String,
-    val profileName: String,
-    val signatureRequired: Boolean? = false,
-    val textures: Map<String, TextureObject>
+	val timestamp: Int,
+	val profileId: String,
+	val profileName: String,
+	val signatureRequired: Boolean? = false,
+	val textures: Map<String, TextureObject>
 )
 
 /**
@@ -87,36 +87,36 @@ data class TextureObjectMetadata(val model: String)
  * @return [McPlayer] object or null if an error occurs.
  */
 fun getMcPlayer(uuid: UUID): McPlayer? {
-    return try {
-        LOGGING.debug("Fetching Minecraft player profile for UUID: $uuid")
-        val url: URL =
-            URI.create("https://sessionserver.mojang.com/session/minecraft/profile/$uuid").toURL()
-        val response = url.readText()
-        LOGGING.debug("Response: $response")
-        Json.decodeFromString<McPlayer>(response)
-    } catch (e: Exception) {
-        LOGGING.warn("Something went wrong while fetching Minecraft profile for UUID: $uuid")
-        e.printStackTrace()
+	return try {
+		LOGGING.debug("Fetching Minecraft player profile for UUID: $uuid")
+		val url: URL =
+			URI.create("https://sessionserver.mojang.com/session/minecraft/profile/$uuid").toURL()
+		val response = url.readText()
+		LOGGING.debug("Response: $response")
+		Json.decodeFromString<McPlayer>(response)
+	} catch (e: Exception) {
+		LOGGING.warn("Something went wrong while fetching Minecraft profile for UUID: $uuid")
+		e.printStackTrace()
 		null
-    }
+	}
 }
 
 fun KrafterMinecraftLinkTransactor.LinkStatus.getMcPlayer(): McPlayer? = getMcPlayer(uuid)
 
 suspend fun getMcPlayer(member: Snowflake): McPlayer? {
-    val link = KrafterMinecraftLinkTransactor.getLinkStatus(member)
+	val link = KrafterMinecraftLinkTransactor.getLinkStatus(member)
 
-    if (link == null) {
-        LOGGING.warn("Couldn't fetch link for McPlayer object for member $member with $link")
-        return null
-    }
+	if (link == null) {
+		LOGGING.warn("Couldn't fetch link for McPlayer object for member $member with $link")
+		return null
+	}
 
-    if (!link.verified) {
-        LOGGING.debugWarning("Minecraft link for member $member is not verified, will not fetch player profile.")
-        return null
-    }
+	if (!link.verified) {
+		LOGGING.debugWarning("Minecraft link for member $member is not verified, will not fetch player profile.")
+		return null
+	}
 
-    return getMcPlayer(link.uuid)
+	return getMcPlayer(link.uuid)
 }
 
 /**
@@ -126,15 +126,15 @@ suspend fun getMcPlayer(member: Snowflake): McPlayer? {
  * @return [McPlayer] object or null if an error occurs.
  */
 fun getMcPlayerSigned(uuid: UUID): McPlayer? {
-    return try {
-        val url: URL =
-            URI.create("https://sessionserver.mojang.com/session/minecraft/profile/$uuid?unsigned=false").toURL()
-        val response = url.readText()
-        Json.decodeFromString<McPlayer>(response)
-    } catch (e: Exception) {
-        LOGGING.warn("Something went wrong while fetching signed Minecraft profile for UUID: $uuid")
-        null
-    }
+	return try {
+		val url: URL =
+			URI.create("https://sessionserver.mojang.com/session/minecraft/profile/$uuid?unsigned=false").toURL()
+		val response = url.readText()
+		Json.decodeFromString<McPlayer>(response)
+	} catch (e: Exception) {
+		LOGGING.warn("Something went wrong while fetching signed Minecraft profile for UUID: $uuid")
+		null
+	}
 }
 
 fun KrafterMinecraftLinkTransactor.LinkStatus.getMcPlayerSigned(): McPlayer? = getMcPlayerSigned(uuid)

@@ -28,10 +28,7 @@ import org.tywrapstudios.krafter.LOGGING
 import org.tywrapstudios.krafter.database.entities.RsvpEvent
 import org.tywrapstudios.krafter.database.transactors.RsvpTransactor
 import org.tywrapstudios.krafter.i18n.Translations
-import org.tywrapstudios.krafter.snowflake
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
-import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -105,7 +102,8 @@ class RsvpExtension : Extension() {
 				)
 
 				respond {
-					content = "Sent RSVP for event '$eventName' at $eventTime. Description: ${eventDescription ?: "No description"}"
+					content =
+						"Sent RSVP for event '$eventName' at $eventTime. Description: ${eventDescription ?: "No description"}"
 				}
 			}
 		}
@@ -180,7 +178,7 @@ class RsvpExtension : Extension() {
 		}
 	}
 
-	inner class RsvpArguments : Arguments() {
+	class RsvpArguments : Arguments() {
 		val eventName by string {
 			name = Translations.Args.Rsvp.eventName
 			description = Translations.Args.Rsvp.EventName.description

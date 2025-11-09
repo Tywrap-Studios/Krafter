@@ -8,16 +8,16 @@ import java.util.concurrent.CompletableFuture
 
 class McMessage(val message: Message) {
 
-    fun getContent(): String {
-        return message.content
-    }
+	fun getContent(): String {
+		return message.content
+	}
 
-    @OptIn(DelicateCoroutinesApi::class)
-    fun getAuthor(): CompletableFuture<McAuthor> = GlobalScope.future {
-        if (message.author?.id != null) {
-            return@future McAuthor(message.getAuthorAsMember(), getMcPlayer(message.author!!.id))
-        } else {
-            return@future McAuthor(message.getAuthorAsMember(), null)
-        }
-    }
+	@OptIn(DelicateCoroutinesApi::class)
+	fun getAuthor(): CompletableFuture<McAuthor> = GlobalScope.future {
+		if (message.author?.id != null) {
+			return@future McAuthor(message.getAuthorAsMember(), getMcPlayer(message.author!!.id))
+		} else {
+			return@future McAuthor(message.getAuthorAsMember(), null)
+		}
+	}
 }

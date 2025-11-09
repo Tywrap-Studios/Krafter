@@ -14,27 +14,27 @@ import org.tywrapstudios.krafter.database.tables.TagsTable.guildId
  * for global tags.
  */
 object TagsTable : IntIdTable() {
-    val category = text("category")
-    val description = mediumText("description")
-    val key = text("key")
-    val title = text("title")
+	val category = text("category")
+	val description = mediumText("description")
+	val key = text("key")
+	val title = text("title")
 
-    val color = integer("color").nullable()
-    val guildId = snowflake("guildId").nullable()
-    val image = text("image").nullable()
+	val color = integer("color").nullable()
+	val guildId = snowflake("guildId").nullable()
+	val image = text("image").nullable()
 
-    fun fromRow(row: ResultRow) = Tag(
-        category = row[category],
-        description = row[description],
-        key = row[key],
-        title = row[title],
+	fun fromRow(row: ResultRow) = Tag(
+		category = row[category],
+		description = row[description],
+		key = row[key],
+		title = row[title],
 
-        color = getColor(row),
-        guildId = row[guildId],
-        image = row[image],
-    )
+		color = getColor(row),
+		guildId = row[guildId],
+		image = row[image],
+	)
 
-    internal fun getColor(row: ResultRow): Color? {
-        return Color(row[color] ?: return null)
-    }
+	internal fun getColor(row: ResultRow): Color? {
+		return Color(row[color] ?: return null)
+	}
 }

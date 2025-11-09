@@ -12,8 +12,8 @@ import dev.kord.core.event.guild.MemberJoinEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.event
-import org.tywrapstudios.krafter.mainConfig
 import org.tywrapstudios.krafter.getOrCreateChannel
+import org.tywrapstudios.krafter.mainConfig
 import org.tywrapstudios.krafter.sabConfig
 
 const val HOIST_REGEX = "^[a-zA-Z]"
@@ -29,23 +29,23 @@ val REPLACEMENTS = arrayOf(
 )
 
 class SafetyAndAbuseExtension : Extension() {
-    override val name: String = "krafter.sab"
-    var dumpChannel: TextChannel? = null
+	override val name: String = "krafter.sab"
+	var dumpChannel: TextChannel? = null
 
-    override suspend fun setup() {
-        val cfg = sabConfig()
+	override suspend fun setup() {
+		val cfg = sabConfig()
 
-        event<GuildCreateEvent> {
-            action {
-                dumpChannel = getOrCreateChannel(
-                    cfg.channel,
-                    "moderation",
-                    "Safety and Abuse logging and dump channel for the Krafter software",
-                    getOverwrites(event.guild),
-                    event.guild
-                )
-            }
-        }
+		event<GuildCreateEvent> {
+			action {
+				dumpChannel = getOrCreateChannel(
+					cfg.channel,
+					"moderation",
+					"Safety and Abuse logging and dump channel for the Krafter software",
+					getOverwrites(event.guild),
+					event.guild
+				)
+			}
+		}
 
 		event<MemberJoinEvent> {
 			action {
@@ -62,7 +62,7 @@ class SafetyAndAbuseExtension : Extension() {
 				deCancer(member)
 			}
 		}
-    }
+	}
 
 	suspend fun deHoist(member: MemberBehavior) {
 		val member = member.asMember()
@@ -78,7 +78,7 @@ class SafetyAndAbuseExtension : Extension() {
 
 	suspend fun deCancer(member: MemberBehavior) {
 		val member = member.asMember()
-		val name = member.effectiveName
+		member.effectiveName
 		if (sabConfig().decancer_usernames) {
 			TODO("Awaiting external API")
 		}
@@ -86,56 +86,56 @@ class SafetyAndAbuseExtension : Extension() {
 }
 
 fun getOverwrites(guild: Guild): MutableSet<Overwrite> {
-    val cfg = mainConfig()
-    val overwrites = mutableSetOf<Overwrite>()
-    for (role in cfg.global_administrators.roles) {
-        overwrites.add(
-            Overwrite(
-                Snowflake(role),
-                OverwriteType.Role,
-                Permissions {
-                    +Permission.ViewChannel
-                    -Permission.SendMessages
-                },
-                Permissions {
-                    -Permission.ViewChannel
-                    +Permission.SendMessages
-                }
-            )
-        )
-    }
+	val cfg = mainConfig()
+	val overwrites = mutableSetOf<Overwrite>()
+	for (role in cfg.global_administrators.roles) {
+		overwrites.add(
+			Overwrite(
+				Snowflake(role),
+				OverwriteType.Role,
+				Permissions {
+					+Permission.ViewChannel
+					-Permission.SendMessages
+				},
+				Permissions {
+					-Permission.ViewChannel
+					+Permission.SendMessages
+				}
+			)
+		)
+	}
 
-    for (user in cfg.global_administrators.users) {
-        overwrites.add(
-            Overwrite(
-                Snowflake(user),
-                OverwriteType.Member,
-                Permissions {
-                    +Permission.ViewChannel
-                    -Permission.SendMessages
-                },
-                Permissions {
-                    -Permission.ViewChannel
-                    +Permission.SendMessages
-                }
-            )
-        )
-    }
+	for (user in cfg.global_administrators.users) {
+		overwrites.add(
+			Overwrite(
+				Snowflake(user),
+				OverwriteType.Member,
+				Permissions {
+					+Permission.ViewChannel
+					-Permission.SendMessages
+				},
+				Permissions {
+					-Permission.ViewChannel
+					+Permission.SendMessages
+				}
+			)
+		)
+	}
 
-    overwrites.add(
-        Overwrite(
-            guild.id,
-            OverwriteType.Role,
-            Permissions {
-                -Permission.ViewChannel
-                -Permission.SendMessages
-            },
-            Permissions {
-                +Permission.ViewChannel
-                +Permission.SendMessages
-            }
-        )
-    )
+	overwrites.add(
+		Overwrite(
+			guild.id,
+			OverwriteType.Role,
+			Permissions {
+				-Permission.ViewChannel
+				-Permission.SendMessages
+			},
+			Permissions {
+				+Permission.ViewChannel
+				+Permission.SendMessages
+			}
+		)
+	)
 
-    return overwrites
+	return overwrites
 }

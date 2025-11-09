@@ -20,45 +20,45 @@ import org.tywrapstudios.krafter.extensions.suggestion.SuggestionStatus
 import org.tywrapstudios.krafter.snowflake
 
 object SuggestionTable : SnowflakeIdTable() {
-    val guildId = snowflake("guildId")
-    val channelId = snowflake("channelId")
+	val guildId = snowflake("guildId")
+	val channelId = snowflake("channelId")
 
-    val comment = text("comment").nullable()
-    val status = enumeration("status", SuggestionStatus::class).default(SuggestionStatus.RequiresName)
-    val message = snowflake("message").nullable()
-    val thread = snowflake("thread").nullable()
-    val threadButtons = snowflake("threadButtons").nullable()
+	val comment = text("comment").nullable()
+	val status = enumeration("status", SuggestionStatus::class).default(SuggestionStatus.RequiresName)
+	val message = snowflake("message").nullable()
+	val thread = snowflake("thread").nullable()
+	val threadButtons = snowflake("threadButtons").nullable()
 
-    val text = text("text")
-    val problem = text("problem").nullable()
-    val solution = text("solution").nullable()
+	val text = text("text")
+	val problem = text("problem").nullable()
+	val solution = text("solution").nullable()
 
-    val owner = snowflake("owner")
-    val ownerAvatar = text("ownerAvatar").nullable()
-    val ownerName = text("ownerName")
+	val owner = snowflake("owner")
+	val ownerAvatar = text("ownerAvatar").nullable()
+	val ownerName = text("ownerName")
 
-    val positiveVoters = json<List<ULong>>("positiveVoters", Json.Default).default(mutableListOf())
-    val negativeVoters = json<List<ULong>>("negativeVoters", Json.Default).default(mutableListOf())
+	val positiveVoters = json<List<ULong>>("positiveVoters", Json.Default).default(mutableListOf())
+	val negativeVoters = json<List<ULong>>("negativeVoters", Json.Default).default(mutableListOf())
 
-    val isPluralkit = bool("isPluralkit").default(false)
+	val isPluralkit = bool("isPluralkit").default(false)
 
-    fun fromRow(row: ResultRow) = Suggestion(
-        row[id].value,
-        row[guildId],
-        row[channelId],
-        row[comment],
-        row[status],
-        row[message],
-        row[thread],
-        row[threadButtons],
-        row[text],
-        row[problem],
-        row[solution],
-        row[owner],
-        row[ownerAvatar],
-        row[ownerName],
-        row[positiveVoters].snowflake(),
-        row[negativeVoters].snowflake(),
-        row[isPluralkit]
-    )
+	fun fromRow(row: ResultRow) = Suggestion(
+		row[id].value,
+		row[guildId],
+		row[channelId],
+		row[comment],
+		row[status],
+		row[message],
+		row[thread],
+		row[threadButtons],
+		row[text],
+		row[problem],
+		row[solution],
+		row[owner],
+		row[ownerAvatar],
+		row[ownerName],
+		row[positiveVoters].snowflake(),
+		row[negativeVoters].snowflake(),
+		row[isPluralkit]
+	)
 }

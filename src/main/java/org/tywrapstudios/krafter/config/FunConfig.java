@@ -13,6 +13,12 @@ public class FunConfig implements ConfigClass {
 	public AdministratorList administrators = new AdministratorList();
 
 	public Functions functions = new Functions();
+
+	@Override
+	public void validate() {
+
+	}
+
 	public static class Functions {
 
 		@Comment("Bean. Who knows what it does.")
@@ -30,10 +36,5 @@ public class FunConfig implements ConfigClass {
 			Répondez s'il vous plaît. Allows users to create RSVP events,
 			other users can join these and all get pinged when it starts!""")
 		public boolean rsvp = true;
-	}
-
-	@Override
-	public void validate() {
-
 	}
 }

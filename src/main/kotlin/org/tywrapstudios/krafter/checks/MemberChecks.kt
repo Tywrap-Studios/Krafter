@@ -8,101 +8,100 @@ import dev.kordex.core.checks.types.CheckContext
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.toList
 import org.tywrapstudios.krafter.config.AdministratorList
-import org.tywrapstudios.krafter.mainConfig
-import org.tywrapstudios.krafter.config.BotConfig
 import org.tywrapstudios.krafter.getRoles
 import org.tywrapstudios.krafter.getUsers
 import org.tywrapstudios.krafter.i18n.Translations
+import org.tywrapstudios.krafter.mainConfig
 
 suspend fun CheckContext<*>.isBotModuleAdmin(list: AdministratorList) {
-    if (!passed) {
-        return
-    }
+	if (!passed) {
+		return
+	}
 
-    val logger = KotlinLogging.logger("org.tywrapstudios.krafter.checks.isBotModuleAdmin")
-    val member = memberFor(event)
+	val logger = KotlinLogging.logger("org.tywrapstudios.krafter.checks.isBotModuleAdmin")
+	val member = memberFor(event)
 
-    if (member == null) {
-        logger.nullMember(event)
+	if (member == null) {
+		logger.nullMember(event)
 
-        fail()
-    } else {
-        val memberObj = member.asMember()
+		fail()
+	} else {
+		val memberObj = member.asMember()
 
-        val result = when {
-            !memberObj.roles.toList().none { list.getRoles().contains(it.id.value.toString()) } -> true
-            list.getUsers().contains(member.id.value.toString()) -> true
+		val result = when {
+			!memberObj.roles.toList().none { list.getRoles().contains(it.id.value.toString()) } -> true
+			list.getUsers().contains(member.id.value.toString()) -> true
 
-            else -> false
-        }
+			else -> false
+		}
 
-        if (result) {
-            logger.passed()
+		if (result) {
+			logger.passed()
 
-            pass()
-        } else {
-            logger.failed("Member $member is not a bot module admin for the specified AdministratorList.")
+			pass()
+		} else {
+			logger.failed("Member $member is not a bot module admin for the specified AdministratorList.")
 
-            fail(
-                Translations.Checks.IsBotModuleAdmin.failed
-                    .withLocale(locale)
-                    .withOrdinalPlaceholders(list.javaClass.name)
-            )
-        }
-    }
+			fail(
+				Translations.Checks.IsBotModuleAdmin.failed
+					.withLocale(locale)
+					.withOrdinalPlaceholders(list.javaClass.name)
+			)
+		}
+	}
 }
 
 suspend fun CheckContext<*>.notIsBotModuleAdmin(list: AdministratorList) {
-    if (!passed) {
-        return
-    }
+	if (!passed) {
+		return
+	}
 
-    val logger = KotlinLogging.logger("org.tywrapstudios.krafter.checks.notIsBotModuleAdmin")
-    val member = memberFor(event)
+	val logger = KotlinLogging.logger("org.tywrapstudios.krafter.checks.notIsBotModuleAdmin")
+	val member = memberFor(event)
 
-    if (member == null) {
-        logger.nullMember(event)
+	if (member == null) {
+		logger.nullMember(event)
 
-        fail()
-    } else {
-        val memberObj = member.asMember()
+		fail()
+	} else {
+		val memberObj = member.asMember()
 
-        val result = when {
-            memberObj.roles.toList()
-                .none { list.getRoles().contains(it.id.value.toString()) } && !list.getUsers()
-                .contains(member.id.value.toString()) -> true
+		val result = when {
+			memberObj.roles.toList()
+				.none { list.getRoles().contains(it.id.value.toString()) } && !list.getUsers()
+				.contains(member.id.value.toString()) -> true
 
-            else -> false
-        }
+			else -> false
+		}
 
-        if (result) {
-            logger.passed()
+		if (result) {
+			logger.passed()
 
-            pass()
-        } else {
-            logger.failed("Member $member is a bot module admin for the specified AdministratorList.")
+			pass()
+		} else {
+			logger.failed("Member $member is a bot module admin for the specified AdministratorList.")
 
-            fail(
-                Translations.Checks.NotIsBotModuleAdmin.failed
-                    .withLocale(locale)
-                    .withOrdinalPlaceholders(list.javaClass.name)
-            )
-        }
-    }
+			fail(
+				Translations.Checks.NotIsBotModuleAdmin.failed
+					.withLocale(locale)
+					.withOrdinalPlaceholders(list.javaClass.name)
+			)
+		}
+	}
 }
 
 suspend fun CheckContext<*>.isGlobalBotAdmin() {
-    if (!passed) {
-        return
-    }
+	if (!passed) {
+		return
+	}
 
-    isBotModuleAdmin(mainConfig().global_administrators)
+	isBotModuleAdmin(mainConfig().global_administrators)
 }
 
 suspend fun CheckContext<*>.notIsGlobalBotAdmin() {
-    if (!passed) {
-        return
-    }
+	if (!passed) {
+		return
+	}
 
-    notIsBotModuleAdmin(mainConfig().global_administrators)
+	notIsBotModuleAdmin(mainConfig().global_administrators)
 }

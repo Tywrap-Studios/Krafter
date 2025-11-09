@@ -25,120 +25,120 @@ import kotlin.time.toJavaDuration
 @Suppress("TooManyFunctions")
 object OwnedThreadTransactor {
 
-    suspend fun get(id: Snowflake): OwnedThread? {
-        var thread: OwnedThread? = null
+	suspend fun get(id: Snowflake): OwnedThread? {
+		var thread: OwnedThread? = null
 
-        transaction {
-            setup()
+		transaction {
+			setup()
 
-            OwnedThreadTable.selectAll()
-                .where { OwnedThreadTable.id eq id }
-                .forEach { thread = fromRow(it) }
-        }
+			OwnedThreadTable.selectAll()
+				.where { OwnedThreadTable.id eq id }
+				.forEach { thread = fromRow(it) }
+		}
 
-        return thread
-    }
+		return thread
+	}
 
-    suspend fun get(thread: ThreadChannelBehavior) =
-        get(thread.id)
+	suspend fun get(thread: ThreadChannelBehavior) =
+		get(thread.id)
 
-    suspend fun set(thread: OwnedThread) {
-        transaction {
-            setup()
+	suspend fun set(thread: OwnedThread) {
+		transaction {
+			setup()
 
-            OwnedThreadTable.replace {
-                it[id] = thread.id
+			OwnedThreadTable.replace {
+				it[id] = thread.id
 
-                it[owner] = thread.owner
-                it[guildId] = thread.guildId
-                it[preventArchiving] = thread.preventArchiving
+				it[owner] = thread.owner
+				it[guildId] = thread.guildId
+				it[preventArchiving] = thread.preventArchiving
 
-                it[maxThreadDuration] = thread.maxThreadDuration?.toJavaDuration()
-                it[maxThreadAfterIdle] = thread.maxThreadAfterIdle?.toJavaDuration()
-            }
-        }
-    }
+				it[maxThreadDuration] = thread.maxThreadDuration?.toJavaDuration()
+				it[maxThreadAfterIdle] = thread.maxThreadAfterIdle?.toJavaDuration()
+			}
+		}
+	}
 
-    suspend fun getAllWithDuration(): List<OwnedThread> {
-        val threads = mutableListOf<OwnedThread>()
+	suspend fun getAllWithDuration(): List<OwnedThread> {
+		val threads = mutableListOf<OwnedThread>()
 
-        transaction {
-            setup()
+		transaction {
+			setup()
 
-            OwnedThreadTable.selectAll()
-                .where { (maxThreadDuration neq null) or (maxThreadAfterIdle neq null) }
-                .forEach { threads.add(fromRow(it)) }
-        }
+			OwnedThreadTable.selectAll()
+				.where { (maxThreadDuration neq null) or (maxThreadAfterIdle neq null) }
+				.forEach { threads.add(fromRow(it)) }
+		}
 
-        return threads
-    }
+		return threads
+	}
 
-    suspend fun getByOwner(id: Snowflake): OwnedThread? {
-        var thread: OwnedThread? = null
+	suspend fun getByOwner(id: Snowflake): OwnedThread? {
+		var thread: OwnedThread? = null
 
-        transaction {
-            setup()
+		transaction {
+			setup()
 
-            OwnedThreadTable.selectAll()
-                .where { owner eq id }
-                .forEach { thread = fromRow(it) }
-        }
+			OwnedThreadTable.selectAll()
+				.where { owner eq id }
+				.forEach { thread = fromRow(it) }
+		}
 
-        return thread
-    }
+		return thread
+	}
 
-    suspend fun getByOwner(user: UserBehavior) =
-        getByOwner(user.id)
+	suspend fun getByOwner(user: UserBehavior) =
+		getByOwner(user.id)
 
-    suspend fun getByGuild(id: Snowflake): OwnedThread? {
-        var thread: OwnedThread? = null
+	suspend fun getByGuild(id: Snowflake): OwnedThread? {
+		var thread: OwnedThread? = null
 
-        transaction {
-            setup()
+		transaction {
+			setup()
 
-            OwnedThreadTable.selectAll()
-                .where { guildId eq id }
-                .forEach { thread = fromRow(it) }
-        }
+			OwnedThreadTable.selectAll()
+				.where { guildId eq id }
+				.forEach { thread = fromRow(it) }
+		}
 
-        return thread
-    }
+		return thread
+	}
 
-    suspend fun getByGuild(guild: GuildBehavior) =
-        getByGuild(guild.id)
+	suspend fun getByGuild(guild: GuildBehavior) =
+		getByGuild(guild.id)
 
-    suspend fun getByOwnerAndGuild(owner: Snowflake, guild: Snowflake): OwnedThread? {
-        var thread: OwnedThread? = null
+	suspend fun getByOwnerAndGuild(owner: Snowflake, guild: Snowflake): OwnedThread? {
+		var thread: OwnedThread? = null
 
-        transaction {
-            setup()
+		transaction {
+			setup()
 
-            SuggestionTable.selectAll()
-                .where { (OwnedThreadTable.owner eq owner) and (guildId eq guild) }
-                .forEach { thread = fromRow(it) }
-        }
+			SuggestionTable.selectAll()
+				.where { (OwnedThreadTable.owner eq owner) and (guildId eq guild) }
+				.forEach { thread = fromRow(it) }
+		}
 
-        return thread
-    }
+		return thread
+	}
 
-    suspend fun getByOwnerAndGuild(owner: UserBehavior, guild: Snowflake) =
-        getByOwnerAndGuild(owner.id, guild)
+	suspend fun getByOwnerAndGuild(owner: UserBehavior, guild: Snowflake) =
+		getByOwnerAndGuild(owner.id, guild)
 
-    suspend fun getByOwnerAndGuild(owner: Snowflake, guild: GuildBehavior) =
-        getByOwnerAndGuild(owner, guild.id)
+	suspend fun getByOwnerAndGuild(owner: Snowflake, guild: GuildBehavior) =
+		getByOwnerAndGuild(owner, guild.id)
 
-    suspend fun getByOwnerAndGuild(owner: UserBehavior, guild: GuildBehavior) =
-        getByOwnerAndGuild(owner.id, guild.id)
+	suspend fun getByOwnerAndGuild(owner: UserBehavior, guild: GuildBehavior) =
+		getByOwnerAndGuild(owner.id, guild.id)
 
-    suspend fun isOwner(thread: Snowflake, user: Snowflake) =
-        get(thread)?.let { it.owner == user }
+	suspend fun isOwner(thread: Snowflake, user: Snowflake) =
+		get(thread)?.let { it.owner == user }
 
-    suspend fun isOwner(thread: Snowflake, user: UserBehavior) =
-        isOwner(thread, user.id)
+	suspend fun isOwner(thread: Snowflake, user: UserBehavior) =
+		isOwner(thread, user.id)
 
-    suspend fun isOwner(thread: ThreadChannelBehavior, user: Snowflake) =
-        isOwner(thread.id, user)
+	suspend fun isOwner(thread: ThreadChannelBehavior, user: Snowflake) =
+		isOwner(thread.id, user)
 
-    suspend fun isOwner(thread: ThreadChannelBehavior, user: UserBehavior) =
-        isOwner(thread.id, user.id)
+	suspend fun isOwner(thread: ThreadChannelBehavior, user: UserBehavior) =
+		isOwner(thread.id, user.id)
 }

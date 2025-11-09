@@ -7,7 +7,6 @@ import org.jetbrains.exposed.v1.json.json
 import org.tywrapstudios.krafter.database.entities.RsvpEvent
 import org.tywrapstudios.krafter.database.sql.SnowflakeIdTable
 import org.tywrapstudios.krafter.database.sql.snowflake
-import org.tywrapstudios.krafter.snowflake
 import kotlin.time.ExperimentalTime
 import kotlin.time.toKotlinInstant
 

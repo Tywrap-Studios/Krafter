@@ -29,50 +29,50 @@ import org.tywrapstudios.krafter.uLongs
 
 object SuggestionsTransactor {
 
-    suspend fun get(id: Snowflake): Suggestion? {
-        var suggestion: Suggestion? = null
+	suspend fun get(id: Snowflake): Suggestion? {
+		var suggestion: Suggestion? = null
 
-        transaction {
-            setup()
+		transaction {
+			setup()
 
-            SuggestionTable.selectAll()
-                .where { SuggestionTable.id eq id }
-                .forEach { suggestion = fromRow(it) }
-        }
+			SuggestionTable.selectAll()
+				.where { SuggestionTable.id eq id }
+				.forEach { suggestion = fromRow(it) }
+		}
 
-        return suggestion
-    }
+		return suggestion
+	}
 
-    suspend fun getByMessage(id: Snowflake): Suggestion? {
-        var suggestion: Suggestion? = null
+	suspend fun getByMessage(id: Snowflake): Suggestion? {
+		var suggestion: Suggestion? = null
 
-        transaction {
-            setup()
+		transaction {
+			setup()
 
-            SuggestionTable.selectAll()
-                .where { SuggestionTable.message eq id }
-                .forEach { suggestion = fromRow(it) }
-        }
+			SuggestionTable.selectAll()
+				.where { SuggestionTable.message eq id }
+				.forEach { suggestion = fromRow(it) }
+		}
 
-        return suggestion
-    }
+		return suggestion
+	}
 
-    suspend fun getByThread(id: Snowflake): Suggestion? {
-        var suggestion: Suggestion? = null
+	suspend fun getByThread(id: Snowflake): Suggestion? {
+		var suggestion: Suggestion? = null
 
-        transaction {
-            setup()
+		transaction {
+			setup()
 
-            SuggestionTable.selectAll()
-                .where { SuggestionTable.thread eq id }
-                .forEach { suggestion = fromRow(it) }
-        }
+			SuggestionTable.selectAll()
+				.where { SuggestionTable.thread eq id }
+				.forEach { suggestion = fromRow(it) }
+		}
 
-        return suggestion
-    }
+		return suggestion
+	}
 
-    suspend fun getByMessage(message: MessageBehavior) =
-        getByMessage(message.id)
+	suspend fun getByMessage(message: MessageBehavior) =
+		getByMessage(message.id)
 
 	suspend fun getAll(): List<Suggestion> {
 		val suggestions = mutableListOf<Suggestion>()
@@ -88,43 +88,43 @@ object SuggestionsTransactor {
 	}
 
 	suspend fun find(filter: () -> Op<Boolean>): Query {
-        return transaction {
-            setup()
+		return transaction {
+			setup()
 
-            return@transaction SuggestionTable.selectAll().where(filter)
-        }
-    }
+			return@transaction SuggestionTable.selectAll().where(filter)
+		}
+	}
 
-    suspend fun set(suggestion: Suggestion) {
-        transaction {
-            setup()
+	suspend fun set(suggestion: Suggestion) {
+		transaction {
+			setup()
 
-            SuggestionTable.replace {
-                it[id] = suggestion.id
-                it[guildId] = suggestion.guildId
-                it[channelId] = suggestion.channelId
+			SuggestionTable.replace {
+				it[id] = suggestion.id
+				it[guildId] = suggestion.guildId
+				it[channelId] = suggestion.channelId
 
-                it[comment] = suggestion.comment
-                it[status] = suggestion.status
-                it[message] = suggestion.message
-                it[thread] = suggestion.thread
-                it[threadButtons] = suggestion.threadButtons
+				it[comment] = suggestion.comment
+				it[status] = suggestion.status
+				it[message] = suggestion.message
+				it[thread] = suggestion.thread
+				it[threadButtons] = suggestion.threadButtons
 
-                it[text] = suggestion.text
-                it[problem] = suggestion.problem
-                it[solution] = suggestion.solution
+				it[text] = suggestion.text
+				it[problem] = suggestion.problem
+				it[solution] = suggestion.solution
 
-                it[owner] = suggestion.owner
-                it[ownerAvatar] = suggestion.ownerAvatar
-                it[ownerName] = suggestion.ownerName
+				it[owner] = suggestion.owner
+				it[ownerAvatar] = suggestion.ownerAvatar
+				it[ownerName] = suggestion.ownerName
 
-                it[positiveVoters] = suggestion.positiveVoters.uLongs()
-                it[negativeVoters] = suggestion.negativeVoters.uLongs()
+				it[positiveVoters] = suggestion.positiveVoters.uLongs()
+				it[negativeVoters] = suggestion.negativeVoters.uLongs()
 
-                it[isPluralkit] = suggestion.isPluralkit
-            }
-        }
-    }
+				it[isPluralkit] = suggestion.isPluralkit
+			}
+		}
+	}
 
 	suspend fun purgeGuild(guildId: Snowflake) {
 		transaction {

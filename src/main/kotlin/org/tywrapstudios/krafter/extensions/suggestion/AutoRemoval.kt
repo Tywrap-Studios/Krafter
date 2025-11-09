@@ -25,61 +25,61 @@ import org.tywrapstudios.krafter.config.SuggestionsForumConfig
 
 @Serializable
 data class AutoRemoval(
-    val id: String,
-    @Serializable(with = RegexSerializer::class)
-    val regex: Regex,
-    val status: SuggestionStatus,
-    val reason: String
+	val id: String,
+	@Serializable(with = RegexSerializer::class)
+	val regex: Regex,
+	val status: SuggestionStatus,
+	val reason: String
 ) {
-    constructor(
-        id: String,
-        @Language("RegExp") regex: String,
-        status: SuggestionStatus,
-        reason: String
-    ) : this(id, Regex(regex, RegexOption.IGNORE_CASE), status, reason)
+	constructor(
+		id: String,
+		@Language("RegExp") regex: String,
+		status: SuggestionStatus,
+		reason: String
+	) : this(id, Regex(regex, RegexOption.IGNORE_CASE), status, reason)
 
-    override fun toString() = "`$id`: `$regex` -> ${status.readableName.translate()} / \"$reason\""
+	override fun toString() = "`$id`: `$regex` -> ${status.readableName.translate()} / \"$reason\""
 }
 
 fun SuggestionsForumConfig.AnswerMap.toAutoRemoval(): AutoRemoval {
-    val builder: StringBuilder = StringBuilder()
-    this.triggers.forEach { entry ->
-        builder.append("$entry|")
-    }
-    builder.deleteAt(builder.lastIndex)
+	val builder: StringBuilder = StringBuilder()
+	this.triggers.forEach { entry ->
+		builder.append("$entry|")
+	}
+	builder.deleteAt(builder.lastIndex)
 
-    return AutoRemoval(
-        this.id,
-        builder.toString(),
-        SuggestionStatus.valueOf(this.status),
-        this.answer
-    )
+	return AutoRemoval(
+		this.id,
+		builder.toString(),
+		SuggestionStatus.valueOf(this.status),
+		this.answer
+	)
 }
 
 object RegexSerializer : KSerializer<Regex> {
-    override val descriptor: SerialDescriptor =
-        buildClassSerialDescriptor("Regex") {
-            element("pattern", String.serializer().descriptor)
-            element("flags", IntArraySerializer().descriptor)
-        }
+	override val descriptor: SerialDescriptor =
+		buildClassSerialDescriptor("Regex") {
+			element("pattern", String.serializer().descriptor)
+			element("flags", IntArraySerializer().descriptor)
+		}
 
-    override fun deserialize(decoder: Decoder): Regex {
-        return decoder.decodeStructure(descriptor) {
-            val pattern = decodeStringElement(descriptor, 0)
-            val flags = decodeSerializableElement(descriptor, 1, IntArraySerializer())
-            Regex(pattern, flags.map { RegexOption.values()[it] }.toSet())
-        }
-    }
+	override fun deserialize(decoder: Decoder): Regex {
+		return decoder.decodeStructure(descriptor) {
+			val pattern = decodeStringElement(descriptor, 0)
+			val flags = decodeSerializableElement(descriptor, 1, IntArraySerializer())
+			Regex(pattern, flags.map { RegexOption.values()[it] }.toSet())
+		}
+	}
 
-    override fun serialize(encoder: Encoder, value: Regex) {
-        encoder.encodeStructure(descriptor) {
-            encodeStringElement(descriptor, 0, value.pattern)
-            encodeSerializableElement(
-                descriptor,
-                1,
-                IntArraySerializer(),
-                value.options.map { it.ordinal }.toIntArray()
-            )
-        }
-    }
+	override fun serialize(encoder: Encoder, value: Regex) {
+		encoder.encodeStructure(descriptor) {
+			encodeStringElement(descriptor, 0, value.pattern)
+			encodeSerializableElement(
+				descriptor,
+				1,
+				IntArraySerializer(),
+				value.options.map { it.ordinal }.toIntArray()
+			)
+		}
+	}
 }

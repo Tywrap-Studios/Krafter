@@ -21,18 +21,17 @@ import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogParser
 import org.tywrapstudios.krafter.crashAnalyticsConfig
-import org.tywrapstudios.krafter.mainConfig
 import org.tywrapstudios.krafter.getOrCreateChannel
 
 class WrongLocationMessageSender : LogParser() {
-    override val identifier: String = "wrong-location-message-sender"
-    override val order = Order(Int.MIN_VALUE) // be the first parser to run (to destroy the log if necessary)
+	override val identifier: String = "wrong-location-message-sender"
+	override val order = Order(Int.MIN_VALUE) // be the first parser to run (to destroy the log if necessary)
 	var allowedChannel: TextChannel? = null
 
-    @SuppressWarnings("ReturnCount", "MagicNumber")
-    override suspend fun predicate(log: Log, event: Event): Boolean {
-        val channel = channelFor(event)?.asChannelOfOrNull<TextChannel>() ?: return false
-        val guild = guildFor(event)?.asGuildOrNull() ?: return false
+	@SuppressWarnings("ReturnCount", "MagicNumber")
+	override suspend fun predicate(log: Log, event: Event): Boolean {
+		val channel = channelFor(event)?.asChannelOfOrNull<TextChannel>() ?: return false
+		val guild = guildFor(event)?.asGuildOrNull() ?: return false
 		allowedChannel = getOrCreateChannel(
 			crashAnalyticsConfig().channel,
 			"crash-logs",
@@ -44,8 +43,8 @@ class WrongLocationMessageSender : LogParser() {
 		return channel.id != allowedChannel?.id
 	}
 
-    @OptIn(KordExperimental::class, KordUnsafe::class)
+	@OptIn(KordExperimental::class, KordUnsafe::class)
 	override suspend fun process(log: Log) {
-        log.abort("Log sent in the wrong location.\nPlease use ${allowedChannel?.mention} to parse logs.")
-    }
+		log.abort("Log sent in the wrong location.\nPlease use ${allowedChannel?.mention} to parse logs.")
+	}
 }

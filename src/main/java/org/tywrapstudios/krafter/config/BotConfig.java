@@ -2,24 +2,26 @@ package org.tywrapstudios.krafter.config;
 
 import static org.tywrapstudios.krafter.config.Util.channelCheck;
 
-import blue.endless.jankson.Comment;
 import org.tywrapstudios.blossombridge.api.config.BasicConfigClass;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+
+import blue.endless.jankson.Comment;
 
 public class BotConfig extends BasicConfigClass {
 
-    @Comment("Whether the bot should be run altogether.")
-    public boolean enabled = true;
+	@Comment("Whether the bot should be run altogether.")
+	public boolean enabled = true;
 
-    @Comment("""
-            Role and user ids that are considered global administrators for the bot.
-            They most notably have full permission over most of the SAB and Misc functionality.
-            Don't worry though, you can set separate admins for separate functions in their respective configs.""")
-    public AdministratorList global_administrators = new AdministratorList();
+	@Comment("""
+		Role and user ids that are considered global administrators for the bot.
+		They most notably have full permission over most of the SAB and Misc functionality.
+		Don't worry though, you can set separate admins for separate functions in their respective configs.""")
+	public AdministratorList global_administrators = new AdministratorList();
 
-    @Comment("The prefix for chat commands.")
-    public String prefix = ">>";
+	@Comment("The prefix for chat commands.")
+	public String prefix = ">>";
 
 	@Comment("The name of the channel where the bot should dump its logs and whatever.")
 	public String channel = "bot-dump";
@@ -45,8 +47,8 @@ public class BotConfig extends BasicConfigClass {
 	@Comment("Used for the \"streaming\" type.")
 	public String status_url = "";
 
-    @Override
-    public void validate() {
+	@Override
+	public void validate() {
 		if (!List.of(
 			"playing",
 			"listening",
@@ -61,5 +63,5 @@ public class BotConfig extends BasicConfigClass {
 		}
 
 		channel = channelCheck.apply(channel);
-    }
+	}
 }

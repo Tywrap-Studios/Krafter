@@ -16,9 +16,9 @@ public class CrashAnalyticsConfig implements ConfigClass {
 	public String channel = "crash-logs";
 
 	@Comment("""
-                    A list of mod ids to watch out for when parsing, that go against the rules of your server.
-                    This has a few mods in here already that are considered cheat mods globally.
-                    May be a regular expression or wildcard.""")
+		A list of mod ids to watch out for when parsing, that go against the rules of your server.
+		This has a few mods in here already that are considered cheat mods globally.
+		May be a regular expression or wildcard.""")
 	public List<String> bad_mods = new ArrayList<>();
 
 	@Override
