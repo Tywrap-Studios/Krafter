@@ -30,6 +30,14 @@ public class SabConfig implements ConfigClass {
 	@Comment("A link to the place where your rules are stated.")
 	public String rules_link = "";
 
+	@Comment("Whether to block and fix hoisted usernames (usernames that intentionally\n" +
+		"try to go up the members list by adding special characters like \".\" and \"!\").")
+	public boolean block_hoisting = false;
+
+	@Comment("Whether to decancer (replace cancerous, such as fonts, characters with their\n" +
+		"ASCII variant) usernames.")
+	public boolean decancer_usernames = false;
+
 	@Override
 	public void validate() {
 		channel = Util.channelCheck.apply(channel);
