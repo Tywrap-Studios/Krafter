@@ -11,6 +11,9 @@ import org.jetbrains.exposed.v1.jdbc.replace
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.tywrapstudios.krafter.database.entities.TriggerTag
+import org.tywrapstudios.krafter.database.entities.toKordExTag
+import org.tywrapstudios.krafter.database.entities.toTriggerTag
 import org.tywrapstudios.krafter.database.tables.TagsTable
 import org.tywrapstudios.krafter.database.tables.TagsTable.category
 import org.tywrapstudios.krafter.database.tables.TagsTable.fromRow
@@ -18,7 +21,7 @@ import org.tywrapstudios.krafter.database.tables.TagsTable.key
 import org.tywrapstudios.krafter.database.tables.TagsTable.title
 import org.tywrapstudios.krafter.setup
 
-class KrafterTagsData : TagsData {
+object KrafterTagsData : TagsData {
 	override suspend fun getTagByKey(
 		key: String,
 		guildId: Snowflake?
@@ -28,7 +31,7 @@ class KrafterTagsData : TagsData {
 			setup()
 
 			TagsTable.selectAll().where { (TagsTable.key eq key) and (TagsTable.guildId eq guildId) }
-				.forEach { tag = fromRow(it) }
+				.forEach { tag = fromRow(it).toKordExTag() }
 		}
 		return tag
 	}
@@ -43,7 +46,7 @@ class KrafterTagsData : TagsData {
 
 			TagsTable.selectAll()
 				.where { (TagsTable.category eq category) and (TagsTable.guildId eq guildId) }
-				.forEach { tags.add(fromRow(it)) }
+				.forEach { tags.add(fromRow(it).toKordExTag()) }
 		}
 		return tags
 	}
@@ -57,7 +60,7 @@ class KrafterTagsData : TagsData {
 			setup()
 
 			TagsTable.select(key).forEach {
-				if (it[key].contains(partialKey)) tags.add(fromRow(it))
+				if (it[key].contains(partialKey)) tags.add(fromRow(it).toKordExTag())
 			}
 		}
 		return tags
@@ -72,7 +75,7 @@ class KrafterTagsData : TagsData {
 			setup()
 
 			TagsTable.select(title).forEach {
-				if (it[title].contains(partialTitle)) tags.add(fromRow(it))
+				if (it[title].contains(partialTitle)) tags.add(fromRow(it).toKordExTag())
 			}
 		}
 		return tags
@@ -107,7 +110,7 @@ class KrafterTagsData : TagsData {
 				if (guildId == null || guildId == it[TagsTable.guildId]) guildBool = true
 				if (key == null || key == it[TagsTable.key]) keyBool = true
 				if (catBool && guildBool && keyBool) {
-					tags.add(fromRow(it))
+					tags.add(fromRow(it).toKordExTag())
 				}
 			}
 		}
@@ -115,6 +118,11 @@ class KrafterTagsData : TagsData {
 	}
 
 	override suspend fun setTag(tag: Tag) {
+		// We can do this because trigger is nullable and KordEx does not use it regardless
+		setTriggerTag(tag.toTriggerTag())
+	}
+
+	suspend fun setTriggerTag(tag: TriggerTag) {
 		transaction {
 			setup()
 
@@ -126,6 +134,7 @@ class KrafterTagsData : TagsData {
 				it[TagsTable.color] = if (tag.color != null) tag.color!!.rgb else null
 				it[TagsTable.guildId] = tag.guildId
 				it[TagsTable.image] = tag.image
+				it[TagsTable.trigger] = tag.trigger
 			}
 		}
 	}
@@ -139,9 +148,29 @@ class KrafterTagsData : TagsData {
 			setup()
 
 			TagsTable.deleteReturning { (TagsTable.key eq key) and (TagsTable.guildId eq guildId) }.forEach {
-				tag = fromRow(it)
+				tag = fromRow(it).toKordExTag()
 			}
 		}
 		return tag
+	}
+
+	suspend fun getTagsByTrigger(input: String, guildId: Snowflake?): List<Tag> {
+		val tags = ArrayList<Tag>()
+		transaction {
+			setup()
+
+			TagsTable.selectAll()
+				.where { TagsTable.guildId eq guildId }
+				.forEach {
+					val tag = fromRow(it)
+					val regex = tag.trigger?.toRegex()
+					if (regex != null) {
+						if (input.matches(regex)) {
+							tags.add(fromRow(it).toKordExTag())
+						}
+					}
+				}
+		}
+		return tags
 	}
 }

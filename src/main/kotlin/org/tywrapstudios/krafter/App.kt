@@ -32,6 +32,7 @@ import org.tywrapstudios.krafter.extensions.minecraft.MinecraftExtension
 import org.tywrapstudios.krafter.extensions.sab.SafetyAndAbuseExtension
 import org.tywrapstudios.krafter.extensions.sab.getOverwrites
 import org.tywrapstudios.krafter.extensions.suggestion.SuggestionsExtension
+import org.tywrapstudios.krafter.extensions.tag.AutoTagExtension
 import java.io.File
 
 val TEST_SERVER_ID = envOrNull("TEST_SERVER")?.snowflake()
@@ -107,7 +108,7 @@ suspend fun setup(): ExtensibleBot {
 						sabConfig().channel
 					}
 			}
-			if (tagsConfig().enabled) tags(KrafterTagsData()) {
+			if (tagsConfig().enabled) tags(KrafterTagsData) {
 				staffCommandCheck { isBotModuleAdmin(tagsConfig().administrators) }
 				loggingChannelName =
 					if (
@@ -118,6 +119,9 @@ suspend fun setup(): ExtensibleBot {
 					} else {
 						sabConfig().channel
 					}
+			}
+			if (tagsConfig().enabled && tagsConfig().auto_tag) {
+				add(::AutoTagExtension)
 			}
 			if (amaConfig().enabled) extAma(KrafterAmaData())
 			if (crashAnalyticsConfig().enabled) extLogParser {

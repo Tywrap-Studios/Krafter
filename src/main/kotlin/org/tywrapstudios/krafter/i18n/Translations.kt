@@ -907,6 +907,24 @@ public object Translations {
       }
     }
 
+	object ManageTags {
+		val setAuto: Key = Key("commands.manageTags.setAuto")
+			.withBundle(Translations.bundle)
+
+		val editAuto: Key = Key("commands.manageTags.editAuto")
+			.withBundle(Translations.bundle)
+
+		object SetAuto {
+			val description: Key = Key("commands.manageTags.setAuto.description")
+				.withBundle(Translations.bundle)
+		}
+
+		object EditAuto {
+			val description: Key = Key("commands.manageTags.editAuto.description")
+				.withBundle(Translations.bundle)
+		}
+	}
+
     public object Minecraft {
       /**
        * Minecraft related commands.
@@ -1397,6 +1415,15 @@ public object Translations {
         }
       }
     }
+
+	  object ManageTags {
+		  val trigger: Key = Key("generalArgs.manageTags.trigger")
+			  .withBundle(Translations.bundle)
+		  object Trigger {
+			  val description: Key = Key("generalArgs.manageTags.trigger.description")
+				  .withBundle(Translations.bundle)
+		  }
+	  }
 
     public object Suggestions {
       /**

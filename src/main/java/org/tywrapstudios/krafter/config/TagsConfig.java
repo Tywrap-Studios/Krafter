@@ -12,7 +12,8 @@ public class TagsConfig implements ConfigClass {
 	@Comment("People who administer Tags functions.")
 	public AdministratorList administrators = new AdministratorList();
 
-	@Comment("Whether to automatically reply to a message with a tag if it fits certain triggers.")
+	@Comment("Whether to enable the AutoTag extension, which allows you to set certain\n" +
+		"triggers for message contents to which tags are automatically replied.")
 	public boolean auto_tag = false;
 
 	@Override

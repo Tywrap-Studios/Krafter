@@ -25,6 +25,8 @@ import java.nio.file.Path
 import kotlin.io.path.createDirectories
 
 const val CFG_CHANNEL_REASON = "Config prompted for an automatic new channel creation."
+const val NEGATIVE_EMOTE = "❌"
+const val POSITIVE_EMOTE = "✅"
 private var copyrightAdded = false
 
 @Suppress("LongMethod")
