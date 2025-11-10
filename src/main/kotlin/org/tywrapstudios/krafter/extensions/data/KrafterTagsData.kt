@@ -8,9 +8,9 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.deleteReturning
 import org.jetbrains.exposed.v1.jdbc.replace
-import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.tywrapstudios.krafter.LOGGING
 import org.tywrapstudios.krafter.database.entities.TriggerTag
 import org.tywrapstudios.krafter.database.entities.toKordExTag
 import org.tywrapstudios.krafter.database.entities.toTriggerTag
@@ -30,7 +30,8 @@ object KrafterTagsData : TagsData {
 		transaction {
 			setup()
 
-			TagsTable.selectAll().where { (TagsTable.key eq key) and (TagsTable.guildId eq guildId) }
+			TagsTable.selectAll()
+				.where { (TagsTable.key eq key) and ((TagsTable.guildId eq guildId) or (TagsTable.guildId eq null)) }
 				.forEach { tag = fromRow(it).toKordExTag() }
 		}
 		return tag
@@ -45,7 +46,7 @@ object KrafterTagsData : TagsData {
 			setup()
 
 			TagsTable.selectAll()
-				.where { (TagsTable.category eq category) and (TagsTable.guildId eq guildId) }
+				.where { (TagsTable.category eq category) and ((TagsTable.guildId eq guildId) or (TagsTable.guildId eq null)) }
 				.forEach { tags.add(fromRow(it).toKordExTag()) }
 		}
 		return tags
@@ -59,8 +60,9 @@ object KrafterTagsData : TagsData {
 		transaction {
 			setup()
 
-			TagsTable.select(key).forEach {
-				if (it[key].contains(partialKey)) tags.add(fromRow(it).toKordExTag())
+			TagsTable.selectAll().where { (TagsTable.guildId eq guildId) or (TagsTable.guildId eq null) }
+				.forEach {
+				if (it[key].startsWith(partialKey)) tags.add(fromRow(it).toKordExTag())
 			}
 		}
 		return tags
@@ -74,8 +76,9 @@ object KrafterTagsData : TagsData {
 		transaction {
 			setup()
 
-			TagsTable.select(title).forEach {
-				if (it[title].contains(partialTitle)) tags.add(fromRow(it).toKordExTag())
+			TagsTable.selectAll().where { (TagsTable.guildId eq guildId) or (TagsTable.guildId eq null) }
+				.forEach {
+				if (it[title].startsWith(partialTitle, true)) tags.add(fromRow(it).toKordExTag())
 			}
 		}
 		return tags
@@ -86,7 +89,7 @@ object KrafterTagsData : TagsData {
 		transaction {
 			setup()
 
-			TagsTable.select(category).where { (TagsTable.guildId eq guildId) or (TagsTable.guildId eq null) }
+			TagsTable.selectAll().where { (TagsTable.guildId eq guildId) or (TagsTable.guildId eq null) }
 				.forEach { categories.add(it[category]) }
 		}
 		return categories
@@ -147,7 +150,7 @@ object KrafterTagsData : TagsData {
 		transaction {
 			setup()
 
-			TagsTable.deleteReturning { (TagsTable.key eq key) and (TagsTable.guildId eq guildId) }.forEach {
+			TagsTable.deleteReturning { (TagsTable.key eq key) and ((TagsTable.guildId eq guildId) or (TagsTable.guildId eq null)) }.forEach {
 				tag = fromRow(it).toKordExTag()
 			}
 		}
@@ -160,12 +163,14 @@ object KrafterTagsData : TagsData {
 			setup()
 
 			TagsTable.selectAll()
-				.where { TagsTable.guildId eq guildId }
+				.where { (TagsTable.guildId eq guildId) or (TagsTable.guildId eq null) }
 				.forEach {
 					val tag = fromRow(it)
 					val regex = tag.trigger?.toRegex()
 					if (regex != null) {
-						if (input.matches(regex)) {
+						LOGGING.debug("Checking if input '$input' matches tag trigger regex '${tag.trigger}'")
+						if (input.contains(regex)) {
+							LOGGING.debug("Input '$input' matched tag trigger regex '${tag.trigger}'")
 							tags.add(fromRow(it).toKordExTag())
 						}
 					}

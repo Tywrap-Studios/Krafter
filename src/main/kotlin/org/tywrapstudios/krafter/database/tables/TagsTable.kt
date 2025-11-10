@@ -16,7 +16,7 @@ import org.tywrapstudios.krafter.database.tables.TagsTable.guildId
 object TagsTable : IntIdTable() {
 	val category = text("category")
 	val description = mediumText("description")
-	val key = text("key")
+	val key = text("key").uniqueIndex()
 	val title = text("title")
 
 	val color = integer("color").nullable()

@@ -38,6 +38,7 @@ nitpicked to your liking.
 - [ ] Reaction roles - Assign roles based on reactions to messages.
 - [x] Welcome messages - Send personalized welcome messages to new members.
 - [x] Tags - Create and manage custom tags for easy access to frequently used information.
+- [x] Auto responses - Set up automatic responses to specific keywords or phrases. (using the tags system)
 - [x] Basically flawless PluralKit integration - Seamlessly integrate with PluralKit for enhanced server accessibility.
 - [x] Extensive configuration options - Customize the bot to fit your server's needs with a wide range of configuration options.
 - [ ] Music bot capabilities - Play music in voice channels.

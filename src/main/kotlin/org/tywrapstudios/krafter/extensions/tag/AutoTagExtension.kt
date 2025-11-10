@@ -5,6 +5,7 @@ import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.interaction.modal
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kordex.core.checks.anyGuild
+import dev.kordex.core.checks.isNotBot
 import dev.kordex.core.commands.Arguments
 import dev.kordex.core.commands.converters.impl.optionalColor
 import dev.kordex.core.commands.converters.impl.optionalGuild
@@ -46,6 +47,8 @@ class AutoTagExtension : Extension() {
 	override suspend fun setup() {
 
 		event<MessageCreateEvent> {
+			check { isNotBot() }
+
 			action {
 				val message = event.message.asMessage()
 				val tags = tags.getTagsByTrigger(message.content, message.getGuild().id)
@@ -60,8 +63,8 @@ class AutoTagExtension : Extension() {
 		}
 
 		ephemeralSlashCommand {
-			name = TagsTranslations.Command.ManageTags.name
-			description = TagsTranslations.Command.ManageTags.description
+			name = Translations.Commands.manageTags
+			description = Translations.Commands.ManageTags.description
 
 			allowInDms = false
 
@@ -73,8 +76,8 @@ class AutoTagExtension : Extension() {
 
 			@OptIn(KordUnsafe::class)
 			unsafeSubCommand(::SetArgs) {
-				name = TagsTranslations.Command.ManageTags.Set.name
-				description = TagsTranslations.Command.ManageTags.Set.description
+				name = Translations.Commands.ManageTags.setAuto
+				description = Translations.Commands.ManageTags.SetAuto.description
 
 				initialResponse = InitialSlashCommandResponse.None
 
@@ -105,7 +108,7 @@ class AutoTagExtension : Extension() {
 						trigger = arguments.trigger,
 					)
 
-					tags.setTag(tag)
+					tags.setTriggerTag(tag)
 
 					tagsConfig.getLoggingChannel(guild!!.asGuild()).createMessage {
 //						allowedMentions { }
@@ -120,7 +123,7 @@ class AutoTagExtension : Extension() {
 					}
 
 					respondEphemeral {
-						TagsTranslations.Response.Tag.set
+						content = TagsTranslations.Response.Tag.set
 							.withLocale(getLocale())
 							.translateNamed(
 								"emote" to POSITIVE_EMOTE,
@@ -132,8 +135,8 @@ class AutoTagExtension : Extension() {
 
 			@OptIn(KordUnsafe::class)
 			unsafeSubCommand(::EditArgs) {
-				name = TagsTranslations.Command.ManageTags.Edit.name
-				description = TagsTranslations.Command.ManageTags.Edit.description
+				name = Translations.Commands.ManageTags.editAuto
+				description = Translations.Commands.ManageTags.EditAuto.description
 				initialResponse = InitialSlashCommandResponse.None
 
 				action {

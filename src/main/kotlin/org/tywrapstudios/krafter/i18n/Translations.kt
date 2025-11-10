@@ -552,6 +552,12 @@ public object Translations {
         .withBundle(Translations.bundle)
 
     /**
+     * managetags
+     */
+    public val manageTags: Key = Key("commands.manageTags")
+        .withBundle(Translations.bundle)
+
+    /**
      * minecraft
      */
     public val minecraft: Key = Key("commands.minecraft")
@@ -908,6 +914,12 @@ public object Translations {
     }
 
     public object ManageTags {
+      /**
+       * Manage auto-tags that can be applied to messages based on their content.
+       */
+      public val description: Key = Key("commands.manageTags.description")
+          .withBundle(Translations.bundle)
+
       /**
        * edit-auto
        */
