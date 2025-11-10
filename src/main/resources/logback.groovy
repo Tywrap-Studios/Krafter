@@ -1,8 +1,10 @@
 import ch.qos.logback.core.joran.spi.ConsoleTarget
 import ch.qos.logback.core.ConsoleAppender
+import org.tywrapstudios.krafter.DiscordLogAppender
 
 def defaultLevel = INFO
 def defaultTarget = ConsoleTarget.SystemErr
+def logUrl = System.getenv("DISCORD_LOGGER_URL")
 
 def DEV_MODE = System.getProperty("devMode")?.toBoolean() ||
 	System.getenv("DEV_MODE") != null ||
@@ -24,4 +26,16 @@ appender("CONSOLE", ConsoleAppender) {
 	target = defaultTarget
 }
 
-root(defaultLevel, ["CONSOLE"])
+if (logUrl != null) {
+	appender("DISCORD_ERROR", DiscordLogAppender) {
+		level = ERROR
+		url = System.getenv("DISCORD_LOGGER_URL")
+	}
+
+	appender("DISCORD_WARN", DiscordLogAppender) {
+		level = WARN
+		url = System.getenv("DISCORD_LOGGER_URL")
+	}
+}
+
+root(defaultLevel, ["CONSOLE", "DISCORD_ERROR", "DISCORD_WARN"])

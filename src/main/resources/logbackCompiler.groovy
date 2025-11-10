@@ -1,4 +1,6 @@
 importsAcceptList = [
+	'org.tywrapstudios.krafter.DiscordLogAppender',
+
 	'ch.qos.logback.core.testUtil.SampleConverter',
 
 	'ch.qos.logback.core.testUtil.StringListAppender',
