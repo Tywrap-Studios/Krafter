@@ -1,7 +1,7 @@
 # Krafter
 
 Krafter is a content-rich bot for Discord, built using the Kord and KordEx libraries and Kotlin.
-Krafter was made with expansibility in mind, allowing for a lot of configurability and customization.
+Krafter was made with expansibility in mind, allowing for a lot of configurability and customisation.
 Almost everything is turned off by default, and you can enable only the features you want and need with
 minimal effort in the neatly organised config files.
 
@@ -13,7 +13,7 @@ nitpicked to your liking.
   <summary>Click here to view them all!</summary>
 
 - [x] AMA (Ask me Anything) System - Allow users to ask questions and get answers in a structured manner.
-- [x] Minecraft Crash log analytics - Automatically analyze and provide insights on Minecraft crash logs.
+- [x] Minecraft Crash log analytics - Automatically analyse and provide insights on Minecraft crash logs.
 - [x] Setting up channels with embeds - Easily create channels with rich embeds for better communication.
 - [x] Fun utility commands - A variety of commands for entertainment and utility.
   - [x] Haiku detection - Detect and generate Haiku's in chat.
@@ -32,15 +32,17 @@ nitpicked to your liking.
   - [ ] Minecraft release updates - Get notified about new Minecraft releases. (awaiting first-party module)
 - [x] Moderation tools - Tools to help moderate your Discord server.
   - [x] Phishing detection - Detect and prevent phishing attempts in your server.
+  - [x] Mod commands - Easily kick, ban or time your users out.
+  - [x] Dehoist and decancer - Automatically remove problematic characters from usernames.
   - [ ] Auto-block rule breaking mods - Automatically report users who use rule-breaking mods.
 - [x] Full-blown Suggestion forums - Allow users to submit and vote on suggestions.
 - [ ] Starboard - Highlight popular messages with a starboard feature.
 - [ ] Reaction roles - Assign roles based on reactions to messages.
-- [x] Welcome messages - Send personalized welcome messages to new members.
+- [x] Welcome messages - Send personalised welcome messages to new members.
 - [x] Tags - Create and manage custom tags for easy access to frequently used information.
 - [x] Auto responses - Set up automatic responses to specific keywords or phrases. (using the tags system)
 - [x] Basically flawless PluralKit integration - Seamlessly integrate with PluralKit for enhanced server accessibility.
-- [x] Extensive configuration options - Customize the bot to fit your server's needs with a wide range of configuration options.
+- [x] Extensive configuration options - Customise the bot to fit your server's needs with a wide range of configuration options.
 - [ ] Music bot capabilities - Play music in voice channels.
 
 </details>
