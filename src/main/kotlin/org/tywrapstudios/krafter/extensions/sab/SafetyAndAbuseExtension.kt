@@ -8,6 +8,7 @@ import dev.kord.core.behavior.MemberBehavior
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.behavior.ban
 import dev.kord.core.behavior.edit
+import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.User
@@ -15,14 +16,19 @@ import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.MemberJoinEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
+import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.rest.builder.ban.BanCreateBuilder
 import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.create.FollowupMessageCreateBuilder
 import dev.kord.rest.builder.message.embed
+import dev.kordex.core.BOT_VERSION
+import dev.kordex.core.BUILD_KORD_VERSION
 import dev.kordex.core.DISCORD_GREEN
 import dev.kordex.core.DISCORD_LIGHT_BLURPLE
 import dev.kordex.core.DISCORD_RED
+import dev.kordex.core.KORDEX_VERSION
 import dev.kordex.core.annotations.DoNotChain
+import dev.kordex.core.annotations.InternalAPI
 import dev.kordex.core.annotations.UnexpectedFunctionBehaviour
 import dev.kordex.core.commands.Arguments
 import dev.kordex.core.commands.application.slash.ephemeralSubCommand
@@ -77,7 +83,7 @@ class SafetyAndAbuseExtension : Extension() {
 	val tempbans = TempbanTransactor
 	private var unbanTask: Task? = null
 
-	@OptIn(UnexpectedFunctionBehaviour::class, DoNotChain::class)
+	@OptIn(UnexpectedFunctionBehaviour::class, DoNotChain::class, InternalAPI::class)
 	override suspend fun setup() {
 		unbanTask = SCHEDULER.schedule(
 			sabConfig().minute_interval.minutes,
@@ -126,6 +132,35 @@ class SafetyAndAbuseExtension : Extension() {
 			}
 		}
 
+		event<ButtonInteractionCreateEvent> {
+			check { failIfNot(event.interaction.componentId.startsWith("sab:debug_cleanse")) }
+
+			action {
+				event.interaction.respondEphemeral {
+					embed {
+						title = "Cleanse Debug"
+						field {
+							name = "Software"
+							value = """
+								decancer: `3.3.3`
+								Krafter: `$BOT_VERSION`
+								Kord: `$BUILD_KORD_VERSION`
+								KordEx: `$KORDEX_VERSION`
+							""".trimIndent()
+						}
+						field {
+							name = "RegEx pattern"
+							value = "`$HOIST_REGEX`"
+						}
+						field {
+							name = "Name"
+							value = "`${event.interaction.componentId.split(":").last()}`"
+						}
+					}
+				}
+			}
+		}
+
 		fun FollowupMessageCreateBuilder.cleanseEmbed(member: Member, oldName: String) {
 			if (oldName == member.effectiveName) {
 				embed {
@@ -138,7 +173,7 @@ class SafetyAndAbuseExtension : Extension() {
 						"If you believe this to be an error, please report an issue and attach the debug info."
 				}
 				actionRow {
-					interactionButton(ButtonStyle.Primary, "sab:debug_cleanse") {
+					interactionButton(ButtonStyle.Primary, "sab:debug_cleanse:${member.effectiveName}") {
 						label = "Debug"
 					}
 					linkButton("https://github.com/Tywrap-Studios/Krafter/issues/new") {
