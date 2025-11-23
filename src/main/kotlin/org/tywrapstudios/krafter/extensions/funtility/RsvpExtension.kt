@@ -22,13 +22,14 @@ import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.extensions.event
 import dev.kordex.core.time.TimestampType
 import dev.kordex.core.time.toDiscord
-import dev.kordex.core.utils.scheduling.Scheduler
 import dev.kordex.core.utils.scheduling.Task
 import org.tywrapstudios.krafter.LOGGING
+import org.tywrapstudios.krafter.SCHEDULER
 import org.tywrapstudios.krafter.database.entities.RsvpEvent
 import org.tywrapstudios.krafter.database.transactors.RsvpTransactor
 import org.tywrapstudios.krafter.i18n.Translations
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -40,8 +41,8 @@ class RsvpExtension : Extension() {
 	@OptIn(ExperimentalTime::class)
 	@Suppress("MagicNumber")
 	override suspend fun setup() {
-		checkTask = Scheduler().schedule(
-			seconds = 10,
+		checkTask = SCHEDULER.schedule(
+			10.seconds,
 			name = "RSVP Checking Task",
 			repeat = true
 		) {

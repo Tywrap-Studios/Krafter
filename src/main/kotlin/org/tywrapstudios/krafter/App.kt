@@ -3,6 +3,7 @@ package org.tywrapstudios.krafter
 import dev.kordex.core.ExtensibleBot
 import dev.kordex.core.utils.env
 import dev.kordex.core.utils.envOrNull
+import dev.kordex.core.utils.scheduling.Scheduler
 import dev.kordex.data.api.DataCollection
 import dev.kordex.modules.func.phishing.extPhishing
 import dev.kordex.modules.func.tags.tags
@@ -45,6 +46,7 @@ val LOGGING: LoggingHandler<BotConfig> = LoggingHandler(
 	"Krafter",
 	CFG
 )
+val SCHEDULER = Scheduler()
 
 var initialised: Boolean = false
 
