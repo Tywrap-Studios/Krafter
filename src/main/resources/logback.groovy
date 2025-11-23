@@ -36,6 +36,11 @@ if (logUrl != null) {
 		level = WARN
 		url = System.getenv("DISCORD_LOGGER_URL")
 	}
+
+	appender("DISCORD_INFO", DiscordLogAppender) {
+		level = INFO
+		url = System.getenv("DISCORD_LOGGER_URL")
+	}
 }
 
 root(defaultLevel, ["CONSOLE", "DISCORD_ERROR", "DISCORD_WARN"])
