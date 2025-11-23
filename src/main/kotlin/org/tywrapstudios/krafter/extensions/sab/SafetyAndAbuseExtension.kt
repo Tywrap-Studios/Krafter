@@ -7,6 +7,7 @@ import dev.kord.common.entity.*
 import dev.kord.core.behavior.MemberBehavior
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.behavior.ban
+import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.entity.Guild
@@ -19,6 +20,7 @@ import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.rest.builder.ban.BanCreateBuilder
 import dev.kord.rest.builder.message.actionRow
+import dev.kord.rest.builder.message.create.AbstractMessageCreateBuilder
 import dev.kord.rest.builder.message.create.FollowupMessageCreateBuilder
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.BOT_VERSION
@@ -41,15 +43,15 @@ import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.extensions.ephemeralUserCommand
 import dev.kordex.core.extensions.event
+import dev.kordex.core.utils.dm
 import dev.kordex.core.utils.removeTimeout
-import dev.kordex.core.utils.scheduling.Scheduler
 import dev.kordex.core.utils.scheduling.Task
 import dev.kordex.core.utils.timeout
 import io.github.null8626.decancer.CuredString
+import kotlinx.coroutines.flow.firstOrNull
 import org.tywrapstudios.krafter.LOGGING
 import org.tywrapstudios.krafter.SCHEDULER
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
-import org.tywrapstudios.krafter.config.SabConfig
 import org.tywrapstudios.krafter.database.transactors.TempbanTransactor
 import org.tywrapstudios.krafter.getOrCreateChannel
 import org.tywrapstudios.krafter.i18n.Translations
@@ -61,6 +63,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
 val HOIST_REGEX: String get() = sabConfig().hoist_regex
+@Suppress("SpellCheckingInspection")
 val REPLACEMENTS = arrayOf(
 	"Robin",
 	"Proelia",
@@ -198,55 +201,32 @@ class SafetyAndAbuseExtension : Extension() {
 			}
 		}
 
-		fun FollowupMessageCreateBuilder.banEmbed(user: User, duration: Duration) {
-			val durationString = if (duration == Duration.INFINITE) {
-				"indefinitely"
-			} else {
-				"for ${
-					duration.toComponents { days, hours, minutes, seconds, _ ->
-						buildString {
-							if (days > 0) append("$days day${if (days.toInt() == 1) "" else "s"} ")
-							if (hours > 0) append("$hours hour${if (hours == 1) "" else "s"} ")
-							if (minutes > 0) append("$minutes minute${if (minutes == 1) "" else "s"} ")
-							if (seconds > 0) append("$seconds second${if (seconds == 1) "" else "s"}")
-						}.trim()
-					}
-				}"
-			}
+		fun AbstractMessageCreateBuilder.banEmbed(user: User, moderator: User, duration: Duration) {
 			embed {
-				description = "Banned ${user.mention} $durationString."
+				description = "${moderator.mention} **banned** ${user.mention} ${duration.toSentence()}."
 				color = DISCORD_RED
 			}
 		}
 
-		fun FollowupMessageCreateBuilder.unbanEmbed(user: User) {
+		fun AbstractMessageCreateBuilder.unbanEmbed(user: User, moderator: User) {
 			embed {
-				description = "Unbanned ${user.mention}."
+				description = " ${moderator.mention} **unbanned** ${user.mention}."
 				color = DISCORD_GREEN
 			}
 		}
 
-		fun FollowupMessageCreateBuilder.kickEmbed(user: User) {
+		fun AbstractMessageCreateBuilder.kickEmbed(user: User, moderator: User) {
 			embed {
-				description = "Kicked ${user.mention}."
+				description = "${moderator.mention} **kicked** ${user.mention}."
 				color = DISCORD_RED
 			}
 		}
 
-		fun FollowupMessageCreateBuilder.timeoutEmbed(user: User, duration: Duration) {
+		fun AbstractMessageCreateBuilder.timeoutEmbed(user: User, moderator: User, duration: Duration) {
 			embed {
 				description = "${user.mention} " +
 					if (duration == Duration.ZERO) "got their time-out removed."
-					else "was timed out for ${
-						duration.toComponents { days, hours, minutes, seconds, _ ->
-							buildString {
-								if (days > 0) append("$days day${if (days.toInt() == 1) "" else "s"} ")
-								if (hours > 0) append("$hours hour${if (hours == 1) "" else "s"} ")
-								if (minutes > 0) append("$minutes minute${if (minutes == 1) "" else "s"} ")
-								if (seconds > 0) append("$seconds second${if (seconds == 1) "" else "s"}")
-							}.trim()
-						}
-					}."
+					else "was timed out ${duration.toSentence()} by ${moderator.mention}."
 				color = if (duration == Duration.ZERO) DISCORD_GREEN else DISCORD_LIGHT_BLURPLE
 			}
 		}
@@ -300,6 +280,15 @@ class SafetyAndAbuseExtension : Extension() {
 					action {
 						val duration = Duration.parse(arguments.duration)
 						LOGGING.debug("Parsed duration: $duration from input: ${arguments.duration} ISO ${duration.toIsoString()}")
+						arguments.user.dm {
+							content = """Hi. Unfortunately I am here to inform you that you have been banned from ${guild?.asGuild()?.name}.
+							The reason for your ban was: **${arguments.reason?.ifEmpty { "No reason" } ?: "No reason"}**.
+							You are banned **${duration.toSentence()}**.
+							The moderator responsible for your ban was ${user.mention}.
+
+							If you think this ban was not rightful, or an actual accident feel free to contact said, or a different moderator.
+							I wish you a great day further!""".trimIndent()
+						}
 						if (duration.isInfinite()) {
 							arguments.user.ban(guild!!.id) {
 								reason = arguments.reason
@@ -313,12 +302,15 @@ class SafetyAndAbuseExtension : Extension() {
 						}
 						if (arguments.silent) {
 							respond {
-								banEmbed(arguments.user, duration)
+								banEmbed(arguments.user, user.asUser(), duration)
 							}
 						} else {
 							respondOpposite {
-								banEmbed(arguments.user, duration)
+								banEmbed(arguments.user, user.asUser(), duration)
 							}
+						}
+						dumpChannel?.createMessage {
+							banEmbed(arguments.user, user.asUser(), duration)
 						}
 					}
 				}
@@ -342,15 +334,18 @@ class SafetyAndAbuseExtension : Extension() {
 					name = Translations.Commands.Moderate.unban
 					description = Translations.Commands.Moderate.Unban.description
 					action {
-						arguments.user.unban(guild!!.id)
+						arguments.user.unban(guild!!.id, arguments.reason)
 						if (arguments.silent) {
 							respond {
-								unbanEmbed(arguments.user)
+								unbanEmbed(arguments.user, user.asUser())
 							}
 						} else {
 							respondOpposite {
-								unbanEmbed(arguments.user)
+								unbanEmbed(arguments.user, user.asUser())
 							}
+						}
+						dumpChannel?.createMessage {
+							unbanEmbed(arguments.user, user.asUser())
 						}
 					}
 				}
@@ -359,15 +354,26 @@ class SafetyAndAbuseExtension : Extension() {
 					name = Translations.Commands.Moderate.kick
 					description = Translations.Commands.Moderate.Kick.description
 					action {
+						arguments.user.dm {
+							content = """Hi. I am here to inform you that you have been kicked from ${guild?.asGuild()?.name}.
+							The reason for your kick was: **${arguments.reason}**.
+							The moderator responsible for your kick was ${user.mention}.
+
+							If you wish to join back, here is an available Discord Invite Link: ${guild?.asGuild()?.invites?.firstOrNull() ?: "No available invite"}.
+							I wish you a great day further!""".trimIndent()
+						}
 						arguments.user.asMemberOrNull(guild!!.id)?.kick(arguments.reason)
 						if (arguments.silent) {
 							respond {
-								kickEmbed(arguments.user)
+								kickEmbed(arguments.user, user.asUser())
 							}
 						} else {
 							respond {
-								kickEmbed(arguments.user)
+								kickEmbed(arguments.user, user.asUser())
 							}
+						}
+						dumpChannel?.createMessage {
+							kickEmbed(arguments.user, user.asUser())
 						}
 					}
 				}
@@ -390,12 +396,24 @@ class SafetyAndAbuseExtension : Extension() {
 						arguments.user.asMemberOrNull(guild!!.id)?.timeout(duration, arguments.reason)
 						if (arguments.silent) {
 							respond {
-								timeoutEmbed(arguments.user, duration)
+								timeoutEmbed(arguments.user, user.asUser(), duration)
 							}
 						} else {
 							respond {
-								timeoutEmbed(arguments.user, duration)
+								timeoutEmbed(arguments.user, user.asUser(), duration)
 							}
+						}
+						dumpChannel?.createMessage {
+							timeoutEmbed(arguments.user, user.asUser(), duration)
+						}
+						arguments.user.dm {
+							content = """
+								Hello, I am here to inform you that you have been timed out in ${guild?.asGuild()?.name}.
+
+								The reason for your time-out was: **${arguments.reason?.ifEmpty { "No reason" } ?: "No reason"}**.
+								You are timed out **${duration.toSentence()}**.
+								The moderator responsible for your time-out was ${user.mention}.
+							""".trimIndent()
 						}
 					}
 				}
@@ -407,12 +425,23 @@ class SafetyAndAbuseExtension : Extension() {
 						arguments.user.asMemberOrNull(guild!!.id)?.removeTimeout(arguments.reason)
 						if (arguments.silent) {
 							respond {
-								timeoutEmbed(arguments.user, Duration.ZERO)
+								timeoutEmbed(arguments.user, user.asUser(), Duration.ZERO)
 							}
 						} else {
 							respond {
-								timeoutEmbed(arguments.user, Duration.ZERO)
+								timeoutEmbed(arguments.user, user.asUser(), Duration.ZERO)
 							}
+						}
+						dumpChannel?.createMessage {
+							timeoutEmbed(arguments.user, user.asUser(), Duration.ZERO)
+						}
+						arguments.user.dm {
+							content = """
+								Hello, I am here to inform you that your time-out in ${guild?.asGuild()?.name} has been removed.
+
+								The reason for the removal was: **${arguments.reason?.ifEmpty { "No reason" } ?: "No reason"}**.
+								The moderator responsible for the removal was ${user.mention}.
+							""".trimIndent()
 						}
 					}
 				}
@@ -524,6 +553,21 @@ class SafetyAndAbuseExtension : Extension() {
 		val guild = kord.getGuild(guildId)
 		tempbans.remove(id, guildId)
 		guild.unban(id, reason)
+	}
+
+	fun Duration.toSentence(): String {
+		return if (this == Duration.INFINITE) {
+			"indefinitely"
+		} else {
+			"for ${this.toComponents { days, hours, minutes, seconds, _ ->
+				buildString {
+					if (days > 0) append("$days day${if (days.toInt() == 1) "" else "s"} ")
+					if (hours > 0) append("$hours hour${if (hours == 1) "" else "s"} ")
+					if (minutes > 0) append("$minutes minute${if (minutes == 1) "" else "s"} ")
+					if (seconds > 0) append("$seconds second${if (seconds == 1) "" else "s"}")
+				}.trimIndent()
+			}}"
+		}
 	}
 }
 
