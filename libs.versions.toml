@@ -7,6 +7,7 @@ autolink = "0.11.0"
 bbapi = "2.1.0"
 compose = "1.10.0-alpha03"
 cozy-modules = "1.1.0-SNAPSHOT"
+decancer = "3.3.3"
 excelkt = "1.0.2"
 exposed = "1.0.0-rc-2"
 flexver = "1.1.1"
@@ -33,6 +34,7 @@ cozy-ama = {  module = "org.quiltmc.community:module-ama", version.ref = "cozy-m
 cozy-log-parser = { module = "org.quiltmc.community:module-log-parser", version.ref = "cozy-modules" }
 cozy-moderation = { module = "org.quiltmc.community:module-moderation", version.ref = "cozy-modules" }
 cozy-user-cleanup = { module = "org.quiltmc.community:module-user-cleanup", version.ref = "cozy-modules" }
+decancer = { module = "io.github.null8626:decancer", version.ref = "decancer" }
 detekt = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-libraries = { module = "io.gitlab.arturbosch.detekt:detekt-rules-libraries", version.ref = "detekt" }
 excelkt = { module = "io.github.evanrupert:excelkt", version.ref = "excelkt" }

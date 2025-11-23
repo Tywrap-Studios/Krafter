@@ -281,6 +281,24 @@ public object Translations {
       }
     }
 
+    public object Moderate {
+      public object Ban {
+        /**
+         * delete-messages
+         */
+        public val deleteMessages: Key = Key("args.moderate.ban.deleteMessages")
+            .withBundle(Translations.bundle)
+
+        public object DeleteMessages {
+          /**
+           * Whether to delete the user's messages (7 days)
+           */
+          public val description: Key = Key("args.moderate.ban.deleteMessages.description")
+              .withBundle(Translations.bundle)
+        }
+      }
+    }
+
     public object Rsvp {
       /**
        * event-description
@@ -561,6 +579,12 @@ public object Translations {
      * minecraft
      */
     public val minecraft: Key = Key("commands.minecraft")
+        .withBundle(Translations.bundle)
+
+    /**
+     * moderate
+     */
+    public val moderate: Key = Key("commands.moderate")
         .withBundle(Translations.bundle)
 
     /**
@@ -1042,6 +1066,144 @@ public object Translations {
       }
     }
 
+    public object Moderate {
+      /**
+       * ban
+       */
+      public val ban: Key = Key("commands.moderate.ban")
+          .withBundle(Translations.bundle)
+
+      /**
+       * cleanse
+       */
+      public val cleanse: Key = Key("commands.moderate.cleanse")
+          .withBundle(Translations.bundle)
+
+      /**
+       * Commands that help with moderation
+       */
+      public val description: Key = Key("commands.moderate.description")
+          .withBundle(Translations.bundle)
+
+      /**
+       * kick
+       */
+      public val kick: Key = Key("commands.moderate.kick")
+          .withBundle(Translations.bundle)
+
+      /**
+       * remove-timeout
+       */
+      public val removeTimeout: Key = Key("commands.moderate.removeTimeout")
+          .withBundle(Translations.bundle)
+
+      /**
+       * task
+       */
+      public val task: Key = Key("commands.moderate.task")
+          .withBundle(Translations.bundle)
+
+      /**
+       * timeout
+       */
+      public val timeout: Key = Key("commands.moderate.timeout")
+          .withBundle(Translations.bundle)
+
+      /**
+       * unban
+       */
+      public val unban: Key = Key("commands.moderate.unban")
+          .withBundle(Translations.bundle)
+
+      public object Ban {
+        /**
+         * Bans a user from the server
+         */
+        public val description: Key = Key("commands.moderate.ban.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Cleanse {
+        /**
+         * Cleanses a user's username
+         */
+        public val description: Key = Key("commands.moderate.cleanse.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Kick {
+        /**
+         * Kicks a user from the server
+         */
+        public val description: Key = Key("commands.moderate.kick.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object RemoveTimeout {
+        /**
+         * Removes the time-out from a user
+         */
+        public val description: Key = Key("commands.moderate.removeTimeout.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Task {
+        /**
+         * Runs the currently scheduled moderation tasks
+         */
+        public val description: Key = Key("commands.moderate.task.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Timeout {
+        /**
+         * Times out a user
+         */
+        public val description: Key = Key("commands.moderate.timeout.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Unban {
+        /**
+         * Unbans a user from the server
+         */
+        public val description: Key = Key("commands.moderate.unban.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object UserCommand {
+        /**
+         * Ban
+         */
+        public val ban: Key = Key("commands.moderate.userCommand.ban")
+            .withBundle(Translations.bundle)
+
+        /**
+         * Cleanse
+         */
+        public val cleanse: Key = Key("commands.moderate.userCommand.cleanse")
+            .withBundle(Translations.bundle)
+
+        /**
+         * Kick
+         */
+        public val kick: Key = Key("commands.moderate.userCommand.kick")
+            .withBundle(Translations.bundle)
+
+        /**
+         * Remove time-out
+         */
+        public val removeTimeout: Key = Key("commands.moderate.userCommand.removeTimeout")
+            .withBundle(Translations.bundle)
+
+        /**
+         * Time out
+         */
+        public val timeout: Key = Key("commands.moderate.userCommand.timeout")
+            .withBundle(Translations.bundle)
+      }
+    }
+
     public object Rsvp {
       /**
        * Create an event people can RSVP to.
@@ -1452,6 +1614,64 @@ public object Translations {
          * The Regex pattern for matching message content
          */
         public val description: Key = Key("generalArgs.manageTags.trigger.description")
+            .withBundle(Translations.bundle)
+      }
+    }
+
+    public object Moderate {
+      /**
+       * duration
+       */
+      public val duration: Key = Key("generalArgs.moderate.duration")
+          .withBundle(Translations.bundle)
+
+      /**
+       * user
+       */
+      public val member: Key = Key("generalArgs.moderate.member")
+          .withBundle(Translations.bundle)
+
+      /**
+       * reason
+       */
+      public val reason: Key = Key("generalArgs.moderate.reason")
+          .withBundle(Translations.bundle)
+
+      /**
+       * silent
+       */
+      public val silent: Key = Key("generalArgs.moderate.silent")
+          .withBundle(Translations.bundle)
+
+      public object Duration {
+        /**
+         * The duration of the action |d|ays, |h|ours, |m|inutes, |s|econds, "Infinity"
+         */
+        public val description: Key = Key("generalArgs.moderate.duration.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Member {
+        /**
+         * The user to act upon
+         */
+        public val description: Key = Key("generalArgs.moderate.member.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Reason {
+        /**
+         * The reason for the moderation action
+         */
+        public val description: Key = Key("generalArgs.moderate.reason.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Silent {
+        /**
+         * Whether to perform the action silently (no notifications)
+         */
+        public val description: Key = Key("generalArgs.moderate.silent.description")
             .withBundle(Translations.bundle)
       }
     }

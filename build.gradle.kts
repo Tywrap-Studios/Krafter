@@ -59,6 +59,7 @@ dependencies {
 	implementation(libs.bundles.database)
 	implementation(libs.rcon)
 	implementation(libs.excelkt)
+	implementation(libs.decancer)
 
 	implementation(compose.desktop.uiTestJUnit4)
 	implementation(compose.desktop.currentOs)

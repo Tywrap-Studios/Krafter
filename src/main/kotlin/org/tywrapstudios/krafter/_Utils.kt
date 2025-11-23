@@ -95,12 +95,26 @@ internal fun AboutBuilder.addCopyright() {
 		CopyrightType.Library,
 		"https://github.com/xerial/sqlite-jdbc"
 	)
+	copyright(
+		"decancer (Java)",
+		"MIT",
+		CopyrightType.Library,
+		"https://github.com/null8626/decancer"
+	)
 
 	copyrightAdded = true
 }
 
 fun Transaction.setup() {
-	SchemaUtils.create(TagsTable, AmaConfigTable, MinecraftLinkTable, SuggestionTable, OwnedThreadTable, RsvpTable)
+	SchemaUtils.create(
+		TagsTable,
+		AmaConfigTable,
+		MinecraftLinkTable,
+		SuggestionTable,
+		OwnedThreadTable,
+		RsvpTable,
+		TempbanTable
+	)
 	addLogger(krafterSqlLogger)
 }
 
