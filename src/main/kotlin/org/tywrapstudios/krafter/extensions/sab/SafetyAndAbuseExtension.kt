@@ -28,7 +28,10 @@ import dev.kordex.core.BUILD_KORD_VERSION
 import dev.kordex.core.DISCORD_GREEN
 import dev.kordex.core.DISCORD_LIGHT_BLURPLE
 import dev.kordex.core.DISCORD_RED
+import dev.kordex.core.KORDEX_GIT_BRANCH
+import dev.kordex.core.KORDEX_GIT_HASH
 import dev.kordex.core.KORDEX_VERSION
+import dev.kordex.core.KORD_VERSION
 import dev.kordex.core.annotations.DoNotChain
 import dev.kordex.core.annotations.InternalAPI
 import dev.kordex.core.annotations.UnexpectedFunctionBehaviour
@@ -147,8 +150,8 @@ class SafetyAndAbuseExtension : Extension() {
 							value = """
 								decancer: `3.3.3`
 								Krafter: `$BOT_VERSION`
-								Kord: `$BUILD_KORD_VERSION`
-								KordEx: `$KORDEX_VERSION`
+								Kord: `$KORD_VERSION` (`BUILD:$BUILD_KORD_VERSION`)
+								KordEx: `$KORDEX_VERSION ($KORDEX_GIT_BRANCH@$KORDEX_GIT_HASH)`
 							""".trimIndent()
 						}
 						field {
