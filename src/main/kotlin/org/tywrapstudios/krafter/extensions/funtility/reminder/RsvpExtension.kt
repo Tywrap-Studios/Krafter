@@ -1,4 +1,4 @@
-package org.tywrapstudios.krafter.extensions.funtility
+package org.tywrapstudios.krafter.extensions.funtility.reminder
 
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.core.behavior.channel.MessageChannelBehavior
@@ -76,37 +76,37 @@ class RsvpExtension : Extension() {
 			name = Translations.Commands.rsvp
 			description = Translations.Commands.Rsvp.description
 
-			action {
-				val eventName = arguments.eventName
-				val eventTime = arguments.eventTime
-				val eventDescription = arguments.description
+            action {
+                val eventName = arguments.eventName
+                val eventTime = arguments.eventTime
+                val eventDescription = arguments.description
 
-				val message = channel.createMessage {
-					rsvp(
-						eventName,
-						eventDescription,
-						eventTime.instant,
-						user.asUser(),
-					)
-				}
+                val message = channel.createMessage {
+                    rsvp(
+                        eventName,
+                        eventDescription,
+                        eventTime.instant,
+                        user.asUser(),
+                    )
+                }
 
-				rsvp.setRsvp(
-					RsvpEvent(
-						message.id,
-						message.channelId,
-						user.id,
-						mutableListOf(),
-						eventName,
-						eventDescription,
-						eventTime.instant,
-					)
-				)
+                rsvp.setRsvp(
+                    RsvpEvent(
+                        message.id,
+                        message.channelId,
+                        user.id,
+                        mutableListOf(),
+                        eventName,
+                        eventDescription,
+                        eventTime.instant,
+                    )
+                )
 
-				respond {
-					content =
-						"Sent RSVP for event '$eventName' at $eventTime. Description: ${eventDescription ?: "No description"}"
-				}
-			}
+                respond {
+                    content =
+                        "Sent RSVP for event '$eventName' at $eventTime. Description: ${eventDescription ?: "No description"}"
+                }
+            }
 		}
 
 		event<ButtonInteractionCreateEvent> {
@@ -198,11 +198,11 @@ class RsvpExtension : Extension() {
 
 	@OptIn(ExperimentalTime::class)
 	fun MessageBuilder.rsvp(
-		eventTitle: String,
-		eventDescription: String?,
-		eventTimeStamp: Instant,
-		organizer: User,
-		invited: List<ULong> = mutableListOf()
+        eventTitle: String,
+        eventDescription: String?,
+        eventTimeStamp: Instant,
+        organizer: User,
+        invited: List<ULong> = mutableListOf()
 	) {
 		embed {
 			title = "RSVP: $eventTitle"
@@ -243,7 +243,7 @@ class RsvpExtension : Extension() {
 
 	@OptIn(ExperimentalTime::class)
 	suspend fun MessageBuilder.response(
-		rsvpEvent: RsvpEvent,
+        rsvpEvent: RsvpEvent,
 	) {
 		val organizer = kord.getUser(rsvpEvent.organizerId)!!
 

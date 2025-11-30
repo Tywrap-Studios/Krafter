@@ -94,6 +94,9 @@ suspend fun setup(): ExtensibleBot {
 				if (utilityConfig().functions.welcome_message) {
 					add(::WelcomeExtension)
 				}
+				if (utilityConfig().functions.rsvp) {
+					add(::RsvpExtension)
+				}
 			}
 			if (minecraftConfig().enabled) {
 				add(::MinecraftExtension)
@@ -151,7 +154,6 @@ suspend fun setup(): ExtensibleBot {
 			}
 			if (funConfig().enabled) {
 				if (funConfig().functions.haiku) add(::HaikuExtension)
-				if (funConfig().functions.rsvp) add(::RsvpExtension)
 				add(::FunExtension)
 			}
 		}
