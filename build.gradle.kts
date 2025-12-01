@@ -134,6 +134,7 @@ docker {
 		comment("Create required directories")
 		runShell("mkdir -p /bot/plugins")
 		runShell("mkdir -p /bot/data")
+		runShell("mkdir -p /bot/config")
 		runShell("mkdir -p /dist/out")
 
 		emptyLine()
@@ -141,6 +142,7 @@ docker {
 		// Add volumes for locations that you need to persist. This is important!
 		comment("Declare required volumes")
 		volume("/bot/data")  // Storage for data files
+		volume("/bot/config") // Storage for config files
 		volume("/bot/plugins")  // Plugin ZIP/JAR location
 
 		emptyLine()
