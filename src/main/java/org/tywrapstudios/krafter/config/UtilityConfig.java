@@ -39,7 +39,13 @@ public class UtilityConfig implements ConfigClass {
 			Set specialized messages that remind you at a certain point in time
 			or after a specified duration.""")
 		public boolean reminder = true;
+
+		@Comment("""
+			Stick messages to channels, making them always appear at the bottom of
+			that channel.""")
+		public boolean sticky = true;
 	}
+
 	@Override
 	public void validate() {
 		functions.welcome_channel = Util.channelCheck.apply(functions.welcome_channel);
