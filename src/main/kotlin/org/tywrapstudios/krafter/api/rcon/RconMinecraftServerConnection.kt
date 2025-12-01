@@ -7,6 +7,11 @@ import org.tywrapstudios.krafter.config.MinecraftConfig
 import org.tywrapstudios.krafter.minecraftConfig
 import org.tywrapstudios.krafter.platform.services.IMinecraftServerConnection
 
+/**
+ * An implementation of [IMinecraftServerConnection] that utilises Minecraft's built-in
+ * RCON protocol. Not officially declared as a service, but used as a last resort in case
+ * no other implementation is able to be loaded.
+ */
 class RconMinecraftServerConnection : IMinecraftServerConnection {
 	val cfg: MinecraftConfig = minecraftConfig()
 

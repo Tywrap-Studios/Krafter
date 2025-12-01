@@ -2,6 +2,10 @@ package org.tywrapstudios.krafter.platform.services
 
 import org.tywrapstudios.krafter.api.objects.McMessage
 
+/**
+ * Interface for a service that "connects" the Minecraft server with this bot, or at least
+ * lets it perform the specified functions.
+ */
 interface IMinecraftServerConnection {
 
 	/**

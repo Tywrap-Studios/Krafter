@@ -19,6 +19,9 @@ import org.tywrapstudios.krafter.database.sql.snowflake
 import org.tywrapstudios.krafter.extensions.suggestion.SuggestionStatus
 import org.tywrapstudios.krafter.snowflake
 
+/**
+ * Based on [Suggestion].
+ */
 object SuggestionTable : SnowflakeIdTable() {
 	val guildId = snowflake("guildId")
 	val channelId = snowflake("channelId")

@@ -10,6 +10,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.tywrapstudios.krafter.i18n.Translations
 import org.tywrapstudios.krafter.snowflake
 
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] has the
+ * specified [Snowflake] ID.
+ */
 suspend fun CheckContext<*>.hasId(id: Snowflake) {
 	if (!passed) {
 		return
@@ -42,7 +46,10 @@ suspend fun CheckContext<*>.hasId(id: Snowflake) {
 		}
 	}
 }
-
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] does **not** have the
+ * specified [Snowflake] ID.
+ */
 suspend fun CheckContext<*>.notHasId(id: Snowflake) {
 	if (!passed) {
 		return
@@ -76,6 +83,10 @@ suspend fun CheckContext<*>.notHasId(id: Snowflake) {
 	}
 }
 
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] has the
+ * specified [String] -> [Snowflake] ID.
+ */
 suspend fun CheckContext<*>.hasId(id: String) {
 	if (!passed) {
 		return
@@ -85,6 +96,10 @@ suspend fun CheckContext<*>.hasId(id: String) {
 	hasId(id)
 }
 
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] does **not** have the
+ * specified [String] -> [Snowflake] ID.
+ */
 suspend fun CheckContext<*>.notHasId(id: String) {
 	if (!passed) {
 		return
@@ -94,6 +109,10 @@ suspend fun CheckContext<*>.notHasId(id: String) {
 	notHasId(id)
 }
 
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] has the
+ * specified [ULong] -> [Snowflake] ID.
+ */
 suspend fun CheckContext<*>.hasId(id: ULong) {
 	if (!passed) {
 		return
@@ -103,6 +122,10 @@ suspend fun CheckContext<*>.hasId(id: ULong) {
 	hasId(id)
 }
 
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] does **not** have the
+ * specified [ULong] -> [Snowflake] ID.
+ */
 suspend fun CheckContext<*>.notHasId(id: ULong) {
 	if (!passed) {
 		return

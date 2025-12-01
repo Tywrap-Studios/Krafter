@@ -7,6 +7,9 @@ import org.tywrapstudios.krafter.database.sql.SnowflakeIdTable
 import org.tywrapstudios.krafter.database.sql.snowflake
 import kotlin.time.toKotlinDuration
 
+/**
+ * Based on [OwnedThread].
+ */
 object OwnedThreadTable : SnowflakeIdTable() {
 	val owner = snowflake("owner")
 	val guildId = snowflake("guildId")

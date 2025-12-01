@@ -29,6 +29,9 @@ import org.tywrapstudios.krafter.uLongs
 
 object SuggestionsTransactor {
 
+	/**
+	 * Returns a [Suggestion] from the database.
+	 */
 	suspend fun get(id: Snowflake): Suggestion? {
 		var suggestion: Suggestion? = null
 
@@ -43,6 +46,9 @@ object SuggestionsTransactor {
 		return suggestion
 	}
 
+	/**
+	 * Returns a [Suggestion] from the database by its message's ID.
+	 */
 	suspend fun getByMessage(id: Snowflake): Suggestion? {
 		var suggestion: Suggestion? = null
 
@@ -57,6 +63,9 @@ object SuggestionsTransactor {
 		return suggestion
 	}
 
+	/**
+	 * Returns a [Suggestion] from the database by its thread's ID.
+	 */
 	suspend fun getByThread(id: Snowflake): Suggestion? {
 		var suggestion: Suggestion? = null
 
@@ -71,9 +80,15 @@ object SuggestionsTransactor {
 		return suggestion
 	}
 
+	/**
+	 * Returns a [Suggestion] from the database by its message's behaviour.
+	 */
 	suspend fun getByMessage(message: MessageBehavior) =
 		getByMessage(message.id)
 
+	/**
+	 * Returns a list of all the [Suggestion]s in the database.
+	 */
 	suspend fun getAll(): List<Suggestion> {
 		val suggestions = mutableListOf<Suggestion>()
 
@@ -87,6 +102,13 @@ object SuggestionsTransactor {
 		return suggestions
 	}
 
+	/**
+	 * Returns a [Query] of a SQL `SELECT * ... WHERE` operation with the specified [Op].
+	 */
+	@Deprecated(
+		"Unused method from the original package, has no function in this codebase and may not work as expected.",
+		level = DeprecationLevel.HIDDEN
+	)
 	suspend fun find(filter: () -> Op<Boolean>): Query {
 		return transaction {
 			setup()
@@ -95,6 +117,9 @@ object SuggestionsTransactor {
 		}
 	}
 
+	/**
+	 * Inserts a [Suggestion] into the database.
+	 */
 	suspend fun set(suggestion: Suggestion) {
 		transaction {
 			setup()
@@ -126,6 +151,9 @@ object SuggestionsTransactor {
 		}
 	}
 
+	/**
+	 * Removes all the suggestions associated with the specified guild
+	 */
 	suspend fun purgeGuild(guildId: Snowflake) {
 		transaction {
 			setup()

@@ -101,8 +101,17 @@ fun getMcPlayer(uuid: UUID): McPlayer? {
 	}
 }
 
+/**
+ * Gets an [McPlayer] object from a [KrafterMinecraftLinkTransactor.LinkStatus].
+ */
 fun KrafterMinecraftLinkTransactor.LinkStatus.getMcPlayer(): McPlayer? = getMcPlayer(uuid)
 
+/**
+ * Attempts to find a link associated with the [member]'s ID, and resolves it into an [McPlayer]
+ * object. Returns null if the database does not contain a link, the link isn't verified or
+ * something went wrong while fetching the [McPlayer] object.
+ * @param member The ID of the member to find a link of.
+ */
 suspend fun getMcPlayer(member: Snowflake): McPlayer? {
 	val link = KrafterMinecraftLinkTransactor.getLinkStatus(member)
 
@@ -137,4 +146,7 @@ fun getMcPlayerSigned(uuid: UUID): McPlayer? {
 	}
 }
 
+/**
+ * Gets an [McPlayer] object with signed properties from a [KrafterMinecraftLinkTransactor.LinkStatus].
+ */
 fun KrafterMinecraftLinkTransactor.LinkStatus.getMcPlayerSigned(): McPlayer? = getMcPlayerSigned(uuid)

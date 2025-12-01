@@ -162,7 +162,6 @@ class HaikuExtension : Extension() {
 		 * Helper function to add back a syllable if the word ends with a specific
 		 * consonant + ending combination.
 		 *
-		 * @param consonantIndex The index from the end of the word where the consonant should be
 		 * @param ending The ending string to check for
 		 */
 		fun forceAdd(ending: String) {

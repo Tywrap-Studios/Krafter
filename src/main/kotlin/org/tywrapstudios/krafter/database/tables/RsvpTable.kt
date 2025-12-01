@@ -10,6 +10,9 @@ import org.tywrapstudios.krafter.database.sql.snowflake
 import kotlin.time.ExperimentalTime
 import kotlin.time.toKotlinInstant
 
+/**
+ * Based on [RsvpEvent].
+ */
 object RsvpTable : SnowflakeIdTable() {
 	val channelId = snowflake("channel_id")
 	val organizerId = snowflake("organizer_id")

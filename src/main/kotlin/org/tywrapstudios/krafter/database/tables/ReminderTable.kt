@@ -12,6 +12,9 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.toKotlinDuration
 import kotlin.time.toKotlinInstant
 
+/**
+ * Based on [Reminder].
+ */
 object ReminderTable : SnowflakeIdTable() {
 	val channelId = snowflake("channel")
 	val ownerId = snowflake("owner")

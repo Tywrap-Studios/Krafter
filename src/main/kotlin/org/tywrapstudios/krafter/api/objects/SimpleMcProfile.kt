@@ -9,6 +9,11 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
+/**
+ * Represents a Minecraft player's profile, in simple terms, from the Mojang API
+ * at https://api.mojang.com/users/profiles/minecraft/NAME, not to be confused
+ * with the more advanced [McPlayer] result from the session server.
+ */
 @Serializable
 data class SimpleMcProfile(
 	val id: String,

@@ -13,6 +13,10 @@ import org.tywrapstudios.krafter.getUsers
 import org.tywrapstudios.krafter.i18n.Translations
 import org.tywrapstudios.krafter.mainConfig
 
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] is
+ * an admin for a certain module or a global admin.
+ */
 suspend fun CheckContext<*>.isBotModuleAdmin(list: AdministratorList) {
 	if (!passed) {
 		return
@@ -51,6 +55,10 @@ suspend fun CheckContext<*>.isBotModuleAdmin(list: AdministratorList) {
 	}
 }
 
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] is
+ * **not** an admin for a certain module or a global admin.
+ */
 suspend fun CheckContext<*>.notIsBotModuleAdmin(list: AdministratorList) {
 	if (!passed) {
 		return
@@ -90,6 +98,10 @@ suspend fun CheckContext<*>.notIsBotModuleAdmin(list: AdministratorList) {
 	}
 }
 
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] is
+ * a global admin for the bot.
+ */
 suspend fun CheckContext<*>.isGlobalBotAdmin() {
 	if (!passed) {
 		return
@@ -98,6 +110,10 @@ suspend fun CheckContext<*>.isGlobalBotAdmin() {
 	isBotModuleAdmin(mainConfig().global_administrators)
 }
 
+/**
+ * Check asserting the user for an [dev.kord.core.event.Event] is
+ * **not** a global admin for the bot.
+ */
 suspend fun CheckContext<*>.notIsGlobalBotAdmin() {
 	if (!passed) {
 		return

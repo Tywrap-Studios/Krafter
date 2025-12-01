@@ -4,6 +4,9 @@ import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 
+/**
+ * A thread that a certain member owns, this may be someone other than who made the thread.
+ */
 @Serializable
 data class OwnedThread(
 	val id: Snowflake,

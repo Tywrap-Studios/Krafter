@@ -1,5 +1,8 @@
 package org.tywrapstudios.krafter.extensions.funtility
 
+/**
+ * A map of "common" abbreviations to their meanings.
+ */
 val ABBREVIATIONS = mutableMapOf(
 	"rn" to "right now",
 	"idk" to "i don't know",

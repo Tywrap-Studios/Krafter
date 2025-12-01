@@ -17,6 +17,10 @@ import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 
 object TempbanTransactor {
+
+	/**
+	 * Inserts a temporary ban into the database.
+	 */
 	suspend fun add(member: Snowflake, guild: Snowflake, timestamp: Instant) {
 		transaction {
 			setup()
@@ -29,6 +33,9 @@ object TempbanTransactor {
 		}
 	}
 
+	/**
+	 * Removes a temporary ban from the database.
+	 */
 	suspend fun remove(member: Snowflake, guild: Snowflake) {
 		transaction {
 			setup()
@@ -39,6 +46,10 @@ object TempbanTransactor {
 		}
 	}
 
+	/**
+	 * Returns a list with tuples containing the user's and guild's ID's
+	 * with unban times that are **at or before now**.
+	 */
 	suspend fun getExpired(): List<Pair<Snowflake, Snowflake>> {
 		return transaction {
 			setup()
@@ -51,6 +62,10 @@ object TempbanTransactor {
 		}
 	}
 
+	/**
+	 * Returns a list with tuples containing the user's and guild's ID's
+	 * with unban times that are **after now**.
+	 */
 	suspend fun getActive(): List<Pair<Snowflake, Snowflake>> {
 		return transaction {
 			setup()
@@ -62,6 +77,4 @@ object TempbanTransactor {
 			}
 		}
 	}
-
-	data class Ban(val member: Snowflake, val guild: Snowflake)
 }

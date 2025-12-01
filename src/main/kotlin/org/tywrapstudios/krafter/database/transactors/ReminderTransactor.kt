@@ -17,6 +17,10 @@ import kotlin.time.toJavaDuration
 import kotlin.time.toJavaInstant
 
 object ReminderTransactor {
+
+	/**
+	 * Inserts a reminder into the database.
+	 */
 	@OptIn(ExperimentalTime::class)
 	suspend fun set(reminder: Reminder) {
 		transaction {
@@ -37,6 +41,9 @@ object ReminderTransactor {
 		}
 	}
 
+	/**
+	 * Changes the specified reminder's timestamp.
+	 */
 	@OptIn(ExperimentalTime::class)
 	suspend fun update(reminderId: Snowflake, reminderTimestamp: Instant) {
 		transaction {
@@ -48,6 +55,9 @@ object ReminderTransactor {
 		}
 	}
 
+	/**
+	 * Changes the specified reminder's users.
+	 */
 	suspend fun update(reminderId: Snowflake, reminderUsers: MutableList<ULong>) {
 		transaction {
 			setup()
@@ -58,6 +68,9 @@ object ReminderTransactor {
 		}
 	}
 
+	/**
+	 * Returns a reminder from the database
+	 */
 	suspend fun get(id: Snowflake): Reminder? {
 		var reminder: Reminder? = null
 		transaction {
@@ -70,6 +83,9 @@ object ReminderTransactor {
 		return reminder
 	}
 
+	/**
+	 * Returns all the reminders in the database.
+	 */
 	suspend fun getAll(): List<Reminder> {
 		return transaction {
 			setup()
@@ -78,6 +94,9 @@ object ReminderTransactor {
 		}
 	}
 
+	/**
+	 * Removes and returns a reminder from the database.
+	 */
 	suspend fun remove(id: Snowflake): Reminder? {
 		return transaction {
 			setup()

@@ -25,6 +25,9 @@ import kotlin.time.toJavaDuration
 @Suppress("TooManyFunctions")
 object OwnedThreadTransactor {
 
+	/**
+	 * Gets the [OwnedThread] by the ID of the thread.
+	 */
 	suspend fun get(id: Snowflake): OwnedThread? {
 		var thread: OwnedThread? = null
 
@@ -39,9 +42,15 @@ object OwnedThreadTransactor {
 		return thread
 	}
 
+	/**
+	 * Gets the [OwnedThread] by behaviour.
+	 */
 	suspend fun get(thread: ThreadChannelBehavior) =
 		get(thread.id)
 
+	/**
+	 * Inserts an [OwnedThread] into the database.
+	 */
 	suspend fun set(thread: OwnedThread) {
 		transaction {
 			setup()
@@ -59,6 +68,9 @@ object OwnedThreadTransactor {
 		}
 	}
 
+	/**
+	 * Returns a list of [OwnedThread]s that have a duration.
+	 */
 	suspend fun getAllWithDuration(): List<OwnedThread> {
 		val threads = mutableListOf<OwnedThread>()
 
@@ -73,6 +85,9 @@ object OwnedThreadTransactor {
 		return threads
 	}
 
+	/**
+	 * Gets an [OwnedThread] by its owner's ID.
+	 */
 	suspend fun getByOwner(id: Snowflake): OwnedThread? {
 		var thread: OwnedThread? = null
 
@@ -87,9 +102,15 @@ object OwnedThreadTransactor {
 		return thread
 	}
 
+	/**
+	 * Gets an [OwnedThread] by its owner's behaviour.
+	 */
 	suspend fun getByOwner(user: UserBehavior) =
 		getByOwner(user.id)
 
+	/**
+	 * Gets an [OwnedThread] by its guild's ID.
+	 */
 	suspend fun getByGuild(id: Snowflake): OwnedThread? {
 		var thread: OwnedThread? = null
 
@@ -104,9 +125,15 @@ object OwnedThreadTransactor {
 		return thread
 	}
 
+	/**
+	 * Gets an [OwnedThread] by its guild's behaviour.
+	 */
 	suspend fun getByGuild(guild: GuildBehavior) =
 		getByGuild(guild.id)
 
+	/**
+	 * Gets an [OwnedThread] by its owner's and a guild's ID.
+	 */
 	suspend fun getByOwnerAndGuild(owner: Snowflake, guild: Snowflake): OwnedThread? {
 		var thread: OwnedThread? = null
 
@@ -121,24 +148,45 @@ object OwnedThreadTransactor {
 		return thread
 	}
 
+	/**
+	 * Gets an [OwnedThread] by its owner's behaviour and a guild's ID.
+	 */
 	suspend fun getByOwnerAndGuild(owner: UserBehavior, guild: Snowflake) =
 		getByOwnerAndGuild(owner.id, guild)
 
+	/**
+	 * Gets an [OwnedThread] by its owner's ID and a guild's behaviour.
+	 */
 	suspend fun getByOwnerAndGuild(owner: Snowflake, guild: GuildBehavior) =
 		getByOwnerAndGuild(owner, guild.id)
 
+	/**
+	 * Gets an [OwnedThread] by its owner's and a guild's behaviour.
+	 */
 	suspend fun getByOwnerAndGuild(owner: UserBehavior, guild: GuildBehavior) =
 		getByOwnerAndGuild(owner.id, guild.id)
 
+	/**
+	 * Returns whether a person owns a thread by ID's.
+	 */
 	suspend fun isOwner(thread: Snowflake, user: Snowflake) =
 		get(thread)?.let { it.owner == user }
 
+	/**
+	 * Returns whether a person (by behaviour) owns a thread by ID.
+	 */
 	suspend fun isOwner(thread: Snowflake, user: UserBehavior) =
 		isOwner(thread, user.id)
 
+	/**
+	 * Returns whether a person (by ID) owns a thread by behaviour.
+	 */
 	suspend fun isOwner(thread: ThreadChannelBehavior, user: Snowflake) =
 		isOwner(thread.id, user)
 
+	/**
+	 * Returns whether a person owns a thread by behaviours.
+	 */
 	suspend fun isOwner(thread: ThreadChannelBehavior, user: UserBehavior) =
 		isOwner(thread.id, user.id)
 }

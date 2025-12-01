@@ -16,6 +16,10 @@ import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 
 object RsvpTransactor {
+
+	/**
+	 * Inserts an RSVP into the database.
+	 */
 	@OptIn(ExperimentalTime::class)
 	suspend fun setRsvp(event: RsvpEvent) {
 		transaction {
@@ -33,6 +37,9 @@ object RsvpTransactor {
 		}
 	}
 
+	/**
+	 * Returns all the RSVP's that occur **after** the specified [Instant].
+	 */
 	@ExperimentalTime
 	suspend fun getRsvpsAfter(time: Instant): List<RsvpEvent> {
 		val events = mutableListOf<RsvpEvent>()
@@ -48,6 +55,9 @@ object RsvpTransactor {
 		return events
 	}
 
+	/**
+	 * Returns all the RSVP's that occur **before** the specified [Instant].
+	 */
 	@ExperimentalTime
 	suspend fun getRsvpsBeforeAndAt(time: Instant): List<RsvpEvent> {
 		val events = mutableListOf<RsvpEvent>()
@@ -63,6 +73,9 @@ object RsvpTransactor {
 		return events
 	}
 
+	/**
+	 * Returns an RSVP from the database.
+	 */
 	suspend fun getRsvp(eventId: Snowflake): RsvpEvent? {
 		return transaction {
 			setup()
@@ -74,6 +87,10 @@ object RsvpTransactor {
 		}
 	}
 
+	/**
+	 * Adds or removes a person from the invited list.
+	 * @param unsubscribe Whether to remove the user from the list instead of adding them to it
+	 */
 	suspend fun subScribe(eventId: Snowflake, userId: Snowflake, unsubscribe: Boolean = false) {
 		transaction {
 			setup()
@@ -100,6 +117,9 @@ object RsvpTransactor {
 		}
 	}
 
+	/**
+	 * Removes and returns an RSVP from the database.
+	 */
 	suspend fun cancelRsvp(eventId: Snowflake): RsvpEvent? {
 		return transaction {
 			setup()
