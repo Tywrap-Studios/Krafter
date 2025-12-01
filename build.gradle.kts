@@ -75,6 +75,7 @@ distributions {
 		contents {
 			// Copy the LICENSE file into the distribution
 			from("LICENSE")
+			from("LICENSE-cozy-modules")
 
 			// Exclude src/main/dist/README.md
 			exclude("README.md")
