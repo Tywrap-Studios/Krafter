@@ -34,6 +34,11 @@ public class UtilityConfig implements ConfigClass {
 			Répondez s'il vous plaît. Allows users to create RSVP events,
 			other users can join these and all get pinged when it starts!""")
 		public boolean rsvp = true;
+
+		@Comment("""
+			Set specialized messages that remind you at a certain point in time
+			or after a specified duration.""")
+		public boolean reminder = true;
 	}
 	@Override
 	public void validate() {

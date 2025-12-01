@@ -299,6 +299,92 @@ public object Translations {
       }
     }
 
+    public object Remind {
+      /**
+       * channel
+       */
+      public val channel: Key = Key("args.remind.channel")
+          .withBundle(Translations.bundle)
+
+      /**
+       * dm
+       */
+      public val dm: Key = Key("args.remind.dm")
+          .withBundle(Translations.bundle)
+
+      /**
+       * duration
+       */
+      public val duration: Key = Key("args.remind.duration")
+          .withBundle(Translations.bundle)
+
+      /**
+       * ping
+       */
+      public val ping: Key = Key("args.remind.ping")
+          .withBundle(Translations.bundle)
+
+      /**
+       * repeat
+       */
+      public val repeat: Key = Key("args.remind.repeat")
+          .withBundle(Translations.bundle)
+
+      /**
+       * timestamp
+       */
+      public val timestamp: Key = Key("args.remind.timestamp")
+          .withBundle(Translations.bundle)
+
+      public object Channel {
+        /**
+         * The channel to remind you in as a last resort
+         */
+        public val description: Key = Key("args.remind.channel.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Dm {
+        /**
+         * Whether to DM you instead of pinging you in the channel
+         */
+        public val description: Key = Key("args.remind.dm.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Duration {
+        /**
+         * The duration to wait for to remind you
+         */
+        public val description: Key = Key("args.remind.duration.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Ping {
+        /**
+         * Whether to ping you for the reminder
+         */
+        public val description: Key = Key("args.remind.ping.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Repeat {
+        /**
+         * Whether to repeat this reminder until cancelled
+         */
+        public val description: Key = Key("args.remind.repeat.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Timestamp {
+        /**
+         * The timestamp on which to remind you
+         */
+        public val description: Key = Key("args.remind.timestamp.description")
+            .withBundle(Translations.bundle)
+      }
+    }
+
     public object Rsvp {
       /**
        * event-description
@@ -585,6 +671,12 @@ public object Translations {
      * moderate
      */
     public val moderate: Key = Key("commands.moderate")
+        .withBundle(Translations.bundle)
+
+    /**
+     * remind
+     */
+    public val remind: Key = Key("commands.remind")
         .withBundle(Translations.bundle)
 
     /**
@@ -1202,6 +1294,15 @@ public object Translations {
         public val timeout: Key = Key("commands.moderate.userCommand.timeout")
             .withBundle(Translations.bundle)
       }
+    }
+
+    public object Remind {
+      /**
+       * Put up a reminder that either reminds you at a certain point in time, or repeatedly reminds
+       * you.
+       */
+      public val description: Key = Key("commands.remind.description")
+          .withBundle(Translations.bundle)
     }
 
     public object Rsvp {

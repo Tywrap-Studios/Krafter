@@ -24,8 +24,9 @@ import org.tywrapstudios.krafter.extensions.data.KrafterTagsData
 import org.tywrapstudios.krafter.extensions.data.KrafterWelcomeChannelData
 import org.tywrapstudios.krafter.extensions.funtility.FunExtension
 import org.tywrapstudios.krafter.extensions.funtility.HaikuExtension
-import org.tywrapstudios.krafter.extensions.funtility.RsvpExtension
+import org.tywrapstudios.krafter.extensions.funtility.reminder.RsvpExtension
 import org.tywrapstudios.krafter.extensions.funtility.UtilityExtension
+import org.tywrapstudios.krafter.extensions.funtility.reminder.ReminderExtension
 import org.tywrapstudios.krafter.extensions.funtility.welcome.WelcomeExtension
 import org.tywrapstudios.krafter.extensions.logs.RuleBreakingModProcessor
 import org.tywrapstudios.krafter.extensions.logs.WrongLocationMessageSender
@@ -93,6 +94,9 @@ suspend fun setup(): ExtensibleBot {
 				add(::UtilityExtension)
 				if (utilityConfig().functions.welcome_message) {
 					add(::WelcomeExtension)
+				}
+				if (utilityConfig().functions.reminder) {
+					add(::ReminderExtension)
 				}
 				if (utilityConfig().functions.rsvp) {
 					add(::RsvpExtension)
