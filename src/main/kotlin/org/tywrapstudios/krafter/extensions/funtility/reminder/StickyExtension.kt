@@ -34,8 +34,8 @@ class StickyExtension : Extension() {
 		}
 
 		ephemeralSlashCommand(::StickyArguments, ::StickyForm) {
-//			name = TODO Translations.Commands.sticky
-//			description = TODO Translations.Commands.Sticky.description
+			name = Translations.Commands.sticky
+			description = Translations.Commands.Sticky.description
 
 			action { modal ->
 				if (modal?.text?.value == null) {
@@ -52,8 +52,8 @@ class StickyExtension : Extension() {
 
 	class StickyArguments : Arguments() {
 		val tag by string {
-			name = TODO() // Translations.Args.Sticky.tag
-			description = TODO() // Translations.Args.Sticky.Tag.description
+			name = Translations.Args.Sticky.tag
+			description = Translations.Args.Sticky.Tag.description
 
 			autoComplete {
 				val tags = StickyTransactor.getTags()
@@ -67,11 +67,11 @@ class StickyExtension : Extension() {
 	}
 
 	class StickyForm : ModalForm() {
-		override var title: Key = TODO() // Translations.Modals.Sticky.title
+		override var title: Key = Translations.Modals.Sticky.title
 
 		val text = paragraphText {
-			label = TODO() // Translations.Modals.Sticky.Text.label
-			placeholder = TODO() // Translations.Modals.Sticky.Text.placeholder
+			label = Translations.Modals.Sticky.Text.label
+			placeholder = Translations.Modals.Sticky.Text.placeholder
 			required = true
 		}
 	}

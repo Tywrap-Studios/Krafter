@@ -256,11 +256,11 @@ class ReminderExtension : Extension() {
 	}
 
 	class ReminderForm : ModalForm() {
-		override var title: Key = TODO() //Translations.Modals.Remind.title
+		override var title: Key = Translations.Modals.Remind.title
 
 		val content = paragraphText {
-			label = TODO() //Translations.Modals.Remind.Content.label
-			placeholder = TODO() //Translations.Modals.Remind.Content.description
+			label = Translations.Modals.Remind.Content.label
+			placeholder = Translations.Modals.Remind.Content.placeholder
 			maxLength = 1_800
 		}
 	}

@@ -429,6 +429,23 @@ public object Translations {
       }
     }
 
+    public object Sticky {
+      /**
+       * tag
+       */
+      public val tag: Key = Key("args.sticky.tag")
+          .withBundle(Translations.bundle)
+
+      public object Tag {
+        /**
+         * A tag to identify this sticky by, must be unique, otherwise you edit the sticky with the
+         * corresponding tag
+         */
+        public val description: Key = Key("args.sticky.tag.description")
+            .withBundle(Translations.bundle)
+      }
+    }
+
     public object Suggestions {
       public object Edit {
         /**
@@ -683,6 +700,12 @@ public object Translations {
      * rsvp
      */
     public val rsvp: Key = Key("commands.rsvp")
+        .withBundle(Translations.bundle)
+
+    /**
+     * sticky
+     */
+    public val sticky: Key = Key("commands.sticky")
         .withBundle(Translations.bundle)
 
     /**
@@ -1313,6 +1336,14 @@ public object Translations {
           .withBundle(Translations.bundle)
     }
 
+    public object Sticky {
+      /**
+       * Stick messages to the bottom of channels
+       */
+      public val description: Key = Key("commands.sticky.description")
+          .withBundle(Translations.bundle)
+    }
+
     public object Suggestions {
       /**
        * Commands for managing the suggestion forum.
@@ -1847,6 +1878,50 @@ public object Translations {
   }
 
   public object Modals {
+    public object Remind {
+      /**
+       * Reminder
+       */
+      public val title: Key = Key("modals.remind.title")
+          .withBundle(Translations.bundle)
+
+      public object Content {
+        /**
+         * Content
+         */
+        public val label: Key = Key("modals.remind.content.label")
+            .withBundle(Translations.bundle)
+
+        /**
+         * The text that contains what you want to be reminded of
+         */
+        public val placeholder: Key = Key("modals.remind.content.placeholder")
+            .withBundle(Translations.bundle)
+      }
+    }
+
+    public object Sticky {
+      /**
+       * Sticky
+       */
+      public val title: Key = Key("modals.sticky.title")
+          .withBundle(Translations.bundle)
+
+      public object Text {
+        /**
+         * Text
+         */
+        public val label: Key = Key("modals.sticky.text.label")
+            .withBundle(Translations.bundle)
+
+        /**
+         * The message to be stickied
+         */
+        public val placeholder: Key = Key("modals.sticky.text.placeholder")
+            .withBundle(Translations.bundle)
+      }
+    }
+
     public object Utility {
       public object LogEvent {
         /**
