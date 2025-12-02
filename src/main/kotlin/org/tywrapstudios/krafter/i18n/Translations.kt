@@ -438,7 +438,7 @@ public object Translations {
 
       public object Tag {
         /**
-         * A tag to identify this sticky by, must be unique, otherwise you edit the sticky with the
+         * A tag to identify this sticky by, if not unique you edit the sticky with the
          * corresponding tag
          */
         public val description: Key = Key("args.sticky.tag.description")

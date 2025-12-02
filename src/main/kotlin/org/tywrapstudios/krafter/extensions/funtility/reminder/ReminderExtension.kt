@@ -26,11 +26,14 @@ import dev.kordex.core.i18n.types.Key
 import dev.kordex.core.time.TimestampType
 import dev.kordex.core.time.toDiscord
 import dev.kordex.core.utils.scheduling.Task
+import org.tywrapstudios.krafter.LOGGING
 import org.tywrapstudios.krafter.SCHEDULER
 import org.tywrapstudios.krafter.database.entities.Reminder
 import org.tywrapstudios.krafter.database.transactors.ReminderTransactor
 import org.tywrapstudios.krafter.i18n.Translations
 import org.tywrapstudios.krafter.snowflake
+import kotlin.math.floor
+import kotlin.math.roundToInt
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -45,7 +48,7 @@ class ReminderExtension : Extension() {
 	@OptIn(ExperimentalTime::class)
 	override suspend fun setup() {
 		checkTask = SCHEDULER.schedule(
-			10.seconds,
+			5.seconds,
 			name = "Reminder Checking Task",
 			repeat = true
 		) {
@@ -54,7 +57,10 @@ class ReminderExtension : Extension() {
 					continue
 				}
 				if (reminder.repeat) {
-					val newStamp = Clock.System.now() + reminder.duration
+					val difference = Clock.System.now() - reminder.timestamp
+					val offset = floor(difference / reminder.duration).toInt() + 1
+					val newStamp = reminder.timestamp + (reminder.duration * offset)
+					LOGGING.debug("Reminder ${reminder.id}: ${reminder.timestamp} $difference $offset $newStamp")
 					reminders.update(reminder.id, newStamp)
 				} else {
 					reminders.remove(reminder.id)
@@ -66,8 +72,13 @@ class ReminderExtension : Extension() {
 						val user = kord.getUser(userId.snowflake())
 						val dm = user?.getDmChannelOrNull()
 						if (dm != null) {
-							contacted[userId.snowflake()] = true
-							dm.createMessage(reminder.content)
+							try {
+								dm.createMessage(reminder.content)
+								contacted[userId.snowflake()] = true
+							} catch(_: Exception ) {
+								contacted[userId.snowflake()] = false
+								continue
+							}
 						}
 					}
 				}
@@ -114,6 +125,7 @@ class ReminderExtension : Extension() {
 					message.edit {
 						content = "Aborted."
 					}
+					message.delete("Reminder creation aborted")
 					return@action
 				}
 				if (datetime != null && duration != null) {
@@ -124,6 +136,7 @@ class ReminderExtension : Extension() {
 					message.edit {
 						content = "Aborted."
 					}
+					message.delete("Reminder creation aborted")
 					return@action
 				}
 				if (modal?.content?.value == null) {
@@ -158,6 +171,9 @@ class ReminderExtension : Extension() {
 						arguments.repeat,
 						user.asUser(),
 					)
+				}
+				respond {
+					content = "Reminder successfully set."
 				}
 			}
 		}

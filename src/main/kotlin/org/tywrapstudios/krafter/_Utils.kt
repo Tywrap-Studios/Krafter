@@ -113,7 +113,9 @@ fun Transaction.setup() {
 		SuggestionTable,
 		OwnedThreadTable,
 		RsvpTable,
-		TempbanTable
+		TempbanTable,
+		ReminderTable,
+		StickyTable,
 	)
 	addLogger(krafterSqlLogger)
 }

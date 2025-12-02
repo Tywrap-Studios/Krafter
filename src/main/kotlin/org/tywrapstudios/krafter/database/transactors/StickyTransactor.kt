@@ -22,7 +22,7 @@ object StickyTransactor {
 			setup()
 
 			StickyTable.insert {
-				it[this.tag] = tag
+				it[StickyTable.tag] = tag
 				it[channelId] = channel
 				it[lastMessageId] = lastMessage
 				it[text] = content

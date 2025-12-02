@@ -33,6 +33,7 @@ import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.PermissionOverwrite
 import dev.kord.core.entity.ReactionEmoji
+import dev.kord.core.entity.channel.DmChannel
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.TopGuildMessageChannel
@@ -175,6 +176,7 @@ class SuggestionsExtension : Extension() {
 			check { failIf(event.message.data.authorId == event.kord.selfId) }
 			check { failIf(event.message.author?.isBot == true) }
 
+			check { failIf(event.message.channel.asChannel() is DmChannel) }
 			check { failIfNot(event.message.channelId == getChannel(event.guild?.asGuild())?.id) }
 
 			action {
@@ -229,6 +231,7 @@ class SuggestionsExtension : Extension() {
 			check { failIf(event.message.data.authorId == event.kord.selfId) }
 			check { failIf(event.message.author?.isBot == true) }
 
+			check { failIf(event.message.channel.asChannel() is DmChannel) }
 			check { failIfNot(event.message.channelId == getChannel(event.guild?.asGuild())?.id) }
 
 			action {
@@ -272,6 +275,7 @@ class SuggestionsExtension : Extension() {
 		}
 
 		event<MessageCreateEvent> {
+			check { failIf(event.message.channel.asChannel() is DmChannel) }
 			check { failIfNot(event.message.channelId == getChannel(event.message.getGuild())?.id) }
 			check { failIfNot(event.message.type == MessageType.ThreadCreated) }
 
