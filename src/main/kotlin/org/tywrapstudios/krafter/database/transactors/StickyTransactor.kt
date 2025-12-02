@@ -2,9 +2,12 @@ package org.tywrapstudios.krafter.database.transactors
 
 import dev.kord.common.entity.Snowflake
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.replace
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.tywrapstudios.krafter.database.tables.StickyTable
 import org.tywrapstudios.krafter.database.tables.StickyTable.channelId
 import org.tywrapstudios.krafter.database.tables.StickyTable.lastMessageId
@@ -21,7 +24,7 @@ object StickyTransactor {
 		transaction {
 			setup()
 
-			StickyTable.insert {
+			StickyTable.replace {
 				it[StickyTable.tag] = tag
 				it[channelId] = channel
 				it[lastMessageId] = lastMessage
@@ -56,11 +59,11 @@ object StickyTransactor {
 
 			if (channel != null) {
 				StickyTable.selectAll().where(channelId eq channel).forEach {
-					list.add(it[text])
+					list.add(it[tag])
 				}
 			} else {
 				StickyTable.selectAll().forEach {
-					list.add(it[text])
+					list.add(it[tag])
 				}
 			}
 		}
@@ -88,5 +91,23 @@ object StickyTransactor {
 			}
 		}
 		return list
+	}
+
+	suspend fun update(tag: String, lastMessage: Snowflake) {
+		transaction {
+			setup()
+
+			StickyTable.update({ StickyTable.tag eq tag }) {
+				it[lastMessageId] = lastMessage
+			}
+		}
+	}
+
+	suspend fun remove(tag: String) {
+		transaction {
+			setup()
+
+			StickyTable.deleteWhere { StickyTable.tag eq tag }
+		}
 	}
 }

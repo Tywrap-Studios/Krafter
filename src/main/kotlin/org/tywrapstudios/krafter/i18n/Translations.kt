@@ -368,6 +368,22 @@ public object Translations {
             .withBundle(Translations.bundle)
       }
 
+      public object Remove {
+        /**
+         * id
+         */
+        public val id: Key = Key("args.remind.remove.id")
+            .withBundle(Translations.bundle)
+
+        public object Id {
+          /**
+           * The ID of the reminder
+           */
+          public val description: Key = Key("args.remind.remove.id.description")
+              .withBundle(Translations.bundle)
+        }
+      }
+
       public object Repeat {
         /**
          * Whether to repeat this reminder until cancelled
@@ -1321,11 +1337,39 @@ public object Translations {
 
     public object Remind {
       /**
-       * Put up a reminder that either reminds you at a certain point in time, or repeatedly reminds
-       * you.
+       * add
+       */
+      public val add: Key = Key("commands.remind.add")
+          .withBundle(Translations.bundle)
+
+      /**
+       * Commands that handle reminders
        */
       public val description: Key = Key("commands.remind.description")
           .withBundle(Translations.bundle)
+
+      /**
+       * remove
+       */
+      public val remove: Key = Key("commands.remind.remove")
+          .withBundle(Translations.bundle)
+
+      public object Add {
+        /**
+         * Put up a reminder that either reminds you at a certain point in time, or repeatedly
+         * reminds you
+         */
+        public val description: Key = Key("commands.remind.add.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Remove {
+        /**
+         * Remove a reminder
+         */
+        public val description: Key = Key("commands.remind.remove.description")
+            .withBundle(Translations.bundle)
+      }
     }
 
     public object Rsvp {
@@ -1338,10 +1382,38 @@ public object Translations {
 
     public object Sticky {
       /**
+       * add
+       */
+      public val add: Key = Key("commands.sticky.add")
+          .withBundle(Translations.bundle)
+
+      /**
        * Stick messages to the bottom of channels
        */
       public val description: Key = Key("commands.sticky.description")
           .withBundle(Translations.bundle)
+
+      /**
+       * remove
+       */
+      public val remove: Key = Key("commands.sticky.remove")
+          .withBundle(Translations.bundle)
+
+      public object Add {
+        /**
+         * Add a Sticky
+         */
+        public val description: Key = Key("commands.sticky.add.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Remove {
+        /**
+         * Remove a sticky
+         */
+        public val description: Key = Key("commands.sticky.remove.description")
+            .withBundle(Translations.bundle)
+      }
     }
 
     public object Suggestions {

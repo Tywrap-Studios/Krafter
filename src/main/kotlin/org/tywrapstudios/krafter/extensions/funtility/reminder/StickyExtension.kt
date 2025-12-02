@@ -3,6 +3,7 @@ package org.tywrapstudios.krafter.extensions.funtility.reminder
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kordex.core.checks.isNotBot
 import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.application.slash.ephemeralSubCommand
 import dev.kordex.core.commands.converters.impl.string
 import dev.kordex.core.components.forms.ModalForm
 import dev.kordex.core.extensions.Extension
@@ -27,25 +28,45 @@ class StickyExtension : Extension() {
 				for ((tag, lastMessage, text) in channelStickies) {
 					val channel = event.message.channel
 					channel.deleteMessage(lastMessage)
-					val message = channel.createMessage(text)
-					stickies.set(tag, event.message.channelId, message.id, text)
+					val message = channel.createMessage("# \uD83D\uDCCC\n${text}")
+					stickies.update(tag, message.id)
 				}
 			}
 		}
 
-		ephemeralSlashCommand(::StickyArguments, ::StickyForm) {
+		ephemeralSlashCommand {
 			name = Translations.Commands.sticky
 			description = Translations.Commands.Sticky.description
 
-			action { modal ->
-				if (modal?.text?.value == null) {
-					respond {
-						content = "Your text is invalid or null. Please try again."
+			ephemeralSubCommand(::StickyArguments, ::StickyForm) {
+				name = Translations.Commands.Sticky.add
+				description = Translations.Commands.Sticky.Add.description
+
+				action { modal ->
+					if (modal?.text?.value == null) {
+						respond {
+							content = "Your text is invalid or null. Please try again."
+						}
+						return@action
 					}
-					return@action
+					val message = channel.createMessage("# \uD83D\uDCCC\n${modal.text.value!!}")
+					stickies.set(arguments.tag, channel.id, message.id, modal.text.value!!)
+					respond {
+						content = "Sticky successfully set"
+					}
 				}
-				val message = channel.createMessage(modal.text.value!!)
-				stickies.set(arguments.tag, channel.id, message.id, modal.text.value!!)
+			}
+
+			ephemeralSubCommand(::StickyArguments) {
+				name = Translations.Commands.Sticky.remove
+				description = Translations.Commands.Sticky.Remove.description
+
+				action {
+					stickies.remove(arguments.tag)
+					respond {
+						content = "Sticky successfully removed"
+					}
+				}
 			}
 		}
 	}

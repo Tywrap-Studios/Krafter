@@ -14,10 +14,12 @@ import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.DISCORD_GREEN
 import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.application.slash.ephemeralSubCommand
 import dev.kordex.core.commands.converters.impl.defaultingBoolean
 import dev.kordex.core.commands.converters.impl.optionalChannel
 import dev.kordex.core.commands.converters.impl.optionalString
 import dev.kordex.core.commands.converters.impl.optionalTimestamp
+import dev.kordex.core.commands.converters.impl.snowflake
 import dev.kordex.core.components.forms.ModalForm
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.ephemeralSlashCommand
@@ -25,11 +27,14 @@ import dev.kordex.core.extensions.event
 import dev.kordex.core.i18n.types.Key
 import dev.kordex.core.time.TimestampType
 import dev.kordex.core.time.toDiscord
+import dev.kordex.core.utils.FilterStrategy
 import dev.kordex.core.utils.scheduling.Task
+import dev.kordex.core.utils.suggestStringMap
 import org.tywrapstudios.krafter.LOGGING
 import org.tywrapstudios.krafter.SCHEDULER
 import org.tywrapstudios.krafter.database.entities.Reminder
 import org.tywrapstudios.krafter.database.transactors.ReminderTransactor
+import org.tywrapstudios.krafter.database.transactors.StickyTransactor
 import org.tywrapstudios.krafter.i18n.Translations
 import org.tywrapstudios.krafter.snowflake
 import kotlin.math.floor
@@ -105,75 +110,94 @@ class ReminderExtension : Extension() {
 			}
 		}
 
-		ephemeralSlashCommand(::ReminderArguments, ::ReminderForm) {
+		ephemeralSlashCommand {
 			name = Translations.Commands.remind
 			description = Translations.Commands.Remind.description
 
-			action { modal ->
-				val channel = arguments.channel as? MessageChannelBehavior ?: channel
-				val datetime = arguments.timestamp?.instant
-				val duration = Duration.parseOrNull(arguments.duration ?: "null")
+			ephemeralSubCommand(::ReminderArguments, ::ReminderForm) {
+				name = Translations.Commands.Remind.add
+				description = Translations.Commands.Remind.Add.description
 
-				val message = channel.createMessage {
-					content = "Setting..."
-				}
-				if (datetime == null && duration == null) {
-					respond {
-						content = "Your specified date, time or duration was invalid or null.\n" +
-							"Make sure to input one of the two."
-					}
-					message.edit {
-						content = "Aborted."
-					}
-					message.delete("Reminder creation aborted")
-					return@action
-				}
-				if (datetime != null && duration != null) {
-					respond {
-						content = "You specified both a datetime and a duration, this is invalid.\n" +
-							"Make sure to input one of the two. (Not both!)"
-					}
-					message.edit {
-						content = "Aborted."
-					}
-					message.delete("Reminder creation aborted")
-					return@action
-				}
-				if (modal?.content?.value == null) {
-					respond {
-						content = "The content value is null or invalid. Make sure to properly input a content."
-					}
-					message.edit {
-						content = "Aborted."
-					}
-					return@action
-				}
+				action { modal ->
+					val channel = arguments.channel as? MessageChannelBehavior ?: channel
+					val datetime = arguments.timestamp?.instant
+					val duration = Duration.parseOrNull(arguments.duration ?: "null")
 
-				val instant = if (duration != null) Clock.System.now() + duration else datetime!!
-				val reminderDuration = duration ?: (instant - Clock.System.now())
-				reminders.set(Reminder(
-					message.id,
-					channel.id,
-					user.id,
-					arguments.dm,
-					arguments.ping,
-					mutableListOf(user.id.value),
-					instant,
-					reminderDuration,
-					arguments.repeat,
-					modal.content.value!!
-				))
-				message.edit {
-					reminder(
-						modal.content.value!!,
-						instant,
-						message.id,
-						arguments.repeat,
-						user.asUser(),
+					val message = channel.createMessage {
+						content = "Setting..."
+					}
+					if (datetime == null && duration == null) {
+						respond {
+							content = "Your specified date, time or duration was invalid or null.\n" +
+								"Make sure to input one of the two."
+						}
+						message.edit {
+							content = "Aborted."
+						}
+						message.delete("Reminder creation aborted")
+						return@action
+					}
+					if (datetime != null && duration != null) {
+						respond {
+							content = "You specified both a datetime and a duration, this is invalid.\n" +
+								"Make sure to input one of the two. (Not both!)"
+						}
+						message.edit {
+							content = "Aborted."
+						}
+						message.delete("Reminder creation aborted")
+						return@action
+					}
+					if (modal?.content?.value == null) {
+						respond {
+							content = "The content value is null or invalid. Make sure to properly input a content."
+						}
+						message.edit {
+							content = "Aborted."
+						}
+						return@action
+					}
+
+					val instant = if (duration != null) Clock.System.now() + duration else datetime!!
+					val reminderDuration = duration ?: (instant - Clock.System.now())
+					reminders.set(
+						Reminder(
+							message.id,
+							channel.id,
+							user.id,
+							arguments.dm,
+							arguments.ping,
+							mutableListOf(user.id.value),
+							instant,
+							reminderDuration,
+							arguments.repeat,
+							modal.content.value!!
+						)
 					)
+					message.edit {
+						reminder(
+							modal.content.value!!,
+							instant,
+							message.id,
+							arguments.repeat,
+							user.asUser(),
+						)
+					}
+					respond {
+						content = "Reminder successfully set."
+					}
 				}
-				respond {
-					content = "Reminder successfully set."
+			}
+
+			ephemeralSubCommand(::ReminderRemoveArguments) {
+				name = Translations.Commands.Remind.remove
+				description = Translations.Commands.Remind.Remove.description
+
+				action {
+					reminders.remove(arguments.id)
+					respond {
+						content = "Reminder successfully removed."
+					}
 				}
 			}
 		}
@@ -278,6 +302,22 @@ class ReminderExtension : Extension() {
 			label = Translations.Modals.Remind.Content.label
 			placeholder = Translations.Modals.Remind.Content.placeholder
 			maxLength = 1_800
+		}
+	}
+
+	class ReminderRemoveArguments : Arguments() {
+		val id by snowflake {
+			name = Translations.Args.Remind.Remove.id
+			description = Translations.Args.Remind.Remove.Id.description
+
+			autoComplete { autoComplete ->
+				val ids = ReminderTransactor.getAll().map { it.id.toString() }
+
+				suggestStringMap(
+					ids.associateWith { it },
+					FilterStrategy.Contains
+				)
+			}
 		}
 	}
 

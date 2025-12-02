@@ -20,6 +20,8 @@ nitpicked to your liking.
   - [x] RSVP - Manage event attendance with RSVP commands.
   - [x] Thread utilities - Let your players manage their threads easily.
   - [x] Say things as the bot, view Raw Message data, and more.
+  - [x] Sticky - Stick messages to the bottom of channels.
+  - [x] Reminders - Reminders that either remind you at a certain point in time, or repeatedly remind you.
 - [x] Minecraft server connections - Monitor and interact with your Minecraft server.
   - [x] Linking UUIDs to Discord accounts - Link Minecraft UUIDs to Discord accounts for better integration.
   - [ ] Server status - Check the status of your Minecraft server.
@@ -44,6 +46,7 @@ nitpicked to your liking.
 - [x] Basically flawless PluralKit integration - Seamlessly integrate with PluralKit for enhanced server accessibility.
 - [x] Extensive configuration options - Customise the bot to fit your server's needs with a wide range of configuration options.
 - [ ] Music bot capabilities - Play music in voice channels.
+- [ ] Giveaways - Host giveaways that choose random member(s).
 
 </details>
 
