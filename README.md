@@ -36,7 +36,6 @@ nitpicked to your liking.
   - [x] Phishing detection - Detect and prevent phishing attempts in your server.
   - [x] Mod commands - Easily kick, ban or time your users out.
   - [x] Dehoist and decancer - Automatically remove problematic characters from usernames.
-  - [ ] Auto-block rule breaking mods - Automatically report users who use rule-breaking mods.
 - [x] Full-blown Suggestion forums - Allow users to submit and vote on suggestions.
 - [ ] Starboard - Highlight popular messages with a starboard feature.
 - [ ] Reaction roles - Assign roles based on reactions to messages.
