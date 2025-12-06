@@ -6,13 +6,16 @@ import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.core.behavior.channel.edit
 import dev.kord.core.behavior.createVoiceChannel
+import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.VoiceChannel
 import dev.kord.core.event.guild.GuildCreateEvent
+import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.actionRow
+import dev.kord.rest.builder.message.addFile
 import dev.kord.rest.builder.message.create.FollowupMessageCreateBuilder
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.DISCORD_BLURPLE
@@ -33,7 +36,9 @@ import dev.kordex.core.types.EphemeralInteractionContext
 import dev.kordex.core.utils.FilterStrategy
 import dev.kordex.core.utils.scheduling.Task
 import dev.kordex.core.utils.suggestStringMap
+import kotlinx.serialization.json.Json
 import org.tywrapstudios.krafter.SCHEDULER
+import org.tywrapstudios.krafter.api.mcsrvstatus.AddOnInfo
 import org.tywrapstudios.krafter.api.mcsrvstatus.OfflineResponse
 import org.tywrapstudios.krafter.api.mcsrvstatus.OnlineResponse
 import org.tywrapstudios.krafter.api.mcsrvstatus.asResponse
@@ -46,11 +51,14 @@ import org.tywrapstudios.krafter.checks.isGlobalBotAdmin
 import org.tywrapstudios.krafter.database.entities.MinecraftServer
 import org.tywrapstudios.krafter.database.transactors.MinecraftLinkTransactor
 import org.tywrapstudios.krafter.database.transactors.MinecraftServerTransactor
+import org.tywrapstudios.krafter.getDataDirectory
 import org.tywrapstudios.krafter.getOrCreateChannel
 import org.tywrapstudios.krafter.i18n.Translations
 import org.tywrapstudios.krafter.minecraftConfig
 import org.tywrapstudios.krafter.platform.MC_CONNECTION
+import java.io.File
 import java.util.regex.Pattern
+import kotlin.io.path.createDirectories
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -780,7 +788,7 @@ class MinecraftExtension : Extension() {
 										}
 									}
 									actionRow {
-										interactionButton(ButtonStyle.Primary, "srvstatus:get_addons:$address") {
+										interactionButton(ButtonStyle.Primary, "srvstatus:get_addons:$address:$bedrock") {
 											label = "View mods or plugins"
 											disabled = response.getAllAddOns().isEmpty()
 										}
@@ -814,6 +822,41 @@ class MinecraftExtension : Extension() {
 									}
 								}
 							}
+						}
+					}
+				}
+			}
+		}
+
+		event<ButtonInteractionCreateEvent> {
+			check { failIfNot(event.interaction.componentId.startsWith("srvstatus:get_addons:")) }
+
+			action {
+				val address = event.interaction.componentId.split(":")[2]
+				val bedrock = event.interaction.componentId.split(":")[3].toBoolean()
+				val response = org.tywrapstudios.krafter.api.mcsrvstatus.MinecraftServer(address, bedrock).asResponse()
+
+				event.interaction.respondEphemeral {
+					when (response) {
+						is OnlineResponse -> {
+							val file = File(
+								getDataDirectory().resolve("addon_attachments").createDirectories().toFile(),
+								"addons-$address.json"
+							)
+							val json = Json {
+								prettyPrint = true
+							}
+							val element = json.encodeToString<List<AddOnInfo>>(response.getAllAddOns())
+							file.writeText(element)
+							addFile(file.toPath())
+						}
+
+						is OfflineResponse -> {
+							content = "The server seems to be offline while fetching these files."
+						}
+
+						else -> {
+							content = "Something went wrong while fetching the server."
 						}
 					}
 				}

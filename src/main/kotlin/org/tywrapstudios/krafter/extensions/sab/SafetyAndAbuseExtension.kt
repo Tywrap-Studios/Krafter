@@ -574,7 +574,7 @@ class SafetyAndAbuseExtension : Extension() {
 	}
 }
 
-fun getOverwrites(guild: Guild): MutableSet<Overwrite> {
+private fun getOverwrites(guild: Guild): MutableSet<Overwrite> {
 	val cfg = sabConfig()
 	val overwrites = mutableSetOf<Overwrite>()
 	for (role in cfg.administrators.roles) {
