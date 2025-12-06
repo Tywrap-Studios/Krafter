@@ -773,6 +773,12 @@ public object Translations {
         .withBundle(Translations.bundle)
 
     /**
+     * star-board
+     */
+    public val starBoard: Key = Key("commands.starBoard")
+        .withBundle(Translations.bundle)
+
+    /**
      * sticky
      */
     public val sticky: Key = Key("commands.sticky")
@@ -1496,6 +1502,28 @@ public object Translations {
        */
       public val description: Key = Key("commands.rsvp.description")
           .withBundle(Translations.bundle)
+    }
+
+    public object StarBoard {
+      /**
+       * Manage the Starboard
+       */
+      public val description: Key = Key("commands.starBoard.description")
+          .withBundle(Translations.bundle)
+
+      /**
+       * purge
+       */
+      public val purge: Key = Key("commands.starBoard.purge")
+          .withBundle(Translations.bundle)
+
+      public object Purge {
+        /**
+         * Get rid of all the starboard entries in the database.
+         */
+        public val description: Key = Key("commands.starBoard.purge.description")
+            .withBundle(Translations.bundle)
+      }
     }
 
     public object Sticky {

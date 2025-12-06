@@ -37,7 +37,7 @@ nitpicked to your liking.
   - [x] Mod commands - Easily kick, ban or time your users out.
   - [x] Dehoist and decancer - Automatically remove problematic characters from usernames.
 - [x] Full-blown Suggestion forums - Allow users to submit and vote on suggestions.
-- [ ] Starboard - Highlight popular messages with a starboard feature.
+- [x] Starboard - Highlight popular messages with a starboard feature.
 - [ ] Reaction roles - Assign roles based on reactions to messages.
 - [x] Welcome messages - Send personalised welcome messages to new members.
 - [x] Tags - Create and manage custom tags for easy access to frequently used information.

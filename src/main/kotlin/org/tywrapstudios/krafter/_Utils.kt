@@ -116,6 +116,7 @@ fun Transaction.setup() {
 		TempbanTable,
 		ReminderTable,
 		StickyTable,
+		StarBoardTable,
 		MinecraftServerTable,
 	)
 	addLogger(krafterSqlLogger)

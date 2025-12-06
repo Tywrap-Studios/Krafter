@@ -24,6 +24,7 @@ import org.tywrapstudios.krafter.extensions.data.KrafterTagsData
 import org.tywrapstudios.krafter.extensions.data.KrafterWelcomeChannelData
 import org.tywrapstudios.krafter.extensions.funtility.FunExtension
 import org.tywrapstudios.krafter.extensions.funtility.HaikuExtension
+import org.tywrapstudios.krafter.extensions.funtility.StarBoardExtension
 import org.tywrapstudios.krafter.extensions.funtility.reminder.RsvpExtension
 import org.tywrapstudios.krafter.extensions.funtility.UtilityExtension
 import org.tywrapstudios.krafter.extensions.funtility.reminder.ReminderExtension
@@ -161,8 +162,9 @@ suspend fun setup(): ExtensibleBot {
 				add(::SuggestionsExtension)
 			}
 			if (funConfig().enabled) {
-				if (funConfig().functions.haiku) add(::HaikuExtension)
 				add(::FunExtension)
+				if (funConfig().functions.haiku) add(::HaikuExtension)
+				if (funConfig().functions.star_board) add(::StarBoardExtension)
 			}
 		}
 

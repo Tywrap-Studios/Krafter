@@ -14,11 +14,6 @@ public class FunConfig implements ConfigClass {
 
 	public Functions functions = new Functions();
 
-	@Override
-	public void validate() {
-
-	}
-
 	public static class Functions {
 
 		@Comment("Bean. Who knows what it does.")
@@ -31,5 +26,19 @@ public class FunConfig implements ConfigClass {
 
 			This function looks for accidental Haiku's in chat messages.""")
 		public boolean haiku = false;
+
+		@Comment("Allow users to star messages and put them on a dedicated channel.")
+		public boolean star_board = false;
+
+		@Comment("The channel to put starred messages in.")
+		public String star_channel = "";
+
+		@Comment("The minimum amount of stars required to be featured on the board. (>=)")
+		public int min_stars = 10;
+	}
+
+	@Override
+	public void validate() {
+		functions.star_channel = Util.channelCheck.apply(functions.star_channel);
 	}
 }
