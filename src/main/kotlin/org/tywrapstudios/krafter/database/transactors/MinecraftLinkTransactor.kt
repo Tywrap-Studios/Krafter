@@ -13,7 +13,7 @@ import java.util.*
 import kotlin.random.Random
 import kotlin.random.nextUInt
 
-object KrafterMinecraftLinkTransactor {
+object MinecraftLinkTransactor {
 	/**
 	 * Starts a link status for the given member, if one does not already exist.
 	 * If a link status already exists, it will be replaced with the new one.

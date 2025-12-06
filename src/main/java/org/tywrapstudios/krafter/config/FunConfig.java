@@ -22,7 +22,7 @@ public class FunConfig implements ConfigClass {
 	public static class Functions {
 
 		@Comment("Bean. Who knows what it does.")
-		public boolean bean = true;
+		public boolean bean = false;
 
 		@Comment("""
 			A Haiku is a traditional form of Japanese consisting of three lines,
@@ -30,6 +30,6 @@ public class FunConfig implements ConfigClass {
 			line having seven syllables.
 
 			This function looks for accidental Haiku's in chat messages.""")
-		public boolean haiku = true;
+		public boolean haiku = false;
 	}
 }

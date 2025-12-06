@@ -60,6 +60,7 @@ dependencies {
 	implementation(libs.rcon)
 	implementation(libs.excelkt)
 	implementation(libs.decancer)
+	implementation(libs.ktor.client.cio)
 
 	implementation(compose.desktop.uiTestJUnit4)
 	implementation(compose.desktop.currentOs)

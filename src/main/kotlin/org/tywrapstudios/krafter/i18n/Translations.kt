@@ -281,6 +281,54 @@ public object Translations {
       }
     }
 
+    public object MinecraftServer {
+      public object RemoveTrack {
+        /**
+         * server
+         */
+        public val server: Key = Key("args.minecraftServer.removeTrack.server")
+            .withBundle(Translations.bundle)
+
+        public object Server {
+          /**
+           * The Minecraft server to stop tracking
+           */
+          public val description: Key = Key("args.minecraftServer.removeTrack.server.description")
+              .withBundle(Translations.bundle)
+        }
+      }
+
+      public object Track {
+        /**
+         * name
+         */
+        public val name: Key = Key("args.minecraftServer.track.name")
+            .withBundle(Translations.bundle)
+
+        /**
+         * two-channels
+         */
+        public val twoChannels: Key = Key("args.minecraftServer.track.twoChannels")
+            .withBundle(Translations.bundle)
+
+        public object Name {
+          /**
+           * The name to identify this Minecraft server by
+           */
+          public val description: Key = Key("args.minecraftServer.track.name.description")
+              .withBundle(Translations.bundle)
+        }
+
+        public object TwoChannels {
+          /**
+           * Whether to use two channels (one for status, one for players) instead of one for both
+           */
+          public val description: Key = Key("args.minecraftServer.track.twoChannels.description")
+              .withBundle(Translations.bundle)
+        }
+      }
+    }
+
     public object Moderate {
       public object Ban {
         /**
@@ -698,6 +746,12 @@ public object Translations {
      * minecraft
      */
     public val minecraft: Key = Key("commands.minecraft")
+        .withBundle(Translations.bundle)
+
+    /**
+     * minecraft-server
+     */
+    public val minecraftServer: Key = Key("commands.minecraftServer")
         .withBundle(Translations.bundle)
 
     /**
@@ -1193,6 +1247,70 @@ public object Translations {
          * Unlink your Minecraft account from your Discord account.
          */
         public val description: Key = Key("commands.minecraft.unlink.description")
+            .withBundle(Translations.bundle)
+      }
+    }
+
+    public object MinecraftServer {
+      /**
+       * Minecraft server related commands
+       */
+      public val description: Key = Key("commands.minecraftServer.description")
+          .withBundle(Translations.bundle)
+
+      /**
+       * list-tracks
+       */
+      public val listTracks: Key = Key("commands.minecraftServer.listTracks")
+          .withBundle(Translations.bundle)
+
+      /**
+       * remove-track
+       */
+      public val removeTrack: Key = Key("commands.minecraftServer.removeTrack")
+          .withBundle(Translations.bundle)
+
+      /**
+       * status
+       */
+      public val status: Key = Key("commands.minecraftServer.status")
+          .withBundle(Translations.bundle)
+
+      /**
+       * track
+       */
+      public val track: Key = Key("commands.minecraftServer.track")
+          .withBundle(Translations.bundle)
+
+      public object ListTracks {
+        /**
+         * List all tracked Minecraft servers
+         */
+        public val description: Key = Key("commands.minecraftServer.listTracks.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object RemoveTrack {
+        /**
+         * Remove a tracked Minecraft server
+         */
+        public val description: Key = Key("commands.minecraftServer.removeTrack.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Status {
+        /**
+         * Get the current status of a Minecraft server
+         */
+        public val description: Key = Key("commands.minecraftServer.status.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Track {
+        /**
+         * Track the status of a Minecraft server
+         */
+        public val description: Key = Key("commands.minecraftServer.track.description")
             .withBundle(Translations.bundle)
       }
     }
@@ -1818,6 +1936,36 @@ public object Translations {
          * The Regex pattern for matching message content
          */
         public val description: Key = Key("generalArgs.manageTags.trigger.description")
+            .withBundle(Translations.bundle)
+      }
+    }
+
+    public object MinecraftServer {
+      /**
+       * address
+       */
+      public val address: Key = Key("generalArgs.minecraftServer.address")
+          .withBundle(Translations.bundle)
+
+      /**
+       * bedrock
+       */
+      public val bedrock: Key = Key("generalArgs.minecraftServer.bedrock")
+          .withBundle(Translations.bundle)
+
+      public object Address {
+        /**
+         * The address of the Minecraft server to track
+         */
+        public val description: Key = Key("generalArgs.minecraftServer.address.description")
+            .withBundle(Translations.bundle)
+      }
+
+      public object Bedrock {
+        /**
+         * Whether the server is a Bedrock edition server
+         */
+        public val description: Key = Key("generalArgs.minecraftServer.bedrock.description")
             .withBundle(Translations.bundle)
       }
     }

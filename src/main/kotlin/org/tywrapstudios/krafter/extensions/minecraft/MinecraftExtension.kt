@@ -4,16 +4,23 @@ package org.tywrapstudios.krafter.extensions.minecraft
 
 import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
+import dev.kord.core.behavior.channel.edit
+import dev.kord.core.behavior.createVoiceChannel
 import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.VoiceChannel
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.create.FollowupMessageCreateBuilder
 import dev.kord.rest.builder.message.embed
 import dev.kordex.core.DISCORD_BLURPLE
+import dev.kordex.core.DISCORD_GREEN
 import dev.kordex.core.DISCORD_RED
+import dev.kordex.core.checks.anyGuild
+import dev.kordex.core.checks.inChannel
+import dev.kordex.core.checks.isNotBot
 import dev.kordex.core.commands.Arguments
 import dev.kordex.core.commands.application.slash.EphemeralSlashCommand
 import dev.kordex.core.commands.application.slash.ephemeralSubCommand
@@ -23,30 +30,99 @@ import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.extensions.event
 import dev.kordex.core.types.EphemeralInteractionContext
+import dev.kordex.core.utils.FilterStrategy
+import dev.kordex.core.utils.scheduling.Task
+import dev.kordex.core.utils.suggestStringMap
+import org.tywrapstudios.krafter.SCHEDULER
+import org.tywrapstudios.krafter.api.mcsrvstatus.OfflineResponse
+import org.tywrapstudios.krafter.api.mcsrvstatus.OnlineResponse
+import org.tywrapstudios.krafter.api.mcsrvstatus.asResponse
+import org.tywrapstudios.krafter.api.mcsrvstatus.getImageAddress
 import org.tywrapstudios.krafter.api.objects.McMessage
 import org.tywrapstudios.krafter.api.objects.McPlayer
 import org.tywrapstudios.krafter.api.objects.getMcPlayer
 import org.tywrapstudios.krafter.checks.isBotModuleAdmin
 import org.tywrapstudios.krafter.checks.isGlobalBotAdmin
-import org.tywrapstudios.krafter.database.transactors.KrafterMinecraftLinkTransactor
+import org.tywrapstudios.krafter.database.entities.MinecraftServer
+import org.tywrapstudios.krafter.database.transactors.MinecraftLinkTransactor
+import org.tywrapstudios.krafter.database.transactors.MinecraftServerTransactor
 import org.tywrapstudios.krafter.getOrCreateChannel
 import org.tywrapstudios.krafter.i18n.Translations
 import org.tywrapstudios.krafter.minecraftConfig
 import org.tywrapstudios.krafter.platform.MC_CONNECTION
 import java.util.regex.Pattern
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
-var watchChannel: TextChannel? = null
-
 class MinecraftExtension : Extension() {
 	override val name: String = "krafter.minecraft"
-	val data: KrafterMinecraftLinkTransactor = KrafterMinecraftLinkTransactor
+	val links: MinecraftLinkTransactor = MinecraftLinkTransactor
+	val servers = MinecraftServerTransactor
+	private val cfg get() = minecraftConfig()
+	var watchChannel: TextChannel? = null
+	var watchTask: Task? = null
 
 	@OptIn(ExperimentalUuidApi::class)
 	override suspend fun setup() {
-		val cfg = minecraftConfig()
+		watchTask = SCHEDULER.schedule(
+			cfg.status.polling_seconds.seconds,
+			name = "Status Refresher Task",
+			repeat = true
+		) {
+			val list = servers.getAll()
+			for (server in list) {
+				val channel1 = kord.getChannelOf<VoiceChannel>(server.mainChannel)
+				val channel2 = if (server.secondaryChannel != null) kord.getChannelOf<VoiceChannel>(server.secondaryChannel) else null
+				when (val response = server.asResponse()) {
+					is OnlineResponse -> {
+						if (channel2 == null) {
+							channel1?.edit {
+								name = "${server.name}: ${response.players.online}/${response.players.max}"
+							}
+						} else {
+							channel1?.edit {
+								name = "${server.name}: Online"
+							}
+							channel2.edit {
+								name = "${response.players.online} out of ${response.players.max} players online"
+							}
+						}
+					}
+
+					is OfflineResponse -> {
+						if (channel2 == null) {
+							channel1?.edit {
+								name = "${server.name}: Offline"
+							}
+						} else {
+							channel1?.edit {
+								name = "${server.name}: Offline"
+							}
+							channel2.edit {
+								name = "No players"
+							}
+						}
+					}
+
+					else -> {
+						if (channel2 == null) {
+							channel1?.edit {
+								name = "${server.name}: Unavailable"
+							}
+						} else {
+							channel1?.edit {
+								name = "${server.name}: Unavailable"
+							}
+							channel2.edit {
+								name = "Unavailable"
+							}
+						}
+					}
+				}
+			}
+		}
 
 		if (cfg.connection.enabled) {
 			event<GuildCreateEvent> {
@@ -62,10 +138,14 @@ class MinecraftExtension : Extension() {
 				}
 			}
 			event<MessageCreateEvent> {
+				check { isNotBot() }
+				check { failIf(watchChannel == null) }
+				check { inChannel(watchChannel!!.id) }
+
 				action {
 					if (!minecraftConfig().connection.enabled) return@action
 					if (event.message.channel.asChannel() == watchChannel) {
-						event.message.author?.isBot?.let { if (!it) MC_CONNECTION.broadcast(McMessage(event.message)) }
+						MC_CONNECTION.broadcast(McMessage(event.message))
 					}
 				}
 			}
@@ -74,131 +154,135 @@ class MinecraftExtension : Extension() {
 		ephemeralSlashCommand {
 			name = Translations.Commands.minecraft
 			description = Translations.Commands.Minecraft.description
-
-			ephemeralSubCommand(::LinkCommandArguments) {
-				name = Translations.Commands.Minecraft.link
-				description = Translations.Commands.Minecraft.Link.description
-				action {
-					if (!minecraftConfig().enabled) {
-						respond {
-							content =
-								Translations.Responses.Minecraft.Link.Error.disabled.withLocale(getLocale())
-									.withLocale(getLocale()).translate()
+			if (cfg.linking) {
+				ephemeralSubCommand(::LinkCommandArguments) {
+					name = Translations.Commands.Minecraft.link
+					description = Translations.Commands.Minecraft.Link.description
+					action {
+						if (!minecraftConfig().enabled) {
+							respond {
+								content =
+									Translations.Responses.Minecraft.Link.Error.disabled.withLocale(getLocale())
+										.withLocale(getLocale()).translate()
+							}
+							return@action
 						}
-						return@action
-					}
 
-					val uuid = arguments.uuid
-					val member = event.interaction.user.id
+						val uuid = arguments.uuid
+						val member = event.interaction.user.id
 
-					val link =
-						data.setLinkStatus(
-							member,
-							KrafterMinecraftLinkTransactor.LinkStatus(member, Uuid.parse(uuid).toJavaUuid())
-						)
+						val link =
+							links.setLinkStatus(
+								member,
+								MinecraftLinkTransactor.LinkStatus(member, Uuid.parse(uuid).toJavaUuid())
+							)
 
-					respond {
-						content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
-							link.code
-						).withLocale(getLocale()).translate()
-					}
-				}
-			}
-
-			ephemeralSubCommand {
-				name = Translations.Commands.Minecraft.unlink
-				description = Translations.Commands.Minecraft.Unlink.description
-				action {
-					if (!minecraftConfig().enabled) {
 						respond {
-							content = Translations.Responses.Minecraft.Unlink.Error.disabled.withLocale(getLocale())
-								.translate()
-						}
-						return@action
-					}
-
-					val member = event.interaction.user.id
-					val uuid = data.unlink(member)
-					if (uuid == null) {
-						respond {
-							content = Translations.Responses.Minecraft.Unlink.Error.notLinked.withLocale(getLocale())
-								.translate()
-						}
-					} else {
-						respond {
-							content = Translations.Responses.Minecraft.Unlink.success.withOrdinalPlaceholders(
-								uuid
+							content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
+								link.code
 							).withLocale(getLocale()).translate()
 						}
 					}
 				}
-			}
 
-			ephemeralSubCommand(::ForceLinkCommandArguments) {
-				name = Translations.Commands.Minecraft.forceLink
-				description = Translations.Commands.Minecraft.ForceLink.description
-				check {
-					isGlobalBotAdmin()
-				}
-				action {
-					if (!minecraftConfig().enabled) {
-						respond {
-							content = Translations.Responses.Minecraft.ForceLink.Error.disabled.withLocale(getLocale())
-								.translate()
+				ephemeralSubCommand {
+					name = Translations.Commands.Minecraft.unlink
+					description = Translations.Commands.Minecraft.Unlink.description
+					action {
+						if (!minecraftConfig().enabled) {
+							respond {
+								content = Translations.Responses.Minecraft.Unlink.Error.disabled.withLocale(getLocale())
+									.translate()
+							}
+							return@action
 						}
-						return@action
+
+						val member = event.interaction.user.id
+						val uuid = links.unlink(member)
+						if (uuid == null) {
+							respond {
+								content =
+									Translations.Responses.Minecraft.Unlink.Error.notLinked.withLocale(getLocale())
+										.translate()
+							}
+						} else {
+							respond {
+								content = Translations.Responses.Minecraft.Unlink.success.withOrdinalPlaceholders(
+									uuid
+								).withLocale(getLocale()).translate()
+							}
+						}
 					}
+				}
 
-					val member = arguments.member
-					val uuid = arguments.uuid
+				ephemeralSubCommand(::ForceLinkCommandArguments) {
+					name = Translations.Commands.Minecraft.forceLink
+					description = Translations.Commands.Minecraft.ForceLink.description
+					check {
+						isGlobalBotAdmin()
+					}
+					action {
+						if (!minecraftConfig().enabled) {
+							respond {
+								content =
+									Translations.Responses.Minecraft.ForceLink.Error.disabled.withLocale(getLocale())
+										.translate()
+							}
+							return@action
+						}
 
-					val currentLink = data.getLinkStatus(member.id)
+						val member = arguments.member
+						val uuid = arguments.uuid
 
-					if (currentLink == null) {
-						data.setLinkStatus(
-							member.id,
-							KrafterMinecraftLinkTransactor.LinkStatus(member.id, Uuid.parse(uuid).toJavaUuid())
-						)
-					} else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
-						respond {
-							content =
-								Translations.Responses.Minecraft.ForceLink.Error.alreadyLinked.withOrdinalPlaceholders(
+						val currentLink = links.getLinkStatus(member.id)
+
+						if (currentLink == null) {
+							links.setLinkStatus(
+								member.id,
+								MinecraftLinkTransactor.LinkStatus(member.id, Uuid.parse(uuid).toJavaUuid())
+							)
+						} else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
+							respond {
+								content =
+									Translations.Responses.Minecraft.ForceLink.Error.alreadyLinked.withOrdinalPlaceholders(
+										currentLink.uuid
+									).withLocale(getLocale()).translate()
+							}
+							return@action
+						} else if (currentLink.uuid.toString() != uuid && currentLink.verified) {
+							respond {
+								content = Translations.Responses.Minecraft.ForceLink.Error.alreadyLinkedDifferent
+									.withOrdinalPlaceholders(currentLink.uuid)
+									.withLocale(getLocale()).translate()
+							}
+							return@action
+						} else if (!currentLink.verified) {
+							links.verify(member.id, currentLink.code)
+							respond {
+								content = Translations.Responses.Minecraft.ForceLink.success.withOrdinalPlaceholders(
+									member.mention,
 									currentLink.uuid
 								).withLocale(getLocale()).translate()
-						}
-						return@action
-					} else if (currentLink.uuid.toString() != uuid && currentLink.verified) {
-						respond {
-							content = Translations.Responses.Minecraft.ForceLink.Error.alreadyLinkedDifferent
-								.withOrdinalPlaceholders(currentLink.uuid)
-								.withLocale(getLocale()).translate()
-						}
-						return@action
-					} else if (!currentLink.verified) {
-						data.verify(member.id, currentLink.code)
-						respond {
-							content = Translations.Responses.Minecraft.ForceLink.success.withOrdinalPlaceholders(
-								member.mention,
-								currentLink.uuid
-							).withLocale(getLocale()).translate()
+							}
 						}
 					}
 				}
 			}
 
-			publicSubCommand(::LookupCommandArguments) {
-				name = Translations.Commands.Minecraft.lookup
-				description = Translations.Commands.Minecraft.Lookup.description
-				action {
-					val mcLink = data.getLinkStatus(arguments.member.id)
-					val player = mcLink?.getMcPlayer()
-					if (mcLink != null && player != null) {
-						respond {
-							embed {
-								title = "Minecraft profile for ${arguments.member.effectiveName}"
-								field {
-									name = "Username and UUID"
-									value = """
+			if (cfg.profile_utils) {
+				publicSubCommand(::LookupCommandArguments) {
+					name = Translations.Commands.Minecraft.lookup
+					description = Translations.Commands.Minecraft.Lookup.description
+					action {
+						val mcLink = links.getLinkStatus(arguments.member.id)
+						val player = mcLink?.getMcPlayer()
+						if (mcLink != null && player != null) {
+							respond {
+								embed {
+									title = "Minecraft profile for ${arguments.member.effectiveName}"
+									field {
+										name = "Username and UUID"
+										value = """
 										```
 										${player.name}
 										```
@@ -206,382 +290,532 @@ class MinecraftExtension : Extension() {
 										${player.id}
 										```
 									""".trimIndent()
+									}
+									field {
+										name = "Link status"
+										value = "Verified: ${if (mcLink.verified) "✅" else "❌"}"
+									}
+									thumbnail {
+										url = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
+									}
+									footer {
+										text = player.name
+										icon = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
+									}
 								}
-								field {
-									name = "Link status"
-									value = "Verified: ${if (mcLink.verified) "✅" else "❌"}"
-								}
-								thumbnail {
-									url = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
-								}
-								footer {
-									text = player.name
-									icon = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
+								actionRow {
+									interactionButton(ButtonStyle.Primary, "minecraft:force-link") {
+										label = "Force link"
+										emoji(ReactionEmoji.Unicode("🔗"))
+									}
 								}
 							}
-							actionRow {
-								interactionButton(ButtonStyle.Primary, "minecraft:force-link") {
-									label = "Force link"
-									emoji(ReactionEmoji.Unicode("🔗"))
+						} else {
+							respond {
+								embed {
+									title = "Minecraft profile for ${arguments.member.effectiveName}"
+									field {
+										name = "Could not present profile:"
+										value = if (mcLink == null)
+											"Our database does not contain this member."
+										else if (player == null) "Our database contains a linked UUID, but this player profile " +
+											"does not actually exist or could not be found due to other reasons."
+										else "Something unexpected happened, please contact a staff member."
+									}
 								}
 							}
 						}
-					} else {
+					}
+				}
+
+				publicSubCommand(::SearchUuidArguments) {
+					name = Translations.Commands.Minecraft.searchUuid
+					description = Translations.Commands.Minecraft.SearchUuid.description
+
+					action {
+						val player = getMcPlayer(Uuid.parse(arguments.uuid).toJavaUuid())
 						respond {
-							embed {
-								title = "Minecraft profile for ${arguments.member.effectiveName}"
-								field {
-									name = "Could not present profile:"
-									value = if (mcLink == null)
-										"Our database does not contain this member."
-									else if (player == null) "Our database contains a linked UUID, but this player profile " +
-										"does not actually exist or could not be found due to other reasons."
-									else "Something unexpected happened, please contact a staff member."
-								}
-							}
+							mcPlayerProfileEmbed(arguments.uuid, player)
 						}
 					}
 				}
-			}
 
-			publicSubCommand(::SearchUuidArguments) {
-				name = Translations.Commands.Minecraft.searchUuid
-				description = Translations.Commands.Minecraft.SearchUuid.description
+				publicSubCommand(::SearchUsernameArguments) {
+					name = Translations.Commands.Minecraft.searchUsername
+					description = Translations.Commands.Minecraft.SearchUsername.description
 
-				action {
-					val player = getMcPlayer(Uuid.parse(arguments.uuid).toJavaUuid())
-					respond {
-						mcPlayerProfileEmbed(arguments.uuid, player)
-					}
-				}
-			}
-
-			publicSubCommand(::SearchUsernameArguments) {
-				name = Translations.Commands.Minecraft.searchUsername
-				description = Translations.Commands.Minecraft.SearchUsername.description
-
-				action {
-					val player = getMcPlayer(arguments.username)
-					respond {
-						mcPlayerProfileEmbed(arguments.username, player)
+					action {
+						val player = getMcPlayer(arguments.username)
+						respond {
+							mcPlayerProfileEmbed(arguments.username, player)
+						}
 					}
 				}
 			}
 		}
 
-		ephemeralSlashCommand {
-			name = Translations.Commands.cmd
-			description = Translations.Commands.Cmd.description
+		if (cfg.connection.console) {
+			ephemeralSlashCommand {
+				name = Translations.Commands.cmd
+				description = Translations.Commands.Cmd.description
 
-			ephemeralSubCommand {
-				name = Translations.Commands.Cmd.list
-				description = Translations.Commands.Cmd.List.description
+				ephemeralSubCommand {
+					name = Translations.Commands.Cmd.list
+					description = Translations.Commands.Cmd.List.description
 
-				basicMsc("/list")
-			}
+					basicMsc("/list")
+				}
 
-			ephemeralSubCommand(::TellrawArguments) {
-				name = Translations.Commands.Cmd.tellraw
-				description = Translations.Commands.Cmd.Tellraw.description
+				ephemeralSubCommand(::TellrawArguments) {
+					name = Translations.Commands.Cmd.tellraw
+					description = Translations.Commands.Cmd.Tellraw.description
 
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
 
-				action {
-					val text = arguments.text
-					basicMsc("/tellraw @a $text")
+					action {
+						val text = arguments.text
+						basicMsc("/tellraw @a $text")
+					}
+				}
+
+				ephemeralSubCommand(::MclogsArguments) {
+					name = Translations.Commands.Cmd.mclogs
+					description = Translations.Commands.Cmd.Mclogs.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val log = arguments.log
+
+						val resp: String = if (log != null) {
+							MC_CONNECTION.command("/mclogs share $log")
+						} else {
+							MC_CONNECTION.command("/mclogs")
+						}
+
+						if (resp.startsWith("Your log")) {
+							val url = resp.replace("Your log has been uploaded:", "").trim()
+							val id = url.replace("https://mclo.gs/", "").trim()
+							customMscEmbed(
+								Translations.Responses.Cmd.Mclogs.success.withOrdinalPlaceholders(
+									id,
+									url
+								).withLocale(getLocale()).translate(),
+								DISCORD_BLURPLE
+							)
+						} else {
+							customMscEmbed(
+								Translations.Responses.Cmd.Mclogs.error.withOrdinalPlaceholders(
+									resp
+								).withLocale(getLocale()).translate(),
+								DISCORD_RED
+							)
+						}
+					}
+				}
+
+				ephemeralSubCommand(::MaintenanceArguments) {
+					name = Translations.Commands.Cmd.maintenance
+					description = Translations.Commands.Cmd.Maintenance.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val enable = arguments.enable
+
+						basicMsc("/maintenance ${if (enable) "on" else "off"}")
+					}
+				}
+
+				ephemeralSubCommand(::TpOfflineArguments) {
+					name = Translations.Commands.Cmd.modTpOffline
+					description = Translations.Commands.Cmd.ModTpOffline.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val playerName = arguments.playerName
+						val position = arguments.position
+						val x = arguments.x ?: "0"
+						val y = arguments.y ?: "0"
+						val z = arguments.z ?: "0"
+						val command = if (position != null) {
+							"/tp-offline $playerName $position"
+						} else {
+							"/tp-offline $playerName $x $y $z"
+						}
+						basicMsc(command)
+					}
+				}
+
+				ephemeralSubCommand(::SingularPlayerArguments) {
+					name = Translations.Commands.Cmd.modHeal
+					description = Translations.Commands.Cmd.ModHeal.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val playerName = arguments.playerName
+
+						basicMsc("/heal $playerName")
+					}
+				}
+
+				ephemeralSubCommand(::DamageArguments) {
+					name = Translations.Commands.Cmd.modDamage
+					description = Translations.Commands.Cmd.ModDamage.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val playerName = arguments.playerName
+						val amount = arguments.amount
+
+						basicMsc("/damage $playerName $amount")
+					}
+				}
+
+				ephemeralSubCommand(::WhiteListArguments) {
+					name = Translations.Commands.Cmd.modWhitelist
+					description = Translations.Commands.Cmd.ModWhitelist.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val enable = arguments.enable
+
+						basicMsc("/whitelist ${if (enable) "on" else "off"}")
+					}
+				}
+
+				ephemeralSubCommand(::SingularPlayerArguments) {
+					name = Translations.Commands.Cmd.ModWhitelist.add
+					description = Translations.Commands.Cmd.ModWhitelist.Add.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val playerName = arguments.playerName
+
+						basicMsc("/whitelist add $playerName")
+					}
+				}
+
+				ephemeralSubCommand(::SingularPlayerArguments) {
+					name = Translations.Commands.Cmd.ModWhitelist.remove
+					description = Translations.Commands.Cmd.ModWhitelist.Remove.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val playerName = arguments.playerName
+
+						basicMsc("/whitelist remove $playerName")
+					}
+				}
+
+				ephemeralSubCommand {
+					name = Translations.Commands.Cmd.modListWhitelist
+					description = Translations.Commands.Cmd.ModListWhitelist.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					basicMsc("/whitelist list")
+				}
+
+				ephemeralSubCommand(::SingularPlayerArguments) {
+					name = Translations.Commands.Cmd.viewBalance
+					description = Translations.Commands.Cmd.ViewBalance.description
+
+					action {
+						val playerName = arguments.playerName
+
+						basicMsc("/nm view $playerName")
+					}
+				}
+
+				ephemeralSubCommand(::ModArguments) {
+					name = Translations.Commands.Cmd.modBan
+					description = Translations.Commands.Cmd.ModBan.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.player
+						val reason = arguments.reason ?: ""
+
+						basicMsc("/ban $player $reason")
+					}
+				}
+
+				ephemeralSubCommand(::SingularPlayerArguments) {
+					name = Translations.Commands.Cmd.modUnban
+					description = Translations.Commands.Cmd.ModUnban.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.playerName
+
+						basicMsc("/unban $player")
+					}
+				}
+
+				ephemeralSubCommand(::ModArguments) {
+					name = Translations.Commands.Cmd.modKick
+					description = Translations.Commands.Cmd.ModKick.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.player
+						val reason = arguments.reason ?: ""
+
+						basicMsc("/kick $player $reason")
+					}
+				}
+
+				ephemeralSubCommand(::ModArgumentsWithDuration) {
+					name = Translations.Commands.Cmd.tempban
+					description = Translations.Commands.Cmd.Tempban.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.player
+						val reason = arguments.reason ?: ""
+						val duration = arguments.duration
+
+						basicMsc("/tempban $player $duration $reason")
+					}
+				}
+
+				ephemeralSubCommand(::ModArguments) {
+					name = Translations.Commands.Cmd.modMute
+					description = Translations.Commands.Cmd.ModMute.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.player
+						val reason = arguments.reason ?: ""
+
+						basicMsc("/mute $player $reason")
+					}
+				}
+
+				ephemeralSubCommand(::ModArgumentsWithDuration) {
+					name = Translations.Commands.Cmd.modTempMute
+					description = Translations.Commands.Cmd.ModTempMute.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.player
+						val reason = arguments.reason ?: ""
+						val duration = arguments.duration
+
+						basicMsc("/tempmute $player $duration $reason")
+					}
+				}
+
+				ephemeralSubCommand(::SingularPlayerArguments) {
+					name = Translations.Commands.Cmd.modUnmute
+					description = Translations.Commands.Cmd.ModUnmute.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.playerName
+
+						basicMsc("/unmutes $player")
+					}
+				}
+
+				ephemeralSubCommand(::SingularPlayerArguments) {
+					name = Translations.Commands.Cmd.modPardon
+					description = Translations.Commands.Cmd.ModPardon.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.playerName
+
+						basicMsc("/pardon $player")
+					}
+				}
+
+				ephemeralSubCommand(::SingularPlayerArguments) {
+					name = Translations.Commands.Cmd.modClear
+					description = Translations.Commands.Cmd.ModClear.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.playerName
+
+						basicMsc("/clear $player")
+					}
+				}
+
+				ephemeralSubCommand(::SingularPlayerArguments) {
+					name = Translations.Commands.Cmd.modRestore
+					description = Translations.Commands.Cmd.ModRestore.description
+
+					check { isBotModuleAdmin(minecraftConfig().administrators) }
+
+					action {
+						val player = arguments.playerName
+
+						basicMsc("/yigd restore $player")
+					}
 				}
 			}
+		}
 
-			ephemeralSubCommand(::MclogsArguments) {
-				name = Translations.Commands.Cmd.mclogs
-				description = Translations.Commands.Cmd.Mclogs.description
+		if (cfg.status.enabled) {
+			ephemeralSlashCommand {
+				name = Translations.Commands.minecraftServer
+				description = Translations.Commands.MinecraftServer.description
 
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
+				ephemeralSubCommand(::TrackArguments) {
+					name = Translations.Commands.MinecraftServer.track
+					description = Translations.Commands.MinecraftServer.Track.description
 
-				action {
-					val log = arguments.log
+					check { anyGuild() }
 
-					val resp: String = if (log != null) {
-						MC_CONNECTION.command("/mclogs share $log")
-					} else {
-						MC_CONNECTION.command("/mclogs")
-					}
+					action {
+						val channel1 = guild!!.createVoiceChannel("${arguments.name}: ?/?")
+						val channel2 =
+							if (arguments.twoChannels) guild!!.createVoiceChannel("${arguments.name}: ?/?") else null
 
-					if (resp.startsWith("Your log")) {
-						val url = resp.replace("Your log has been uploaded:", "").trim()
-						val id = url.replace("https://mclo.gs/", "").trim()
-						customMscEmbed(
-							Translations.Responses.Cmd.Mclogs.success.withOrdinalPlaceholders(
-								id,
-								url
-							).withLocale(getLocale()).translate(),
-							DISCORD_BLURPLE
+						servers.set(
+							MinecraftServer(
+								arguments.address,
+								arguments.bedrock,
+								arguments.name,
+								guild!!.id,
+								channel1.id,
+								channel2?.id
+							)
 						)
-					} else {
-						customMscEmbed(
-							Translations.Responses.Cmd.Mclogs.error.withOrdinalPlaceholders(
-								resp
-							).withLocale(getLocale()).translate(),
-							DISCORD_RED
+
+						respond {
+							content = "Added ${arguments.name} to the tracking list"
+						}
+					}
+				}
+
+				ephemeralSubCommand(::RemoveTrackArguments) {
+					name = Translations.Commands.MinecraftServer.removeTrack
+					description = Translations.Commands.MinecraftServer.RemoveTrack.description
+
+					action {
+						val removed = servers.remove(arguments.server)
+						respond {
+							content =
+								if (removed != null) "Stopped tracking ${removed.name}" else "The database did not return the server, but it may still be removed"
+						}
+					}
+				}
+
+				ephemeralSubCommand(::StatusArguments) {
+					name = Translations.Commands.MinecraftServer.status
+					description = Translations.Commands.MinecraftServer.Status.description
+
+					action {
+						val address = arguments.address
+						val bedrock = arguments.bedrock
+						val server = org.tywrapstudios.krafter.api.mcsrvstatus.MinecraftServer(
+							address,
+							bedrock
 						)
+
+						val response = try {
+							server.asResponse()
+						} catch (e: Exception) {
+							e.printStackTrace()
+							null
+						}
+
+						respond {
+							when (response) {
+								is OnlineResponse -> {
+									embed {
+										color = DISCORD_GREEN
+										title = "`$address` is online"
+										field {
+											name = "Players"
+											value = "${response.players.online}/${response.players.max}"
+											inline = true
+										}
+										field {
+											name = "Version info"
+											value = response.protocol.toString()
+											if (response.software != null) value += " - ${response.software}"
+											inline = true
+										}
+										field {
+											name = "MOTD"
+											value = """
+															RAW:
+															```
+															${response.motd.raw}
+															```
+															CLEAN:
+															```
+															${response.motd.clean}
+															```
+															HTML:
+															```html
+															${response.motd.html}
+															```
+														""".trimIndent()
+										}
+										footer {
+											text = "Using the https://mcsrvstat.us API"
+										}
+										thumbnail {
+											url = server.getImageAddress()
+										}
+									}
+									actionRow {
+										interactionButton(ButtonStyle.Primary, "srvstatus:get_addons:$address") {
+											label = "View mods or plugins"
+											disabled = response.getAllAddOns().isEmpty()
+										}
+									}
+								}
+
+								is OfflineResponse -> {
+									embed {
+										color = DISCORD_RED
+										title = "`$address` is offline"
+										footer {
+											text = "Using the https://mcsrvstat.us API"
+										}
+										thumbnail {
+											url = server.getImageAddress()
+										}
+									}
+								}
+
+								else -> {
+									embed {
+										color = DISCORD_BLURPLE
+										title = "Something went wrong"
+										description = "The server could not be found, or a different error occurred."
+										footer {
+											text = "Using the https://mcsrvstat.us API"
+										}
+										thumbnail {
+											url = server.getImageAddress()
+										}
+									}
+								}
+							}
+						}
 					}
-				}
-			}
-
-			ephemeralSubCommand(::MaintenanceArguments) {
-				name = Translations.Commands.Cmd.maintenance
-				description = Translations.Commands.Cmd.Maintenance.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val enable = arguments.enable
-
-					basicMsc("/maintenance ${if (enable) "on" else "off"}")
-				}
-			}
-
-			ephemeralSubCommand(::TpOfflineArguments) {
-				name = Translations.Commands.Cmd.modTpOffline
-				description = Translations.Commands.Cmd.ModTpOffline.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val playerName = arguments.playerName
-					val position = arguments.position
-					val x = arguments.x ?: "0"
-					val y = arguments.y ?: "0"
-					val z = arguments.z ?: "0"
-					val command = if (position != null) {
-						"/tp-offline $playerName $position"
-					} else {
-						"/tp-offline $playerName $x $y $z"
-					}
-					basicMsc(command)
-				}
-			}
-
-			ephemeralSubCommand(::SingularPlayerArguments) {
-				name = Translations.Commands.Cmd.modHeal
-				description = Translations.Commands.Cmd.ModHeal.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val playerName = arguments.playerName
-
-					basicMsc("/heal $playerName")
-				}
-			}
-
-			ephemeralSubCommand(::DamageArguments) {
-				name = Translations.Commands.Cmd.modDamage
-				description = Translations.Commands.Cmd.ModDamage.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val playerName = arguments.playerName
-					val amount = arguments.amount
-
-					basicMsc("/damage $playerName $amount")
-				}
-			}
-
-			ephemeralSubCommand(::WhiteListArguments) {
-				name = Translations.Commands.Cmd.modWhitelist
-				description = Translations.Commands.Cmd.ModWhitelist.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val enable = arguments.enable
-
-					basicMsc("/whitelist ${if (enable) "on" else "off"}")
-				}
-			}
-
-			ephemeralSubCommand(::SingularPlayerArguments) {
-				name = Translations.Commands.Cmd.ModWhitelist.add
-				description = Translations.Commands.Cmd.ModWhitelist.Add.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val playerName = arguments.playerName
-
-					basicMsc("/whitelist add $playerName")
-				}
-			}
-
-			ephemeralSubCommand(::SingularPlayerArguments) {
-				name = Translations.Commands.Cmd.ModWhitelist.remove
-				description = Translations.Commands.Cmd.ModWhitelist.Remove.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val playerName = arguments.playerName
-
-					basicMsc("/whitelist remove $playerName")
-				}
-			}
-
-			ephemeralSubCommand {
-				name = Translations.Commands.Cmd.modListWhitelist
-				description = Translations.Commands.Cmd.ModListWhitelist.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				basicMsc("/whitelist list")
-			}
-
-			ephemeralSubCommand(::SingularPlayerArguments) {
-				name = Translations.Commands.Cmd.viewBalance
-				description = Translations.Commands.Cmd.ViewBalance.description
-
-				action {
-					val playerName = arguments.playerName
-
-					basicMsc("/nm view $playerName")
-				}
-			}
-
-			ephemeralSubCommand(::ModArguments) {
-				name = Translations.Commands.Cmd.modBan
-				description = Translations.Commands.Cmd.ModBan.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.player
-					val reason = arguments.reason ?: ""
-
-					basicMsc("/ban $player $reason")
-				}
-			}
-
-			ephemeralSubCommand(::SingularPlayerArguments) {
-				name = Translations.Commands.Cmd.modUnban
-				description = Translations.Commands.Cmd.ModUnban.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.playerName
-
-					basicMsc("/unban $player")
-				}
-			}
-
-			ephemeralSubCommand(::ModArguments) {
-				name = Translations.Commands.Cmd.modKick
-				description = Translations.Commands.Cmd.ModKick.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.player
-					val reason = arguments.reason ?: ""
-
-					basicMsc("/kick $player $reason")
-				}
-			}
-
-			ephemeralSubCommand(::ModArgumentsWithDuration) {
-				name = Translations.Commands.Cmd.tempban
-				description = Translations.Commands.Cmd.Tempban.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.player
-					val reason = arguments.reason ?: ""
-					val duration = arguments.duration
-
-					basicMsc("/tempban $player $duration $reason")
-				}
-			}
-
-			ephemeralSubCommand(::ModArguments) {
-				name = Translations.Commands.Cmd.modMute
-				description = Translations.Commands.Cmd.ModMute.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.player
-					val reason = arguments.reason ?: ""
-
-					basicMsc("/mute $player $reason")
-				}
-			}
-
-			ephemeralSubCommand(::ModArgumentsWithDuration) {
-				name = Translations.Commands.Cmd.modTempMute
-				description = Translations.Commands.Cmd.ModTempMute.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.player
-					val reason = arguments.reason ?: ""
-					val duration = arguments.duration
-
-					basicMsc("/tempmute $player $duration $reason")
-				}
-			}
-
-			ephemeralSubCommand(::SingularPlayerArguments) {
-				name = Translations.Commands.Cmd.modUnmute
-				description = Translations.Commands.Cmd.ModUnmute.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.playerName
-
-					basicMsc("/unmutes $player")
-				}
-			}
-
-			ephemeralSubCommand(::SingularPlayerArguments) {
-				name = Translations.Commands.Cmd.modPardon
-				description = Translations.Commands.Cmd.ModPardon.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.playerName
-
-					basicMsc("/pardon $player")
-				}
-			}
-
-			ephemeralSubCommand(::SingularPlayerArguments) {
-				name = Translations.Commands.Cmd.modClear
-				description = Translations.Commands.Cmd.ModClear.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.playerName
-
-					basicMsc("/clear $player")
-				}
-			}
-
-			ephemeralSubCommand(::SingularPlayerArguments) {
-				name = Translations.Commands.Cmd.modRestore
-				description = Translations.Commands.Cmd.ModRestore.description
-
-				check { isBotModuleAdmin(minecraftConfig().administrators) }
-
-				action {
-					val player = arguments.playerName
-
-					basicMsc("/yigd restore $player")
 				}
 			}
 		}
@@ -595,7 +829,7 @@ class MinecraftExtension : Extension() {
 
 	suspend fun EphemeralInteractionContext.basicMsc(command: String) {
 		respond {
-			if (minecraftConfig().enabled) {
+			if (minecraftConfig().connection.console) {
 				val response = try {
 					MC_CONNECTION.command(command.trim())
 				} catch (e: Exception) {
@@ -641,7 +875,7 @@ class MinecraftExtension : Extension() {
 	@OptIn(ExperimentalUuidApi::class)
 	suspend fun FollowupMessageCreateBuilder.mcPlayerProfileEmbed(prompt: String, player: McPlayer?) {
 		val mcLink = try {
-			KrafterMinecraftLinkTransactor.getLinkStatus(Uuid.parse(player?.id ?: "").toJavaUuid())
+			MinecraftLinkTransactor.getLinkStatus(Uuid.parse(player?.id ?: "").toJavaUuid())
 		} catch (_: Exception) {
 			null
 		}
@@ -695,6 +929,57 @@ class MinecraftExtension : Extension() {
 					emoji(ReactionEmoji.Unicode("🔗"))
 				}
 			}
+		}
+	}
+
+	class TrackArguments : Arguments() {
+		val name by string {
+			name = Translations.Args.MinecraftServer.Track.name
+			description = Translations.Args.MinecraftServer.Track.Name.description
+		}
+		val address by string {
+			name = Translations.GeneralArgs.MinecraftServer.address
+			description = Translations.GeneralArgs.MinecraftServer.Address.description
+		}
+		val bedrock by defaultingBoolean {
+			name = Translations.GeneralArgs.MinecraftServer.bedrock
+			description = Translations.GeneralArgs.MinecraftServer.Bedrock.description
+			defaultValue = false
+		}
+		val twoChannels by defaultingBoolean {
+			name = Translations.Args.MinecraftServer.Track.twoChannels
+			description = Translations.Args.MinecraftServer.Track.TwoChannels.description
+			defaultValue = false
+		}
+	}
+
+	class RemoveTrackArguments : Arguments() {
+		val server by string {
+			name = Translations.Args.MinecraftServer.RemoveTrack.server
+			description = Translations.Args.MinecraftServer.RemoveTrack.Server.description
+
+			autoComplete {
+				val list = MinecraftServerTransactor.getAll()
+
+				suggestStringMap(
+					list.associate {
+						it.name to it.address
+					},
+					FilterStrategy.Contains
+				)
+			}
+		}
+	}
+
+	class StatusArguments : Arguments() {
+		val address by string {
+			name = Translations.GeneralArgs.MinecraftServer.address
+			description = Translations.GeneralArgs.MinecraftServer.Address.description
+		}
+		val bedrock by defaultingBoolean {
+			name = Translations.GeneralArgs.MinecraftServer.bedrock
+			description = Translations.GeneralArgs.MinecraftServer.Bedrock.description
+			defaultValue = false
 		}
 	}
 

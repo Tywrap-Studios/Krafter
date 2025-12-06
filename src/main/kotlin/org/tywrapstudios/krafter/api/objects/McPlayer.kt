@@ -4,7 +4,7 @@ import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.tywrapstudios.krafter.LOGGING
-import org.tywrapstudios.krafter.database.transactors.KrafterMinecraftLinkTransactor
+import org.tywrapstudios.krafter.database.transactors.MinecraftLinkTransactor
 import java.net.URI
 import java.net.URL
 import java.util.*
@@ -102,9 +102,9 @@ fun getMcPlayer(uuid: UUID): McPlayer? {
 }
 
 /**
- * Gets an [McPlayer] object from a [KrafterMinecraftLinkTransactor.LinkStatus].
+ * Gets an [McPlayer] object from a [MinecraftLinkTransactor.LinkStatus].
  */
-fun KrafterMinecraftLinkTransactor.LinkStatus.getMcPlayer(): McPlayer? = getMcPlayer(uuid)
+fun MinecraftLinkTransactor.LinkStatus.getMcPlayer(): McPlayer? = getMcPlayer(uuid)
 
 /**
  * Attempts to find a link associated with the [member]'s ID, and resolves it into an [McPlayer]
@@ -113,7 +113,7 @@ fun KrafterMinecraftLinkTransactor.LinkStatus.getMcPlayer(): McPlayer? = getMcPl
  * @param member The ID of the member to find a link of.
  */
 suspend fun getMcPlayer(member: Snowflake): McPlayer? {
-	val link = KrafterMinecraftLinkTransactor.getLinkStatus(member)
+	val link = MinecraftLinkTransactor.getLinkStatus(member)
 
 	if (link == null) {
 		LOGGING.warn("Couldn't fetch link for McPlayer object for member $member with $link")
@@ -147,6 +147,6 @@ fun getMcPlayerSigned(uuid: UUID): McPlayer? {
 }
 
 /**
- * Gets an [McPlayer] object with signed properties from a [KrafterMinecraftLinkTransactor.LinkStatus].
+ * Gets an [McPlayer] object with signed properties from a [MinecraftLinkTransactor.LinkStatus].
  */
-fun KrafterMinecraftLinkTransactor.LinkStatus.getMcPlayerSigned(): McPlayer? = getMcPlayerSigned(uuid)
+fun MinecraftLinkTransactor.LinkStatus.getMcPlayerSigned(): McPlayer? = getMcPlayerSigned(uuid)

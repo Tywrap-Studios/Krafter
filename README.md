@@ -24,7 +24,7 @@ nitpicked to your liking.
   - [x] Reminders - Reminders that either remind you at a certain point in time, or repeatedly remind you.
 - [x] Minecraft server connections - Monitor and interact with your Minecraft server.
   - [x] Linking UUIDs to Discord accounts - Link Minecraft UUIDs to Discord accounts for better integration.
-  - [ ] Server status - Check the status of your Minecraft server.
+  - [x] Server status - Check the status of your Minecraft server.
   - [x] Run commands remotely - Execute commands on your Minecraft server remotely.
   - [x] Whitelist management - Manage your Minecraft server whitelist directly from Discord.
   - [x] Talk to in-game players - Send messages to in-game players from Discord.
