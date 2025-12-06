@@ -1,5 +1,8 @@
 package org.tywrapstudios.krafter.api.mcsrvstatus
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class OfflineResponse(
 	val online: Boolean,
 	override val ip: String,

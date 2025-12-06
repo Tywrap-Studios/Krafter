@@ -38,14 +38,14 @@ nitpicked to your liking.
   - [x] Dehoist and decancer - Automatically remove problematic characters from usernames.
 - [x] Full-blown Suggestion forums - Allow users to submit and vote on suggestions.
 - [x] Starboard - Highlight popular messages with a starboard feature.
-- [ ] Reaction roles - Assign roles based on reactions to messages.
+- [ ] Reaction roles - Assign roles based on reactions to messages. (kinda obsolete because of onboarding)
 - [x] Welcome messages - Send personalised welcome messages to new members.
 - [x] Tags - Create and manage custom tags for easy access to frequently used information.
 - [x] Auto responses - Set up automatic responses to specific keywords or phrases. (using the tags system)
 - [x] Basically flawless PluralKit integration - Seamlessly integrate with PluralKit for enhanced server accessibility.
 - [x] Extensive configuration options - Customise the bot to fit your server's needs with a wide range of configuration options.
-- [ ] Music bot capabilities - Play music in voice channels.
-- [ ] Giveaways - Host giveaways that choose random member(s).
+- [ ] Music bot capabilities - Play music in voice channels. (technical limitation)
+- [ ] Giveaways - Host giveaways that choose random member(s). (future concern for personal use)
 
 </details>
 

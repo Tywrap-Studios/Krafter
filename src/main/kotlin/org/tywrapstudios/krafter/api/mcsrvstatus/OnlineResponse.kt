@@ -16,7 +16,7 @@ data class OnlineResponse(
 	val protocol: ProtocolInfo? = null,
 	val icon: String? = null,
 	val software: String? = null,
-	val map: MapInfo,
+//	val map: MapInfo,
 	@SerialName("gamemode")
 	val gameMode: String? = null,
 	@SerialName("serverid")
@@ -74,7 +74,10 @@ data class PlayerInfo(
 data class PlayerProfile @OptIn(ExperimentalUuidApi::class) constructor(
 	val name: String,
 	val uuid: Uuid,
-)
+) {
+	@OptIn(ExperimentalUuidApi::class)
+	override fun toString(): String = "$name (${uuid.toHexDashString()})"
+}
 
 @Serializable
 data class AddOnInfo(

@@ -71,6 +71,10 @@ class MinecraftExtension : Extension() {
 	private val cfg get() = minecraftConfig()
 	var watchChannel: TextChannel? = null
 	var watchTask: Task? = null
+	private val json = Json {
+		prettyPrint = true
+		isLenient = true
+	}
 
 	@OptIn(ExperimentalUuidApi::class)
 	override suspend fun setup() {
@@ -94,7 +98,7 @@ class MinecraftExtension : Extension() {
 								name = "${server.name}: Online"
 							}
 							channel2.edit {
-								name = "${response.players.online} out of ${response.players.max} players online"
+								name = "${response.players.online} / ${response.players.max} players"
 							}
 						}
 					}
@@ -159,138 +163,141 @@ class MinecraftExtension : Extension() {
 			}
 		}
 
-		ephemeralSlashCommand {
-			name = Translations.Commands.minecraft
-			description = Translations.Commands.Minecraft.description
-			if (cfg.linking) {
-				ephemeralSubCommand(::LinkCommandArguments) {
-					name = Translations.Commands.Minecraft.link
-					description = Translations.Commands.Minecraft.Link.description
-					action {
-						if (!minecraftConfig().enabled) {
-							respond {
-								content =
-									Translations.Responses.Minecraft.Link.Error.disabled.withLocale(getLocale())
-										.withLocale(getLocale()).translate()
+		if (cfg.profile_utils || cfg.linking) {
+			ephemeralSlashCommand {
+				name = Translations.Commands.minecraft
+				description = Translations.Commands.Minecraft.description
+				if (cfg.linking) {
+					ephemeralSubCommand(::LinkCommandArguments) {
+						name = Translations.Commands.Minecraft.link
+						description = Translations.Commands.Minecraft.Link.description
+						action {
+							if (!minecraftConfig().enabled) {
+								respond {
+									content =
+										Translations.Responses.Minecraft.Link.Error.disabled.withLocale(getLocale())
+											.withLocale(getLocale()).translate()
+								}
+								return@action
 							}
-							return@action
-						}
 
-						val uuid = arguments.uuid
-						val member = event.interaction.user.id
+							val uuid = arguments.uuid
+							val member = event.interaction.user.id
 
-						val link =
-							links.setLinkStatus(
-								member,
-								MinecraftLinkTransactor.LinkStatus(member, Uuid.parse(uuid).toJavaUuid())
-							)
+							val link =
+								links.setLinkStatus(
+									member,
+									MinecraftLinkTransactor.LinkStatus(member, Uuid.parse(uuid).toJavaUuid())
+								)
 
-						respond {
-							content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
-								link.code
-							).withLocale(getLocale()).translate()
-						}
-					}
-				}
-
-				ephemeralSubCommand {
-					name = Translations.Commands.Minecraft.unlink
-					description = Translations.Commands.Minecraft.Unlink.description
-					action {
-						if (!minecraftConfig().enabled) {
 							respond {
-								content = Translations.Responses.Minecraft.Unlink.Error.disabled.withLocale(getLocale())
-									.translate()
-							}
-							return@action
-						}
-
-						val member = event.interaction.user.id
-						val uuid = links.unlink(member)
-						if (uuid == null) {
-							respond {
-								content =
-									Translations.Responses.Minecraft.Unlink.Error.notLinked.withLocale(getLocale())
-										.translate()
-							}
-						} else {
-							respond {
-								content = Translations.Responses.Minecraft.Unlink.success.withOrdinalPlaceholders(
-									uuid
+								content = Translations.Responses.Minecraft.Link.success.withOrdinalPlaceholders(
+									link.code
 								).withLocale(getLocale()).translate()
 							}
 						}
 					}
-				}
 
-				ephemeralSubCommand(::ForceLinkCommandArguments) {
-					name = Translations.Commands.Minecraft.forceLink
-					description = Translations.Commands.Minecraft.ForceLink.description
-					check {
-						isGlobalBotAdmin()
-					}
-					action {
-						if (!minecraftConfig().enabled) {
-							respond {
-								content =
-									Translations.Responses.Minecraft.ForceLink.Error.disabled.withLocale(getLocale())
-										.translate()
+					ephemeralSubCommand {
+						name = Translations.Commands.Minecraft.unlink
+						description = Translations.Commands.Minecraft.Unlink.description
+						action {
+							if (!minecraftConfig().enabled) {
+								respond {
+									content =
+										Translations.Responses.Minecraft.Unlink.Error.disabled.withLocale(getLocale())
+											.translate()
+								}
+								return@action
 							}
-							return@action
-						}
 
-						val member = arguments.member
-						val uuid = arguments.uuid
-
-						val currentLink = links.getLinkStatus(member.id)
-
-						if (currentLink == null) {
-							links.setLinkStatus(
-								member.id,
-								MinecraftLinkTransactor.LinkStatus(member.id, Uuid.parse(uuid).toJavaUuid())
-							)
-						} else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
-							respond {
-								content =
-									Translations.Responses.Minecraft.ForceLink.Error.alreadyLinked.withOrdinalPlaceholders(
-										currentLink.uuid
+							val member = event.interaction.user.id
+							val uuid = links.unlink(member)
+							if (uuid == null) {
+								respond {
+									content =
+										Translations.Responses.Minecraft.Unlink.Error.notLinked.withLocale(getLocale())
+											.translate()
+								}
+							} else {
+								respond {
+									content = Translations.Responses.Minecraft.Unlink.success.withOrdinalPlaceholders(
+										uuid
 									).withLocale(getLocale()).translate()
+								}
 							}
-							return@action
-						} else if (currentLink.uuid.toString() != uuid && currentLink.verified) {
-							respond {
-								content = Translations.Responses.Minecraft.ForceLink.Error.alreadyLinkedDifferent
-									.withOrdinalPlaceholders(currentLink.uuid)
-									.withLocale(getLocale()).translate()
+						}
+					}
+
+					ephemeralSubCommand(::ForceLinkCommandArguments) {
+						name = Translations.Commands.Minecraft.forceLink
+						description = Translations.Commands.Minecraft.ForceLink.description
+						check {
+							isGlobalBotAdmin()
+						}
+						action {
+							if (!minecraftConfig().enabled) {
+								respond {
+									content =
+										Translations.Responses.Minecraft.ForceLink.Error.disabled.withLocale(getLocale())
+											.translate()
+								}
+								return@action
 							}
-							return@action
-						} else if (!currentLink.verified) {
-							links.verify(member.id, currentLink.code)
-							respond {
-								content = Translations.Responses.Minecraft.ForceLink.success.withOrdinalPlaceholders(
-									member.mention,
-									currentLink.uuid
-								).withLocale(getLocale()).translate()
+
+							val member = arguments.member
+							val uuid = arguments.uuid
+
+							val currentLink = links.getLinkStatus(member.id)
+
+							if (currentLink == null) {
+								links.setLinkStatus(
+									member.id,
+									MinecraftLinkTransactor.LinkStatus(member.id, Uuid.parse(uuid).toJavaUuid())
+								)
+							} else if (currentLink.uuid.toString() == uuid && currentLink.verified) {
+								respond {
+									content =
+										Translations.Responses.Minecraft.ForceLink.Error.alreadyLinked.withOrdinalPlaceholders(
+											currentLink.uuid
+										).withLocale(getLocale()).translate()
+								}
+								return@action
+							} else if (currentLink.uuid.toString() != uuid && currentLink.verified) {
+								respond {
+									content = Translations.Responses.Minecraft.ForceLink.Error.alreadyLinkedDifferent
+										.withOrdinalPlaceholders(currentLink.uuid)
+										.withLocale(getLocale()).translate()
+								}
+								return@action
+							} else if (!currentLink.verified) {
+								links.verify(member.id, currentLink.code)
+								respond {
+									content =
+										Translations.Responses.Minecraft.ForceLink.success.withOrdinalPlaceholders(
+											member.mention,
+											currentLink.uuid
+										).withLocale(getLocale()).translate()
+								}
 							}
 						}
 					}
 				}
-			}
 
-			if (cfg.profile_utils) {
-				publicSubCommand(::LookupCommandArguments) {
-					name = Translations.Commands.Minecraft.lookup
-					description = Translations.Commands.Minecraft.Lookup.description
-					action {
-						val mcLink = links.getLinkStatus(arguments.member.id)
-						val player = mcLink?.getMcPlayer()
-						if (mcLink != null && player != null) {
-							respond {
-								embed {
-									title = "Minecraft profile for ${arguments.member.effectiveName}"
-									field {
-										name = "Username and UUID"
-										value = """
+				if (cfg.profile_utils) {
+					publicSubCommand(::LookupCommandArguments) {
+						name = Translations.Commands.Minecraft.lookup
+						description = Translations.Commands.Minecraft.Lookup.description
+						action {
+							val mcLink = links.getLinkStatus(arguments.member.id)
+							val player = mcLink?.getMcPlayer()
+							if (mcLink != null && player != null) {
+								respond {
+									embed {
+										title = "Minecraft profile for ${arguments.member.effectiveName}"
+										field {
+											name = "Username and UUID"
+											value = """
 										```
 										${player.name}
 										```
@@ -298,64 +305,65 @@ class MinecraftExtension : Extension() {
 										${player.id}
 										```
 									""".trimIndent()
+										}
+										field {
+											name = "Link status"
+											value = "Verified: ${if (mcLink.verified) "✅" else "❌"}"
+										}
+										thumbnail {
+											url = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
+										}
+										footer {
+											text = player.name
+											icon = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
+										}
 									}
-									field {
-										name = "Link status"
-										value = "Verified: ${if (mcLink.verified) "✅" else "❌"}"
-									}
-									thumbnail {
-										url = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
-									}
-									footer {
-										text = player.name
-										icon = "https://mc-heads.net/avatar/${mcLink.uuid}/90"
+									actionRow {
+										interactionButton(ButtonStyle.Primary, "minecraft:force-link") {
+											label = "Force link"
+											emoji(ReactionEmoji.Unicode("🔗"))
+										}
 									}
 								}
-								actionRow {
-									interactionButton(ButtonStyle.Primary, "minecraft:force-link") {
-										label = "Force link"
-										emoji(ReactionEmoji.Unicode("🔗"))
+							} else {
+								respond {
+									embed {
+										title = "Minecraft profile for ${arguments.member.effectiveName}"
+										field {
+											name = "Could not present profile:"
+											value = if (mcLink == null)
+												"Our database does not contain this member."
+											else if (player == null) "Our database contains a linked UUID, but this player profile " +
+												"does not actually exist or could not be found due to other reasons."
+											else "Something unexpected happened, please contact a staff member."
+										}
 									}
 								}
 							}
-						} else {
+						}
+					}
+
+					publicSubCommand(::SearchUuidArguments) {
+						name = Translations.Commands.Minecraft.searchUuid
+						description = Translations.Commands.Minecraft.SearchUuid.description
+
+						action {
+							val player = getMcPlayer(Uuid.parse(arguments.uuid).toJavaUuid())
 							respond {
-								embed {
-									title = "Minecraft profile for ${arguments.member.effectiveName}"
-									field {
-										name = "Could not present profile:"
-										value = if (mcLink == null)
-											"Our database does not contain this member."
-										else if (player == null) "Our database contains a linked UUID, but this player profile " +
-											"does not actually exist or could not be found due to other reasons."
-										else "Something unexpected happened, please contact a staff member."
-									}
-								}
+								mcPlayerProfileEmbed(arguments.uuid, player)
 							}
 						}
 					}
-				}
 
-				publicSubCommand(::SearchUuidArguments) {
-					name = Translations.Commands.Minecraft.searchUuid
-					description = Translations.Commands.Minecraft.SearchUuid.description
+					publicSubCommand(::SearchUsernameArguments) {
+						name = Translations.Commands.Minecraft.searchUsername
+						description = Translations.Commands.Minecraft.SearchUsername.description
 
-					action {
-						val player = getMcPlayer(Uuid.parse(arguments.uuid).toJavaUuid())
-						respond {
-							mcPlayerProfileEmbed(arguments.uuid, player)
-						}
-					}
-				}
-
-				publicSubCommand(::SearchUsernameArguments) {
-					name = Translations.Commands.Minecraft.searchUsername
-					description = Translations.Commands.Minecraft.SearchUsername.description
-
-					action {
-						val player = getMcPlayer(arguments.username)
-						respond {
-							mcPlayerProfileEmbed(arguments.username, player)
+						action {
+							val player = getMcPlayer(arguments.username)
+							respond {
+								mcPlayerProfileEmbed(arguments.username, player)
+							}
 						}
 					}
 				}
@@ -793,6 +801,12 @@ class MinecraftExtension : Extension() {
 											disabled = response.getAllAddOns().isEmpty()
 										}
 									}
+									actionRow {
+										interactionButton(ButtonStyle.Primary, "srvstatus:get_players:$address:$bedrock") {
+											label = "View player list"
+											disabled = response.players.list?.isEmpty() ?: true
+										}
+									}
 								}
 
 								is OfflineResponse -> {
@@ -843,10 +857,42 @@ class MinecraftExtension : Extension() {
 								getDataDirectory().resolve("addon_attachments").createDirectories().toFile(),
 								"addons-$address.json"
 							)
-							val json = Json {
-								prettyPrint = true
-							}
 							val element = json.encodeToString<List<AddOnInfo>>(response.getAllAddOns())
+							file.writeText(element)
+							addFile(file.toPath())
+						}
+
+						is OfflineResponse -> {
+							content = "The server seems to be offline while fetching these files."
+						}
+
+						else -> {
+							content = "Something went wrong while fetching the server."
+						}
+					}
+				}
+			}
+		}
+
+		event<ButtonInteractionCreateEvent> {
+			check { failIfNot(event.interaction.componentId.startsWith("srvstatus:get_players:")) }
+
+			action {
+				val address = event.interaction.componentId.split(":")[2]
+				val bedrock = event.interaction.componentId.split(":")[3].toBoolean()
+				val response = org.tywrapstudios.krafter.api.mcsrvstatus.MinecraftServer(address, bedrock).asResponse()
+
+				event.interaction.respondEphemeral {
+					when (response) {
+						is OnlineResponse -> {
+							val file = File(
+								getDataDirectory().resolve("mcsrv").createDirectories().toFile(),
+								"players-$address.txt"
+							)
+							var element = ""
+							for (player in response.players.list ?: listOf()) {
+								element += "$player\n"
+							}
 							file.writeText(element)
 							addFile(file.toPath())
 						}

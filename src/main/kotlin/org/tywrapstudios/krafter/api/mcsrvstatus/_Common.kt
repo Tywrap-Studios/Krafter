@@ -6,17 +6,23 @@ import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
 const val ENDPOINT_BASE = "https://api.mcsrvstat.us"
 const val API_BASE = "https://api.mcsrvstat.us/3"
 const val BEDROCK_API_BASE = "https://api.mcsrvstat.us/bedrock/3"
+internal val json = Json {
+	prettyPrint = true
+	isLenient = true
+	ignoreUnknownKeys = true
+}
 
 internal val MinecraftServer.apiBase get() = if (bedrock) BEDROCK_API_BASE else API_BASE
 
 internal val client: HttpClient = HttpClient(CIO) {
 	install(ContentNegotiation) {
 		json(
-			kotlinx.serialization.json.Json { ignoreUnknownKeys = true },
+			Json { ignoreUnknownKeys = true },
 			ContentType.Any
 		)
 	}
@@ -28,7 +34,7 @@ internal val client: HttpClient = HttpClient(CIO) {
 internal val imageClient: HttpClient = HttpClient(CIO) {
 	install(ContentNegotiation) {
 		json(
-			kotlinx.serialization.json.Json { ignoreUnknownKeys = true },
+			Json { ignoreUnknownKeys = true },
 			ContentType.Image.PNG
 		)
 	}

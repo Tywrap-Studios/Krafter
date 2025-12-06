@@ -11,9 +11,9 @@ interface StatusResponse {
 	val port: Int
 	val hostname: String?
 
-	suspend fun asOnline(bedrock: Boolean = false): OnlineResponse = Json.decodeFromJsonElement<OnlineResponse>(getBody(bedrock))
+	suspend fun asOnline(bedrock: Boolean = false): OnlineResponse = json.decodeFromJsonElement<OnlineResponse>(getBody(bedrock))
 
-	suspend fun asOffline(bedrock: Boolean = false): OfflineResponse = Json.decodeFromJsonElement<OfflineResponse>(getBody(bedrock))
+	suspend fun asOffline(bedrock: Boolean = false): OfflineResponse = json.decodeFromJsonElement<OfflineResponse>(getBody(bedrock))
 
 	private suspend fun getBody(bedrock: Boolean): JsonObject {
 		val apiBase = if (bedrock) BEDROCK_API_BASE else API_BASE
