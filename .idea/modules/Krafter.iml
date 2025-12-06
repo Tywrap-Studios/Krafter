@@ -10,6 +10,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../../config" />
       <excludeFolder url="file://$MODULE_DIR$/../../config/ext-pluralkit" />
       <excludeFolder url="file://$MODULE_DIR$/../../data" />
+      <excludeFolder url="file://$MODULE_DIR$/../../docs/.vitepress/cache" />
     </content>
   </component>
 </module>

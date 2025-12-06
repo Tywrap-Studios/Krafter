@@ -118,3 +118,8 @@ welcome.png
 
 # Env vars - don't commit this!
 .env
+
+## VitePress
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+node_modules/
