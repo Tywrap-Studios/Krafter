@@ -21,7 +21,7 @@ plugins {
 }
 
 group = "org.tywrapstudios.krafter"
-version = "0.1.0-SNAPSHOT"
+version = "0.1.0"
 
 repositories {
 	maven {
