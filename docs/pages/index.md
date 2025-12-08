@@ -9,20 +9,16 @@ hero:
   image:
     src: /itstiazzz.png
     alt: ItsTiazzz
-  actions:
-    - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
-    - theme: alt
-      text: API Examples
-      link: /api-examples
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: For users
+    details: Documentation on how to get started using this software
+    link: /users/getting-started
+  - title: For developers
+    details: Documentation for developers who want to tinker with the software
+    link: /api/getting-started
+  - title: Configuration
+    details: Extended explanation on the configuration of this bot
+    link: /config
 ---
 
