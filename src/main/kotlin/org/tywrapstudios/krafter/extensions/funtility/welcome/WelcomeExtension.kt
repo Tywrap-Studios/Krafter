@@ -38,7 +38,7 @@ class WelcomeExtension : Extension() {
 					val provider = ChannelProvider {
 						welcomeImageFile.readChannel()
 					}
-					addFile("welcome.png", provider)
+					addFile("welcome-$username.png", provider)
 				}
 			}
 		}

@@ -17,8 +17,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.tywrapstudios.krafter.getDataDirectory
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.io.path.createDirectories
 
 @Composable
 @Suppress("FunctionNaming")
@@ -79,7 +81,7 @@ fun generateWelcomeImage(username: String, avatar: ImageBitmap): File {
 
 	val imageBitmap = scene.render().toComposeImageBitmap()
 
-	val imageFile = File("welcome.png")
+	val imageFile = File(getDataDirectory().resolve("ext-welcome").createDirectories().toFile(), "welcome-$username.png")
 	ImageIO.write(imageBitmap.toAwtImage(), "png", imageFile)
 
 	return imageFile
