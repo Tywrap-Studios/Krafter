@@ -101,6 +101,12 @@ internal fun AboutBuilder.addCopyright() {
 		CopyrightType.Library,
 		"https://github.com/null8626/decancer"
 	)
+	copyright(
+		"Compose MP",
+		"Apache-2.0", //TODO please check this
+		CopyrightType.Library,
+		"https://github.com/JetBrains/compose-multiplatform/"
+	)
 
 	copyrightAdded = true
 }
@@ -118,6 +124,7 @@ fun Transaction.setup() {
 		StickyTable,
 		StarBoardTable,
 		MinecraftServerTable,
+		inBatch = true,
 	)
 	addLogger(krafterSqlLogger)
 }
