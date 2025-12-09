@@ -103,7 +103,7 @@ internal fun AboutBuilder.addCopyright() {
 	)
 	copyright(
 		"Compose MP",
-		"Apache-2.0", //TODO please check this
+		"Apache-2.0",
 		CopyrightType.Library,
 		"https://github.com/JetBrains/compose-multiplatform/"
 	)

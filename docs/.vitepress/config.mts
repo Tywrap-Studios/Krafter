@@ -16,6 +16,18 @@ export default defineConfig({
       {text: 'Config', link: '/config'}
     ],
 
+    logo: '/Krafter_Trans.png',
+
+    search: {
+      provider: 'local'
+    },
+
+    editLink: {
+      pattern: 'https://github.com/Tywrap-Studios/Krafter/edit/master/docs/pages/:path'
+    },
+
+    externalLinkIcon: true,
+
     sidebar: {
       'users/': [{
         text: 'Usage',
@@ -52,9 +64,16 @@ export default defineConfig({
 
     socialLinks: [
       {icon: 'github', link: 'https://github.com/Tywrap-Studios/Krafter'},
-      {icon: 'youtube', link: 'https://youtube.com/'}
+      {icon: 'youtube', link: 'https://www.youtube.com/channel/UCjdRI_nlvxTw4W2Ldfsf5EA'},
+      {icon: 'discord', link: 'https://tiazzz.me/discord'},
     ],
+
+    footer: {
+      copyright: '<a href="https://docs.tiazzz.me/Krafter">Krafter Documentation</a> © 2025 by <a href="https://tywrap-studios.tiazzz.me">Tywrap Studios</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">'
+    }
   },
 
-  cleanUrls: true
+  cleanUrls: true,
+  lastUpdated: true,
+  ignoreDeadLinks: true,
 })

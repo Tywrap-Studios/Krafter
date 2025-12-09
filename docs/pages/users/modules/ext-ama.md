@@ -1,5 +1,4 @@
-# AMA
-[//]: # (TODO: Add Cozy badge)
+# AMA <Badge type="tip" text="Cozy Module" />
 AMA stands for "Ask me Anything", and is a common way for developers, community managers, streamers 
 and many more to interact with their community and answer questions live.
 

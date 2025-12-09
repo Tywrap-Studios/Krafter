@@ -1,5 +1,4 @@
-# PluralKit
-[//]: # (TODO: Add KordEx badge)
+# PluralKit <Badge type="tip" text="KordEx Module" />
 The PluralKit software allows you to add accessibility to the bot for Plural people and Systems.
 
 No idea what plurality is? No worries! There are enough sources online that can explain it neatly.

@@ -1,5 +1,4 @@
-# Suggestions
-[//]: # (TODO: Add Cozy badge)
+# Suggestions <Badge type="tip" text="Cozy Module" />
 The Suggestions module lets you set up a Suggestions Forum for your member
 to suggest things in. It comes packed with a lot of utilities to properly
 manage them and can be especially nice if you're running a community that

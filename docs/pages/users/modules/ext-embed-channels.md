@@ -1,3 +1,2 @@
-# Embed Channels
-[//]: # (TODO: Add KordEx badge)
+# Embed Channels <Badge type="tip" text="KordEx Module" />
 [//]: # (TODO)

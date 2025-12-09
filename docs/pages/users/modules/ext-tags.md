@@ -1,5 +1,4 @@
-# Tags
-[//]: # (TODO: Add KordEx badge)
+# Tags <Badge type="tip" text="KordEx Module" />
 
 Tags are a simple, yet effective way to instantly answer your frequently asked questions,
 or to provide information to users quickly without having to explain everything yourself.

@@ -7,8 +7,8 @@ hero:
   text: "Content-rich bot software"
   tagline: Configurable, very configurable. All fresh in Kotlin
   image:
-    src: /itstiazzz.png
-    alt: ItsTiazzz
+    src: /Krafter_Trans.png
+    alt: Krafter Logo
 
 features:
   - title: For users

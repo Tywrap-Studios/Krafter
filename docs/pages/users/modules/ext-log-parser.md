@@ -1,5 +1,4 @@
-# Log Parser
-[//]: # (TODO: Add Cozy badge)
+# Log Parser <Badge type="tip" text="Cozy Module" />
 
 The log parser module will look for Minecraft logs and sum up the problems with
 it in order to assist users in fixing their Minecraft instance.
