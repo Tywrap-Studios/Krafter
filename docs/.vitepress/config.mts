@@ -58,6 +58,7 @@ export default defineConfig({
         items: [
           {text: 'Introduction', link: '/config/'},
           {text: 'Where are the config files?', link: '/config/where-are-they'},
+          {text: 'The Main Config', link: '/config/main-config'},
         ]
       }]
     },

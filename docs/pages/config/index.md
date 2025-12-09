@@ -32,3 +32,4 @@ you've configured the software to your needs.
 4. Due to a technical limitation, you are not able to hotswap configs, every config change
 needs a complete restart of the run before it is applied again. It is suggested to batch as
 many changes as you can into one restart in order to not have to restart as often.
+5. Read up on admin lists [here](./main-config#admin-lists).
