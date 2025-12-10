@@ -49,6 +49,9 @@ nitpicked to your liking.
 
 </details>
 
+## Using the software
+Refer to the getting started guide here: https://docs.tiazzz.me/Krafter/users/getting-started
+
 ## Forking and Development
 
 ### Prerequisites
